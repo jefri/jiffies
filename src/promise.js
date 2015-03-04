@@ -61,10 +61,7 @@
 						if (x === promise2){
 							throw new TypeError();
 						}
-						then['call'](x, pass, fail );
-
-						function pass(){ if (!cbCalled++) resolve.apply(undef, arguments); }
-						function fail(value){ if (!cbCalled++) promise2(false, [value]); }
+						then['call'](x, pass, fail);
 					} else {
 						promise2(true, arguments);
 					}
@@ -73,6 +70,8 @@
 						promise2(false, [e]);
 					}
 				}
+				function pass(){ if (!cbCalled++) resolve.apply(undef, arguments); }
+				function fail(value){ if (!cbCalled++) promise2(false, [value]); }
 			}
 		};
 
