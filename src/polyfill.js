@@ -83,3 +83,8 @@ if (!Object.isObject) {
 	}
 }
 
+if (!Object.isNumber) {
+	Object.isNumber = function(n) {
+	  return !isNaN(parseFloat(n)) && isFinite(n);
+	};
+}
