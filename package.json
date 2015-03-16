@@ -34,7 +34,7 @@
     }
   ],
   "browser": {
-    "./src/request/server.coffee": "./src/request/browser.coffee",
+    "./src/request/server.js": "./src/request/browser.js",
     "./src/random/server.js": "./src/random/browser.js"
   },
   "devDependencies": {
@@ -71,7 +71,8 @@
     "st": "^0.5.2"
   },
   "dependencies": {
+    "node-fetch": "^1.0.4",
     "pinkyswear": "^2.2.2",
-    "request": "~2.27.0"
+    "whatwg-fetch": "^0.7.0"
   }
 }
