@@ -1,10 +1,20 @@
-var fetch = require('server.js');
+var _fetch = require('server.js');
 
-fetch.get = function get(uri){
-  return fecth(uri);
+module.exports = function fetch(uri, options){
+  console.log('Fetching ' + uri);
+  return _fetch(uri, options).then(function(response){
+    console.log(response.status);
+    var data = response.body.json();
+    console.log(data);
+    return data;
+  });
 };
 
-fetch.post = function post(uri, options){
+module.exports.get = function get(uri){
+  return fetch(uri).then(response);
+};
+
+module.exports.post = function post(uri, options){
   options.method = 'POST';
   if(options.data){
     options.body = options.data.toString();
@@ -16,5 +26,3 @@ fetch.post = function post(uri, options){
   }
   return fetch(uri, options);
 };
-
-module.exports = fetch;

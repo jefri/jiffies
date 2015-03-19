@@ -1,7 +1,14 @@
-promise = require('../../').promise
+jiffies = if window?
+	window.jiffies
+else
+	require('../../src')
 
+promise = jiffies.promise
+
+debugger
 describe "Promises/A+ Tests", ->
   describe.skip 'Spec', ->
+	return unless require?
     require("promises-aplus-tests").mocha
       resolved: (value)->
         p = promise()
@@ -34,4 +41,7 @@ describe "Promises/A+ Tests", ->
       .then ->
         failures.should.equal 1
         done()
+      .catch (e)->
+        done(e)
+
       p(false, ['Err'])

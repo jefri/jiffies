@@ -6,8 +6,8 @@ module.exports = function(){
       return set['then'](null, onRejected);
     };
 
-    set['done'] = function Done(onSuccess, onRejected){
-      set['then'](onSuccess, onRejected);
+    set['finally'] = function Finally(onFinished){
+      set['then'](onFinished, onFinished);
     };
 
     return set;

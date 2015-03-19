@@ -1,4 +1,8 @@
-jiffies = require('../../src/index')
+jiffies = if window?
+	window.jiffies
+else
+	require('../../src')
+
 describe 'event', ->
 	it 'provides an event mixin', ->
 		passes = false

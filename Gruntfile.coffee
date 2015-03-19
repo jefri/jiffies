@@ -69,13 +69,13 @@ module.exports = (grunt) ->
 				options:
 					files: [
 						'lib/<%= pkg.name %>.js',
-						'test/karma/**/*.coffee'
+						'test/mocha/**/*.coffee'
 					]
 			min:
 				options:
 					files: [
 						'lib/<%= pkg.name %>.min.js',
-						'test/karma/**/*.coffee'
+						'test/mocha/**/*.coffee'
 					]
 
 		release: {}
@@ -102,4 +102,4 @@ module.exports = (grunt) ->
 				res.end('this is not a static file')
 		.listen(8000)
 
-	grunt.registerTask "default", ["clean", "mochaTest", "webpack", "karma:client", "uglify", "karma:min"]
+	grunt.registerTask "default", ["clean", "connect", "mochaTest", "webpack", "karma:client", "uglify", "karma:min"]
