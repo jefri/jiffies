@@ -5,10 +5,9 @@ else
 
 promise = jiffies.promise
 
-debugger
 describe "Promises/A+ Tests", ->
   describe.skip 'Spec', ->
-	return unless require?
+    return unless require?
     require("promises-aplus-tests").mocha
       resolved: (value)->
         p = promise()
