@@ -4,7 +4,7 @@ module.exports = {
 	Event: require('./event'),
 	lock: require('./lock'),
 	promise: require('./promise'),
-	request: require('./request/server'),
+	request: require('./request'),
 	UUID: require('./UUID')
 };
 

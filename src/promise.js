@@ -1,15 +1,21 @@
-var _promise = require('pinkyswear');
-
-module.exports = function(){
-  return _promise(function extend(set){
-    set['catch'] = function Catch(onRejected){
-      return set['then'](null, onRejected);
-    };
-
-    set['finally'] = function Finally(onFinished){
-      set['then'](onFinished, onFinished);
-    };
-
-    return set;
-  })
+var Promise = require('promise-polyfill');
+Promise.prototype.finally = function(onFinished){
+  return this.then(onFinished, onFinished);
 };
+Promise.prototype.done = function(){
+  return;
+}
+Promise.defer = function(){
+  var resolve, reject, promise = new Promise(function(s, j){
+    resolve = s;
+    reject = j;
+  });
+
+  return {
+    promise: promise,
+    resolve: resolve,
+    reject: reject
+  };
+}
+
+module.exports = Promise;

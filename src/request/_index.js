@@ -1,12 +1,12 @@
-var _fetch = require('server.js');
+var _fetch = require('./server.js');
 
 module.exports = function fetch(uri, options){
-  console.log('Fetching ' + uri);
   return _fetch(uri, options).then(function(response){
-    console.log(response.status);
-    var data = response.body.json();
-    console.log(data);
-    return data;
+    return JSON.parse(
+      typeof response.text === 'function' ?
+        response.text() :
+        response.text
+    );
   });
 };
 

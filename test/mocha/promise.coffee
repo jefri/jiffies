@@ -1,40 +1,23 @@
 jiffies = if window?
-	window.jiffies
+  window.jiffies
 else
-	require('../../src')
+  require('../../src')
 
-promise = jiffies.promise
+Promise = jiffies.promise
 
 describe "Promises/A+ Tests", ->
-  describe.skip 'Spec', ->
+  describe 'Spec', ->
     return unless require?
     require("promises-aplus-tests").mocha
-      resolved: (value)->
-        p = promise()
-        p true, [value]
-        return p
-      rejected: (reason)->
-         p = promise()
-         p false, [reason]
-         return p
-      deferred: ->
-        p = promise()
-
-        promise: p,
-        resolve: (value)->
-          p(true, [value])
-        reject: (reason)->
-          p false, [reason]
+      resolved: (value)-> new Promise (s, j)-> s(value)
+      rejected: (reason)-> new Promise (s, j)-> j(reason)
+      deferred: -> Promise.defer()
 
   describe 'Promise Extensions', ->
-    it 'stops the chain on done', ->
-      p = promise()
-      (->p.done().then()).should.throw(Error)
-
     it 'catches the chain', (done)->
-      p = promise()
       failures = 0
-      p
+      p = Promise.defer()
+      p.promise
       .catch ->
         failures++
       .then ->
@@ -43,4 +26,30 @@ describe "Promises/A+ Tests", ->
       .catch (e)->
         done(e)
 
-      p(false, ['Err'])
+      p.reject('err')
+
+    it 'has a finally', ->
+      failures = 0
+      p = Promise.defer()
+      p.promise
+      .catch ->
+        failures++
+      .then ->
+        failures.should.equal 1
+      .finally (e)->
+        done(e)
+
+      p.reject('err')
+
+    it 'has a done', ->
+      failures = 0
+      p = Promise.defer()
+      p.promise
+      .catch ->
+        failures++
+      .then ->
+        failures.should.equal 1
+        done()
+      .done()
+
+      p.reject('err')

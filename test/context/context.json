@@ -1,0 +1,181 @@
+{	"attributes": {},
+	"entities": {
+		"Context": {
+			"key": "context_id",
+			"properties": {
+				"context_id": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"relationships": {
+				"entities": {
+					"type": "has_many",
+					"property": "context_id",
+					"to": {
+						"type": "Entity",
+						"property": "context_id"
+					},
+					"back": "context"
+				}
+			},
+			"methods": {
+				"export": {
+					"definitions": {
+						"javascript": "var context = {attributes: {}, entities: {}};\nthis.entities.forEach(function(entity){\n\tcontext.entities[entity.name] = entity.export();\n});\nreturn JSON.stringify(context);"
+					}
+				}
+			}
+		},
+		"Entity": {
+			"key": "entity_id",
+			"properties": {
+				"entity_id": {
+					"type": "string"
+				},
+				"context_id": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"key": {
+					"type": "string"
+				}
+			},
+			"relationships": {
+				"context": {
+					"type": "has_a",
+					"property": "context_id",
+					"to": {
+						"type": "Context",
+						"property": "context_id"
+					},
+					"back": "entities"
+				},
+				"properties": {
+					"type": "has_many",
+					"property": "entity_id",
+					"to": {
+						"type": "Property",
+						"property": "entity_id"
+					},
+					"back": "entity"
+				},
+				"relationships": {
+					"type": "has_many",
+					"property": "entity_id",
+					"to": {
+						"type": "Relationship",
+						"property": "to_id"
+					},
+					"back": "from"
+				}
+			},
+			"methods": {
+				"export": {
+					"definitions": {
+						"javascript": "var entity = {key: this.key, properties: {}, relationships: {}};\nthis.properties.forEach(function(property){\n\tentity.properties[property.name] = property.export();\n});\nthis.relationships.forEach(function(relationship){\n\tentity.relationships[relationship.name] = relationship.export();\n});\nreturn entity;"
+					}
+				}
+			}
+		},
+		"Property": {
+			"key": "property_id",
+			"properties": {
+				"property_id": {
+					"type": "string"
+				},
+				"entity_id": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				}
+			},
+			"relationships": {
+				"entity": {
+					"type": "has_a",
+					"property": "entity_id",
+					"to": {
+						"type": "Entity",
+						"property": "entity_id"
+					},
+					"back": "properties"
+				}
+			},
+			"methods": {
+				"export": {
+					"definitions": {
+						"javascript": "var property = {type: this.type};\nreturn property;"
+					}
+				}
+			}
+		},
+		"Relationship": {
+			"key": "relationship_id",
+			"properties": {
+				"relationship_id": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"to_id": {
+					"type": "string"
+				},
+				"to_property": {
+					"type": "string"
+				},
+				"from_id": {
+					"type": "string"
+				},
+				"from_property": {
+					"type": "string"
+				},
+				"back": {
+					"type": "string"
+				}
+			},
+			"relationships": {
+				"to": {
+					"type": "has_a",
+					"property": "to_id",
+					"to": {
+						"type": "Entity",
+						"property": "entity_id"
+					}
+				},
+				"from": {
+					"type": "has_a",
+					"property": "from_id",
+					"to": {
+						"type": "Entity",
+						"property": "entity_id"
+					},
+					"back": "relationships"
+				}
+			},
+			"methods": {
+				"normalize": {
+					"definitions": {
+						"javascript": "var this$=this;\nthis._runtime.get_first({'_type': 'Entity', 'entity_id': this.to_id}).then(\n\tfunction(found){\n\t\tthis$.to = found;\n\t}\n);"
+					}
+				},
+				"export": {
+					"definitions": {
+						"javascript": "var relationship = {type: this.type, property: this.from_property, to: {type: this.to.name, property: this.to_property}, back: this.back};\nreturn relationship;"
+					}
+				}
+			}
+		}
+	}
+}

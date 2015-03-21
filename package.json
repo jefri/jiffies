@@ -34,7 +34,7 @@
     }
   ],
   "browser": {
-    "./src/request/server.js": "./src/request/browser.js",
+    "./src/request/server.coffee": "./src/request/browser.coffee",
     "./src/random/server.js": "./src/random/browser.js"
   },
   "devDependencies": {
@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "node-fetch": "^1.0.4",
-    "pinkyswear": "^2.2.2",
-    "whatwg-fetch": "^0.7.0"
+    "promise-polyfill": "^2.0.0",
+    "request": "^2.53.0"
   }
 }
