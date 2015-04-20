@@ -64,12 +64,15 @@
     "karma-sinon-chai": "^0.3.0",
     "karma-spec-reporter": "0.0.16",
     "mocha": "^2.1.0",
+    "promises-aplus-tests": "^2.1.0",
     "should": "~4.6.0",
     "sinon": "^1.12.2",
     "sinon-chai": "^2.6.0",
     "st": "^0.5.2"
   },
   "dependencies": {
-    "request": "~2.27.0"
+    "node-fetch": "^1.0.4",
+    "promise-polyfill": "^2.0.0",
+    "request": "^2.53.0"
   }
 }

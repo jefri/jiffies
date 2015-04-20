@@ -1,4 +1,7 @@
-jiffies = require('../../src')
+jiffies = if window?
+	window.jiffies
+else
+	require('../../src')
 
 describe 'UUID', ->
 	it 'generates random UUIDs', ->

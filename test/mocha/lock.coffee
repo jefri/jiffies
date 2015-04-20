@@ -1,4 +1,8 @@
-jiffies = require('../../src/')
+jiffies = if window?
+	window.jiffies
+else
+	require('../../src')
+
 
 describe 'Lock', ->
 	it 'prevents reentry', ->
