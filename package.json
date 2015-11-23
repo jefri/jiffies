@@ -17,9 +17,9 @@
   ],
   "main": "./src",
   "scripts": {
-    "build": "tsc -p src ; tsc -p test ; webpack ./dist/index.js ./lib/jiffies.js",
+    "build": "tsc -p src ; tsc -p test ; webpack ./dist/index.js ./lib/jiffies.js ; webpack test/**/*.js test/tests.js",
     "pretest": "npm run build",
-    "test": "mocha test/**/*.js"
+    "test": "mocha test/**/*.js ; karma start karma.config.js"
   },
   "repository": {
     "type": "git",
@@ -37,29 +37,22 @@
   ],
   "browser": {
     "./dist/request/server.js": "./dist/request/browser.js",
-    "./dist/random/server.js": "./dist/random/browser.js"
+    "./dist/random/server.js": "./dist/random/browser.js",
+    "./dist": "./lib/jiffies.js"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
+    "chai": "^3.4.1",
     "glob": "^6.0.1",
-    "karma": "^0.12.31",
-    "karma-chrome-launcher": "^0.1.7",
-    "karma-coffee-preprocessor": "^0.2.1",
-    "karma-coverage": "^0.2.7",
-    "karma-firefox-launcher": "^0.1.4",
-    "karma-junit-reporter": "^0.2.2",
-    "karma-mocha": "^0.1.10",
-    "karma-sinon-chai": "^0.3.0",
-    "karma-spec-reporter": "0.0.16",
-    "mocha": "^2.1.0",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.6.0",
-    "st": "^0.5.2",
+    "karma": "^0.13.15",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.2.1",
+    "karma-mocha": "^0.2.1",
+    "karma-spec-reporter": "0.0.22",
+    "mocha": "^2.3.4",
+    "typescript": "^1.6.2",
     "webpack": "^1.12.8"
   },
   "dependencies": {
-    "node-fetch": "^1.0.4",
-    "promise-polyfill": "^2.0.0",
     "request": "^2.53.0"
   }
 }
