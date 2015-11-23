@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "module": "commonjs",
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "preserveConstEnums": true,
+        "rootDir": "./",
+        "suppressImplicitAnyIndexErrors": true,
+        "target": "es5"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

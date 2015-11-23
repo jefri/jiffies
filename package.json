@@ -17,7 +17,9 @@
   ],
   "main": "./src",
   "scripts": {
-    "test": "./node_modules/.bin/grunt"
+    "build": "tsc -p src ; tsc -p test ; webpack ./dist/index.js ./lib/jiffies.js",
+    "pretest": "npm run build",
+    "test": "mocha test/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -34,26 +36,12 @@
     }
   ],
   "browser": {
-    "./src/request/server.coffee": "./src/request/browser.coffee",
-    "./src/random/server.js": "./src/random/browser.js"
+    "./dist/request/server.js": "./dist/request/browser.js",
+    "./dist/random/server.js": "./dist/random/browser.js"
   },
   "devDependencies": {
     "chai": "^1.10.0",
-    "coffee-loader": "^0.7.2",
-    "coffee-script": "^1.9.0",
-    "grunt": "~0.4.1",
-    "grunt-contrib-clean": "~0.6.0",
-    "grunt-contrib-coffee": "~0.12.0",
-    "grunt-contrib-concat": "~0.5.0",
-    "grunt-contrib-connect": "~0.9.0",
-    "grunt-contrib-copy": "~0.7.0",
-    "grunt-contrib-jshint": "~0.11.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-watch": "~0.6.0",
-    "grunt-karma": "^0.10.1",
-    "grunt-mocha-test": "~0.6.3",
-    "grunt-release": "^0.11.0",
-    "grunt-webpack": "^1.0.8",
+    "glob": "^6.0.1",
     "karma": "^0.12.31",
     "karma-chrome-launcher": "^0.1.7",
     "karma-coffee-preprocessor": "^0.2.1",
@@ -64,11 +52,10 @@
     "karma-sinon-chai": "^0.3.0",
     "karma-spec-reporter": "0.0.16",
     "mocha": "^2.1.0",
-    "promises-aplus-tests": "^2.1.0",
-    "should": "~4.6.0",
     "sinon": "^1.12.2",
     "sinon-chai": "^2.6.0",
-    "st": "^0.5.2"
+    "st": "^0.5.2",
+    "webpack": "^1.12.8"
   },
   "dependencies": {
     "node-fetch": "^1.0.4",

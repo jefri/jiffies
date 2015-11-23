@@ -7,3 +7,4 @@ test/spec/node/spec/
 bower_components/
 node_modules/
 build/
+dist
