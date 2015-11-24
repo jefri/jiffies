@@ -13,11 +13,15 @@
   "files": [
     "lib/",
     "src/",
+    "dist/",
     "package.json"
   ],
-  "main": "./src",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "scripts": {
-    "test": "./node_modules/.bin/grunt"
+    "build": "rm -rf dist/ lib/ test/mocha/**/*.js && tsc -p src && webpack ./dist/index.js ./lib/jiffies.js && tsc -p test && webpack test/**/*.js test/tests.js",
+    "pretest": "npm run build",
+    "test": "mocha test/mocha/**/*.js && karma start karma.config.js"
   },
   "repository": {
     "type": "git",
@@ -34,45 +38,23 @@
     }
   ],
   "browser": {
-    "./src/request/server.coffee": "./src/request/browser.coffee",
-    "./src/random/server.js": "./src/random/browser.js"
+    "./dist/request/server.js": "./dist/request/browser.js",
+    "./dist/random/server.js": "./dist/random/browser.js",
+    "./dist": "./lib/jiffies.js"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
-    "coffee-loader": "^0.7.2",
-    "coffee-script": "^1.9.0",
-    "grunt": "~0.4.1",
-    "grunt-contrib-clean": "~0.6.0",
-    "grunt-contrib-coffee": "~0.12.0",
-    "grunt-contrib-concat": "~0.5.0",
-    "grunt-contrib-connect": "~0.9.0",
-    "grunt-contrib-copy": "~0.7.0",
-    "grunt-contrib-jshint": "~0.11.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-watch": "~0.6.0",
-    "grunt-karma": "^0.10.1",
-    "grunt-mocha-test": "~0.6.3",
-    "grunt-release": "^0.11.0",
-    "grunt-webpack": "^1.0.8",
-    "karma": "^0.12.31",
-    "karma-chrome-launcher": "^0.1.7",
-    "karma-coffee-preprocessor": "^0.2.1",
-    "karma-coverage": "^0.2.7",
-    "karma-firefox-launcher": "^0.1.4",
-    "karma-junit-reporter": "^0.2.2",
-    "karma-mocha": "^0.1.10",
-    "karma-sinon-chai": "^0.3.0",
-    "karma-spec-reporter": "0.0.16",
-    "mocha": "^2.1.0",
-    "promises-aplus-tests": "^2.1.0",
-    "should": "~4.6.0",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.6.0",
-    "st": "^0.5.2"
+    "chai": "^3.4.1",
+    "glob": "^6.0.1",
+    "karma": "^0.13.15",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.2.1",
+    "karma-mocha": "^0.2.1",
+    "karma-spec-reporter": "0.0.22",
+    "mocha": "^2.3.4",
+    "typescript": "^1.6.2",
+    "webpack": "^1.12.8"
   },
   "dependencies": {
-    "node-fetch": "^1.0.4",
-    "promise-polyfill": "^2.0.0",
-    "request": "^2.53.0"
+    "superagent": "^1.4.0"
   }
 }
