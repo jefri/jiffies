@@ -1,4 +1,4 @@
-import { UUID } from '../../dist';
+import { UUID } from '../..';
 import { expect } from 'chai';
 
 describe('UUID', function() {

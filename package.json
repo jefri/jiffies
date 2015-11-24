@@ -13,13 +13,15 @@
   "files": [
     "lib/",
     "src/",
+    "dist/",
     "package.json"
   ],
-  "main": "./src",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p src ; tsc -p test ; webpack ./dist/index.js ./lib/jiffies.js ; webpack test/**/*.js test/tests.js",
+    "build": "rm -rf dist/ lib/ test/mocha/**/*.js && tsc -p src && webpack ./dist/index.js ./lib/jiffies.js && tsc -p test && webpack test/**/*.js test/tests.js",
     "pretest": "npm run build",
-    "test": "mocha test/**/*.js ; karma start karma.config.js"
+    "test": "mocha test/mocha/**/*.js && karma start karma.config.js"
   },
   "repository": {
     "type": "git",
@@ -53,6 +55,6 @@
     "webpack": "^1.12.8"
   },
   "dependencies": {
-    "request": "^2.53.0"
+    "superagent": "^1.4.0"
   }
 }
