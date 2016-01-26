@@ -1,4 +1,4 @@
-import { UUID } from '../..';
+import { UUID } from '../../src/UUID';
 import { expect } from 'chai';
 
 describe('UUID', function() {

@@ -1,4 +1,4 @@
-import { request } from '../../';
+import { request } from '../../src/request';
 import { expect } from 'chai';
 import { setup, teardown } from '../util/http/mock';
 

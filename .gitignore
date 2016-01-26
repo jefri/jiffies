@@ -1,10 +1,4 @@
-test/nunit/tests.js
-test/qunit/min/ls/compiled/
-test/qunit/min/tests.js
-test/spec/jefri/
-test/spec/node/spec/
-
-bower_components/
+*.js
 node_modules/
 build/
-dist
+lib/

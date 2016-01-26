@@ -19,9 +19,9 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist/ lib/ test/mocha/**/*.js && tsc -p src && webpack ./dist/index.js ./lib/jiffies.js && tsc -p test && webpack test/**/*.js test/tests.js",
+    "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/src/index.js ./lib/jiffies.js && webpack ./build/test/**/*.js ./build/tests.js",
     "pretest": "npm run build",
-    "test": "mocha test/mocha/**/*.js && karma start karma.config.js"
+    "test": "mocha ./build/test/mocha/**/*.js && karma start karma.config.js"
   },
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
     "karma-mocha": "^0.2.1",
     "karma-spec-reporter": "0.0.22",
     "mocha": "^2.3.4",
+    "superagent-mock": "^1.9.0",
     "typescript": "^1.6.2",
     "webpack": "^1.12.8"
   },

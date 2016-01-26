@@ -1,4 +1,3 @@
-import * as nock from 'nock';
 import * as superagent from 'superagent';
 import * as samock from 'superagent-mock';
 

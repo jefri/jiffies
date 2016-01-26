@@ -3,7 +3,7 @@ module.exports = function(config) {
     browsers: ['Chrome'],
     frameworks: [ 'mocha', 'chai' ],
     files: [
-      'test/tests.js'
+      'build/tests.js'
     ],
     reporters: ['spec'],
     singleRun: true,

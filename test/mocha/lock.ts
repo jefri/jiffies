@@ -1,4 +1,4 @@
-import { lock } from '../../dist';
+import { lock } from '../../src/lock';
 import { expect } from 'chai';
 
 // if (window) {
