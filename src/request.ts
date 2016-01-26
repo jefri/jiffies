@@ -2,15 +2,16 @@ import * as superagent from 'superagent';
 
 var req: any = function(uri: string): Promise<string> {
   return get(uri)
-}
-req.get = get
-req.post = post
+};
+req.get = get;
+req.post = post;
 
+type httpResult = Promise<String>;
+type httpMethod = (uri: string, options?: PostOptions) => httpResult;
 export let request: {
-  (uri: string): Promise<string>,
-  get: (uri: string) => Promise<string>,
-  post: (uri: string, options: PostOptions) => Promise<string>
-} = req;
+  (uri: string): httpResult, get: httpMethod, post: httpMethod,
+}
+= req;
 
 export function get(uri: string): Promise<string> {
   return new Promise<string>(function(resolve: Function, reject: Function) {
@@ -26,10 +27,7 @@ export function get(uri: string): Promise<string> {
   });
 }
 
-export interface PostOptions {
-  data?: any,
-  dataType?: string,
-}
+export interface PostOptions { data?: any, dataType?: string, }
 
 export function post(uri: string, options: PostOptions): Promise<string> {
   let req = superagent.post(uri);
@@ -49,5 +47,3 @@ export function post(uri: string, options: PostOptions): Promise<string> {
     });
   });
 }
-
-

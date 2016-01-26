@@ -8,22 +8,17 @@ declare module "jiffies" {
     (fn: Function): Function
   }
 
-  interface request {
-
-  }
+  interface request {}
 
   interface UUID {
-    rvalid: RegExp,
-    v4(): string
+    rvalid: RegExp, v4(): string
   }
 
-	// promise: require('./promise'),
-	// request: require('./request'),
+  // promise: require('./promise'),
+  // request: require('./request'),
 
   export = {
     // Event,
-    lock,
-    reqeust,
-    UUID
+    lock, reqeust, UUID
   };
 }

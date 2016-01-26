@@ -1,4 +1,4 @@
-//const __locked: Symbol = Symbol('__locked');
+// const __locked: Symbol = Symbol('__locked');
 const __locked: string = '__locked';
 export function lock(fn: Function): Function {
   return function(...args: any[]) {

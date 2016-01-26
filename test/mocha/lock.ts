@@ -1,5 +1,5 @@
-import { lock } from '../../src/lock';
-import { expect } from 'chai';
+import {lock} from '../../src/lock';
+import {expect} from 'chai';
 
 // if (window) {
 //  jiffies = window['jiffies'];
@@ -7,9 +7,10 @@ import { expect } from 'chai';
 
 describe('Lock', function() {
   it('prevents reentry', function() {
-    let count = 0
-    let inc = lock(function() {
-      if (count > 4) { return; }
+    let count = 0 let inc = lock(function() {
+      if (count > 4) {
+        return;
+      }
       inc();
       count++;
     });
