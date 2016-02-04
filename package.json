@@ -19,8 +19,9 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
+    "format": "clang-format --style=google -i '{src,test}/**/*.ts'",
     "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/test/**/*.js ./build/tests.js",
-    "pretest": "npm run build",
+    "pretest": "npm run format ; npm run build",
     "test": "mocha ./build/test/mocha/**/*.js && karma start karma.config.js"
   },
   "repository": {
