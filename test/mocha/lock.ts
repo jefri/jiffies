@@ -7,7 +7,8 @@ import {expect} from 'chai';
 
 describe('Lock', function() {
   it('prevents reentry', function() {
-    let count = 0 let inc = lock(function() {
+    let count = 0;
+    let inc = lock(function() {
       if (count > 4) {
         return;
       }

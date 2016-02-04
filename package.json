@@ -19,7 +19,7 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/src/index.js ./lib/jiffies.js && webpack ./build/test/**/*.js ./build/tests.js",
+    "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/test/**/*.js ./build/tests.js",
     "pretest": "npm run build",
     "test": "mocha ./build/test/mocha/**/*.js && karma start karma.config.js"
   },

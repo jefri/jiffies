@@ -6,8 +6,8 @@ var req: any = function(uri: string): Promise<string> {
 req.get = get;
 req.post = post;
 
-type httpResult = Promise<String>;
-type httpMethod = (uri: string, options?: PostOptions) => httpResult;
+export type httpResult = Promise<String>;
+export type httpMethod = (uri: string, options?: PostOptions) => httpResult;
 export let request: {
   (uri: string): httpResult, get: httpMethod, post: httpMethod,
 }
