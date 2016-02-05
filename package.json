@@ -16,8 +16,8 @@
     "dist/",
     "package.json"
   ],
-  "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "scripts": {
     "format": "clang-format --style=google -i '{src,test}/**/*.ts'",
     "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/test/**/*.js ./build/tests.js",
