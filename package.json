@@ -1,6 +1,6 @@
 {
   "name": "jefri-jiffies",
-  "etitle": "JEFRi Jiffies",
+  "title": "JEFRi Jiffies",
   "version": "0.1.3-pre3",
   "description": "JEFRi Jiffies: minimal helpers & polyfills.",
   "homepage": "http://www.jefri.org",
@@ -19,7 +19,7 @@
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
   "scripts": {
-    "format": "clang-format --style=google -i '{src,test}/**/*.ts'",
+    "format": "clang-format --style=google -i {src,test}/**/*.ts",
     "build": "rm -rf build/ lib/ && tsc && cp -a ./build/src ./lib && webpack ./build/test/**/*.js ./build/tests.js",
     "pretest": "npm run format ; npm run build",
     "test": "mocha ./build/test/mocha/**/*.js && karma start karma.config.js"
@@ -39,18 +39,18 @@
     }
   ],
   "devDependencies": {
-    "chai": "^3.4.1",
-    "karma": "^0.13.15",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^0.2.1",
-    "karma-mocha": "^0.2.1",
-    "karma-spec-reporter": "0.0.22",
-    "mocha": "^2.3.4",
-    "superagent-mock": "^1.9.0",
-    "typescript": "^1.6.2",
-    "webpack": "^1.12.8"
+    "chai": "^3.4",
+    "karma": "^0.13",
+    "karma-chai": "^0.1",
+    "karma-chrome-launcher": "^0.2",
+    "karma-mocha": "^0.2",
+    "karma-spec-reporter": "^0.0",
+    "mocha": "^2.3",
+    "superagent-mock": "^1.9",
+    "typescript": "^1.6",
+    "webpack": "^1.12"
   },
   "dependencies": {
-    "superagent": "^1.4.0"
+    "superagent": "^1.4"
   }
 }
