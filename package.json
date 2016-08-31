@@ -1,7 +1,7 @@
 {
   "name": "jefri-jiffies",
   "title": "JEFRi Jiffies",
-  "version": "0.1.3-pre3",
+  "version": "0.2.1",
   "description": "JEFRi Jiffies: minimal helpers & polyfills.",
   "homepage": "http://www.jefri.org",
   "bugs": "https://github.com/jefri/jefri-jiffies/issues",
