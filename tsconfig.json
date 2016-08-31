@@ -1,20 +1,31 @@
 {
-    "compilerOptions": {
-        "declaration": true,
-        "experimentalDecorators": true,
-        "module": "commonjs",
-        "noEmitOnError": true,
-        "noImplicitAny": true,
-        "outDir": "./build",
-        "preserveConstEnums": true,
-        "rootDir": ".",
-        "sourceMap": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "target": "es5"
-    },
-    "exclude": [
-        "node_modules",
-        "build",
-        "lib"
-    ]
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "outDir": "./dist",
+    "lib": [
+      "es5",
+      "es2015",
+      "dom"
+    ],
+    "module": "commonjs",
+    "diagnostics": false,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true
+  },
+  "include": [
+    "src/**/*",
+    "typings/index.d.ts"
+  ]
 }

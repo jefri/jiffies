@@ -1,0 +1,10 @@
+{
+  "globalDependencies": {
+    "mocha": "registry:dt/mocha#2.2.5+20160619032855",
+    "node": "registry:env/node#6.0.0+20160622202520",
+    "superagent": "registry:dt/superagent#1.4.0+20160317120654"
+  },
+  "dependencies": {
+    "chai": "registry:npm/chai#3.5.0+20160415060238"
+  }
+}

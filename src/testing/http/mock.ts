@@ -8,7 +8,7 @@ export function setup() {
     {
       pattern: 'http://localhost:8000/context.json',
       fixtures: function() {},
-      get: function(match: any, data: any) { return {body: {entities: {}}}; }
+      get: function() { return {body: {entities: {}}}; }
     }
   ]);
 }

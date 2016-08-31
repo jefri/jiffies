@@ -1,3 +1,1 @@
-export {lock} from './lock';
-export {request} from './request';
-export {UUID} from './UUID';
+export {lock, request, UUID } from './lib/index';
