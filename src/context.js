@@ -1,4 +1,4 @@
-import { Err, isResult } from "./result.js";
+import { Ok, Err, isResult } from "./result.js";
 
 export const Enter = Symbol("Context Enter");
 export const Exit = Symbol("Context Exit");
@@ -14,8 +14,8 @@ export const Exit = Symbol("Context Exit");
  * @template T
  * @template {Error} E
  * @template {Context} C
- * @param {C|(() => C)} context
- * @param {(c: C) => T | import("./result.js").Result<T, Error>} operation
+ * @param {C|(() => C)|((c: C) => T | import("./result.js").Result<T, Error>)} context
+ * @param {(c: C) => T | import("./result.js").Result<T, Error>=} operation
  * @param {(e: Error | unknown | any) => Err<E>} normalizeError
  * @returns {import("./result.js").Result<T, E>}
  */

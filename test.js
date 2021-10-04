@@ -10,7 +10,7 @@ describe("Test executor", () => {
   });
 
   it("fails on inequality", () => {
-    expect(1).toBe(2);
+    expect(() => expect(1).toBe(2)).toThrow();
   });
 });
 
