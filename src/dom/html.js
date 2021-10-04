@@ -1,11 +1,11 @@
 import { up } from "./dom.js";
 
-/** @template {keyof HTMLElementTagNameMap K */
+/** @template {keyof HTMLElementTagNameMap} K */
 const makeElement =
   (/** @type K */ name) =>
-  /** @returns {HTMLElementTagNameMap[K]} */
+  /** @returns {HTMLElementTagNameMap[K]&import("./dom.js").Updater<HTMLElementTagNameMap[K]>} */
   (
-    /** @type Record<string, string>|Node|string= */ attrs,
+    /** @type {import ("./dom").DenormAttrs}= */ attrs,
     /** @type Array<Node|string> */ ...children
   ) =>
     up(document.createElement(name), attrs, ...children);
