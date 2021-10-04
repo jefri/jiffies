@@ -40,7 +40,7 @@ export class Matcher {
     );
   }
 
-  toThrow(/** @type string */ message) {
+  toThrow(/** @type string= */ message = "") {
     let didThrow = false;
 
     /** @type unknown */
@@ -49,7 +49,7 @@ export class Matcher {
       result = this.actual();
     } catch ({ message: e }) {
       assert(
-        e.matches(message),
+        (e ?? "").match(message),
         () => `Expected thrown message to match ${message}, got ${e}`
       );
       didThrow = true;

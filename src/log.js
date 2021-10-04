@@ -18,12 +18,8 @@ export const LEVEL = {
   ERROR: 4,
 };
 
-/**
- *
- * @param {string} name
- * @returns {Logger}
- */
-export function getLogger(name) {
+/** @returns {Logger} */
+export function getLogger(/** @type  {string} */ name) {
   const /** @type Partial<Logger> */ logger = { level: LEVEL.INFO };
 
   /**

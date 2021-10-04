@@ -1,4 +1,5 @@
-import { error, info } from "../log.js";
+import { makeHTMLLogger } from "../components/html_logger.js";
+import { LEVEL } from "../log.js";
 import {
   afterall,
   aftereach,
@@ -82,10 +83,20 @@ function prepareErrors(errors, prefix = "") {
 
 export function makeStatistics(errors = {}) {
   const topLine = `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`;
+
   return `${topLine}\n\n${prepareErrors(errors)
     .map(({ test, stack }) => `${test}\n${stack}`)
     .join("\n\n")}`;
 }
+
 export function displayStatistics(errors = {}) {
-  info(makeStatistics(errors));
+  const logger = makeHTMLLogger(
+    `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`
+  );
+  logger.level = LEVEL.DEBUG;
+  for (const { test, stack } of prepareErrors(errors)) {
+    logger.info(test);
+    logger.debug(`${stack}`);
+  }
+  document.body.appendChild(logger.root);
 }

@@ -1,0 +1,43 @@
+/** @typedef {import("../log").Logger} Logger */
+
+import { div, span, ul, li, pre, code } from "../dom/html.js";
+import { LEVEL } from "../log.js";
+
+/**
+ * @typedef {Logger} HTMLLogger
+ * @property {Element} root
+ */
+
+/** @returns {HTMLLogger} */
+export function makeHTMLLogger(/** @type string */ name) {
+  /** @type Element&(import ("../dom/dom").Updater<Element>) */ let log;
+  const root = div(div(span(name)), (log = ul()));
+  const /** @type HTMLLogger */ logger = { level: LEVEL.INFO, root };
+
+  /** @returns void */
+  function append(/** @type string */ message) {
+    log.appendChild(li(pre(code(message))));
+  }
+
+  /**
+   *
+   * @param {number} level
+   * @returns {(message: unknown) => void}
+   */
+  const logAt =
+    (level) =>
+    /**
+     *
+     * @param {unknown} message
+     * @returns void
+     */
+    (message) =>
+      level >= (logger.level ?? LEVEL.ERROR) ? append(message) : undefined;
+
+  logger.debug = logAt(LEVEL.VERBOSE);
+  logger.info = logAt(LEVEL.INFO);
+  logger.warn = logAt(LEVEL.WARN);
+  logger.error = logAt(LEVEL.ERROR);
+
+  return logger;
+}
