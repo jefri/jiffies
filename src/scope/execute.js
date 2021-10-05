@@ -12,8 +12,8 @@ import {
 let executedCases = 0;
 let passedCases = 0;
 let failedCases = 0;
-/** @returns import("./scope").TestErrors */
-export function execute(
+/** @returns Promise<import("./scope").TestErrors> */
+export async function execute(
   prefix = "",
   cases = rootCases(),
   /** @type import("./scope").TestErrors */ errors = {}
@@ -26,7 +26,7 @@ export function execute(
   errors = errors[prefix] = {};
 
   try {
-    beforeallfn();
+    await beforeallfn();
   } catch (e) {
     errors["_beforeAll"] = e;
     return;
@@ -36,20 +36,20 @@ export function execute(
     if (block instanceof Function) {
       try {
         executedCases += 1;
-        beforeeachfn();
-        block();
-        aftereachfn();
+        await beforeeachfn();
+        await block();
+        await aftereachfn();
         passedCases += 1;
       } catch (e) {
         errors[title] = e;
         failedCases += 1;
       }
     } else if (block) {
-      execute(title, block, (errors[title] = {}));
+      await execute(title, block, (errors[title] = {}));
     }
   }
   try {
-    afterallfn();
+    await afterallfn();
   } catch (e) {
     errors["_afterAll"] = e;
     return;

@@ -14,5 +14,7 @@ describe("Test executor", () => {
   });
 });
 
-const errors = execute();
-displayStatistics(errors);
+(async function test() {
+  const errors = await execute();
+  displayStatistics(errors);
+})();
