@@ -1,4 +1,4 @@
-import { makeHTMLLogger } from "../components/html_logger.js";
+import { makeHTMLLogger } from "../components/logger.js";
 import { LEVEL } from "../log.js";
 import {
   afterall,
@@ -67,10 +67,16 @@ export function getStatics() {
   };
 }
 
+/**
+ * @param {import("./scope").TestErrors} errors
+ * @returns ({test: string, stack: string })[]
+ */
 function prepareErrors(errors, prefix = "") {
   const errorList = [];
   for (const [title, err] of Object.entries(errors)) {
-    if (err.message) {
+    if (typeof err == "string") {
+      errorList.push({ test: `${prefix} ${title}`, stack: err });
+    } else if (/** @type Error */ (err).message) {
       errorList.push({ test: `${prefix} ${title}`, stack: err.stack });
     } else {
       errorList.push(
