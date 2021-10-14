@@ -69,7 +69,7 @@ export function getStatics() {
 
 /**
  * @param {import("./scope").TestErrors} errors
- * @returns ({test: string, stack: string })[]
+ * @returns {({test: string, stack?: string })[]}
  */
 function prepareErrors(errors, prefix = "") {
   const errorList = [];
@@ -77,7 +77,10 @@ function prepareErrors(errors, prefix = "") {
     if (typeof err == "string") {
       errorList.push({ test: `${prefix} ${title}`, stack: err });
     } else if (/** @type Error */ (err).message) {
-      errorList.push({ test: `${prefix} ${title}`, stack: err.stack });
+      errorList.push({
+        test: `${prefix} ${title}`,
+        stack: /** @type Error */ (err).stack,
+      });
     } else {
       errorList.push(
         ...prepareErrors(err, `${prefix}${prefix == "" ? "" : " -> "}${title}`)
@@ -95,7 +98,7 @@ export function makeStatistics(errors = {}) {
     .join("\n\n")}`;
 }
 
-export function displayStatistics(errors = {}) {
+export function displayStatistics(errors = {}, root = document.body) {
   const logger = makeHTMLLogger(
     `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`
   );
@@ -104,5 +107,5 @@ export function displayStatistics(errors = {}) {
     logger.info(test);
     logger.debug(`${stack}`);
   }
-  document.body.appendChild(logger.root);
+  root.appendChild(logger.root);
 }

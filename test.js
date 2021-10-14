@@ -16,7 +16,9 @@ describe("Test executor", () => {
   });
 });
 
+const root = document.getElementById("test_output") ?? undefined;
+
 (async function test() {
   const errors = await execute();
-  displayStatistics(errors);
+  displayStatistics(errors, root);
 })();
