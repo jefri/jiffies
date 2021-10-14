@@ -50,7 +50,7 @@ const events = Symbol("events");
 
 /**
  * @template {Element} E
- * @returns {E&Updater<E>}
+ * @returns {Updater<E>}
  */
 function update(
   /** @type E&{[events]: Map<string, Function>} */ element,
@@ -85,6 +85,8 @@ function update(
           }
           break;
         // Some IDL properties require setting them directly
+        case "disabled":
+        case "readonly":
         case "required":
           element[k] = v;
           break;
