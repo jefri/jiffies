@@ -1,6 +1,6 @@
 /**
  * @typedef {
-    Record<string, string|null> |
+    Record<string, string|number|boolean|null> |
     Partial<{style?: string | Partial<{[K in keyof CSSStyleDeclaration]: string}>}> |
     Partial<{
       [K in keyof HTMLElementEventMap]: ((ev?: HTMLElementEventMap[K]) => void)|null
@@ -10,9 +10,10 @@
  * @typedef {Attrs|DenormChildren} DenormAttrs
  */
 
-function normalizeArguments(
+export function normalizeArguments(
   /** @type DenormAttrs= */ attrs,
-  /** @type DenormChildren[]= */ children = []
+  /** @type DenormChildren[]= */ children = [],
+  defaultAttrs = {}
 ) {
   if (
     typeof attrs === "string" ||
@@ -22,23 +23,23 @@ function normalizeArguments(
     attrs = undefined;
   }
   return /** @type [Record<string, string>, Array<Node | string>] */ ([
-    attrs ?? {},
+    attrs ?? defaultAttrs,
     children,
   ]);
 }
 
 /**
  * @template {Element} E
- * @typedef {{update: (attrs: Record<string, string>, ...children: (Node|string)[]) => E}} Updater
+ * @typedef {E & {update: (attrs: Record<string, string>, ...children: (Node|string)[]) => E}} Updater
  */
 
 /**
  * @template {Element} E
- * @returns {E&Updater<E>}
+ * @returns {Updater<E>}
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function up(
-  /** @type E|Updater<E> */ element,
+  /** @type Updater<E> */ element,
   /** @type DenormAttrs= */ attrs,
   /** @type DenormChildren[] */ ...children
 ) {
@@ -83,20 +84,29 @@ function update(
             });
           }
           break;
+        // Some IDL properties require setting them directly
+        case "required":
+          element[k] = v;
+          break;
         default:
-          element.setAttributeNS(element.namespaceURI, k, v);
+          switch (v) {
+            case false:
+              element.removeAttributeNS(element.namespaceURI, k);
+              break;
+            case true:
+              element.setAttributeNS(element.namespaceURI, k, k);
+              break;
+            default:
+              element.setAttributeNS(element.namespaceURI, k, v);
+          }
       }
     }
   });
   element.replaceChildren(...children);
-  /** @type unknown */ element.update =
-    element.update ??
-    function (
-      /** @type DenormAttrs= */ attrs,
-      /** @type DenormChildren[] */ ...children
-    ) {
-      return update(element, ...normalizeArguments(attrs, children));
-    };
+  element.update ??= (
+    /** @type DenormAttrs= */ attrs,
+    /** @type DenormChildren[] */ ...children
+  ) => update(element, ...normalizeArguments(attrs, children));
 
-  return /** @type E&Updater<E> */ element;
+  return /** @type Updater<E> */ (element);
 }

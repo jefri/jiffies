@@ -3,6 +3,8 @@ import { describe, expect, it } from "./src/scope/index.js";
 
 import * as dom_html from "./src/dom/html.test.js";
 import * as context from "./src/context.test.js";
+import * as result from "./src/result.test.js";
+import * as fc from "./src/dom/fc.test.js";
 
 describe("Test executor", () => {
   it("matches equality", () => {
