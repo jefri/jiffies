@@ -1,5 +1,5 @@
 /**
- * @typedef { import("./display").Display } Display
+ * @typedef {{ toString: () => string }} Display
  * /
 
 /**
