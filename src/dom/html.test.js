@@ -18,8 +18,10 @@ describe("html", () => {
   it("attaches event handlers", () => {
     let clicked = false;
     const btn = button({
-      click: () => {
-        clicked = true;
+      events: {
+        click: () => {
+          clicked = true;
+        },
       },
     });
     btn.click();
@@ -29,15 +31,17 @@ describe("html", () => {
   it("removes event handlers", () => {
     let clicked = 0;
     const btn = button({
-      click: () => {
-        clicked += 1;
+      events: {
+        click: () => {
+          clicked += 1;
+        },
       },
     });
     btn.click();
 
     expect(clicked).toBe(1);
 
-    btn.update({ click: null });
+    btn.update({ events: { click: null } });
     btn.click();
     expect(clicked).toBe(1);
   });
@@ -67,7 +71,9 @@ describe("html", () => {
       style: {
         flexDirection: "column",
       },
-      click: () => (clicked = true),
+      events: {
+        click: () => (clicked = true),
+      },
     });
     btn.click();
 

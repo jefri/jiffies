@@ -3,9 +3,10 @@ import { up } from "./dom.js";
 /** @template {keyof HTMLElementTagNameMap} K */
 const makeElement =
   (/** @type K */ name) =>
-  /** @returns {HTMLElementTagNameMap[K]&import("./dom.js").Updater<HTMLElementTagNameMap[K]>} */
+  /** @returns {import("./dom.js").Updatable<HTMLElementTagNameMap[K]>} */
   (
     /** @type {import ("./dom").DenormAttrs}= */ attrs,
+
     /** @type Array<Node|string> */ ...children
   ) =>
     up(document.createElement(name), attrs, ...children);

@@ -26,7 +26,8 @@ describe("FC", () => {
     );
 
     document.body.appendChild(f);
-    expect(f.children.length).toBe(2);
+    expect(f.children.length).toBe(3);
+    expect(f.querySelectorAll("input[required]").length).toBe(2);
     expect(f.querySelectorAll('input[name="firstName"]').length).toBe(1);
   });
 });
