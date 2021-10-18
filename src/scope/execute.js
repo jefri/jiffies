@@ -1,5 +1,6 @@
 import { makeHTMLLogger } from "../components/logger.js";
-import { LEVEL } from "../log.js";
+import { button } from "../dom/html.js";
+import { DEFAULT_LOGGER, LEVEL } from "../log.js";
 import {
   afterall,
   aftereach,
@@ -99,13 +100,21 @@ export function makeStatistics(errors = {}) {
 }
 
 export function displayStatistics(errors = {}, root = document.body) {
-  const logger = makeHTMLLogger(
-    `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`
-  );
+  const logger = (() => {
+    try {
+      return makeHTMLLogger(
+        `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`
+      );
+    } catch (e) {
+      return DEFAULT_LOGGER;
+    }
+  })();
   logger.level = LEVEL.DEBUG;
   for (const { test, stack } of prepareErrors(errors)) {
     logger.info(test);
     logger.debug(`${stack}`);
   }
-  root.appendChild(logger.root);
+  if (logger.root) {
+    root.appendChild(logger.root);
+  }
 }
