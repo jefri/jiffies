@@ -1,26 +1,37 @@
 /**
- * @typedef {(event: Event) => void} EventHandler
+ * @typedef {EventListenerOrEventListenerObject|null} EventHandler
  */
 
 /**
- * @typedef {{update: (attrs?: DenormAttrs, ...children: DenormChildren[]) => Node}} Updater
- */
-/**
- * @template {Element} N 
+ * @template {Node} N 
  * @typedef {
       N &
-      Partial<{[$events]: Map<string, EventListenerOrEventListenerObject>} &
-      Partial<Updater>>
+      Partial<{
+        [Events]: Map<string, EventHandler>,
+        update: (attrs?: DenormAttrs, ...children: DenormChildren[]) => Node
+      }>
+    } Updater
+ */
+
+/**
+ * @template {Node} N 
+ * @typedef {
+      N &
+      {
+        [Events]: Map<string, EventHandler>,
+        update: (attrs?: DenormAttrs, ...children: DenormChildren[]) => Node
+      }
     } Updatable
  */
+
 /**
  * @typedef {
     Partial<{style: string | Partial<{[K in keyof CSSStyleDeclaration]: string}>}> |
     {events?:
       Partial<{
-        [K in keyof HTMLElementEventMap]: EventListenerOrEventListenerObject 
+        [K in keyof HTMLElementEventMap]: EventHandler
       }> 
-    }|
+    } |
     Record<string, string|number|boolean|null>
   } Attrs
  * @typedef {Node|string} DenormChildren
@@ -59,7 +70,7 @@ export function normalizeArguments(
 
 /**
  * @template {Element} E
- * @returns {E&Updater}
+ * @returns {Updatable<E>}
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function up(
@@ -70,42 +81,44 @@ export function up(
   return update(element, ...normalizeArguments(attrs, children));
 }
 
-const $events = Symbol("events");
+const Events = Symbol("events");
 
 /**
  * @template {Element} E
- * @returns {E&Updater}
+ * @returns {Updatable<E>}
  */
 function update(
-  /** @type Updatable<E> */ element,
+  /** @type Updater<E> */ element,
   /** @type Attrs */ attrs,
   /** @type DenormChildren[] */ children
 ) {
   // Track events, to remove later
-  element[$events] ??= new Map();
+  const $events = (element[Events] ??= new Map());
   const { style = {}, events = {}, ...rest } = attrs;
 
   Object.entries(events).forEach(([k, v]) => {
-    if (v === null && element[$events].has(k)) {
+    if (v === null && $events.has(k)) {
       const listener = /** @type {EventListenerOrEventListenerObject} */ (
-        element[$events].get(k)
+        $events.get(k)
       );
       element.removeEventListener(k, listener);
-    } else if (!element[$events].has(k)) {
+    } else if (!$events.has(k)) {
       element.addEventListener(k, v);
-      element[$events].set(k, v);
+      $events.set(k, v);
     }
   });
 
-  if (typeof style === "string") {
-    element.style.cssText = style;
-  } else {
-    Object.entries(style).forEach(([k, v]) => {
-      element.style[k] = v;
-    });
-  }
+  const _style = /** @type {CSSStyleDeclaration} */ (element).style;
+  if (_style)
+    if (typeof style === "string") {
+      _style.cssText = style;
+    } else {
+      Object.entries(style).forEach(([k, v]) => {
+        _style[k] = v;
+      });
+    }
 
-  Object.entries(attrs).forEach(([k, v]) => {
+  Object.entries(rest).forEach(([k, v]) => {
     switch (k) {
       case "class":
         /** @type string */ (v)
@@ -140,5 +153,5 @@ function update(
     /** @type DenormChildren[] */ ...children
   ) => update(element, ...normalizeArguments(attrs, children));
 
-  return /** @type E&Updater */ (element);
+  return /** @type Updatable<E> */ (element);
 }
