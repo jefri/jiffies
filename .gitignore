@@ -8,3 +8,5 @@ bower_components/
 node_modules/
 build/
 dist
+dist
+.parcel-cache

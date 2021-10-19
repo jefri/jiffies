@@ -61,11 +61,12 @@ export function normalizeArguments(
   defaultAttrs = {}
 ) {
   if (isAttrs(attrs)) {
-    return [attrs ?? defaultAttrs, children];
+    attrs ??= defaultAttrs;
   } else {
     children.unshift(/** @type string|Node */ (attrs));
-    return [defaultAttrs, children];
+    attrs = defaultAttrs;
   }
+  return [attrs, children.flat()];
 }
 
 /**
@@ -127,6 +128,7 @@ function update(
         break;
       // Some IDL properties require setting them directly
       case "disabled":
+      case "href":
       case "name":
       case "readonly":
       case "required":
