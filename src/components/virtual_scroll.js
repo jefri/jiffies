@@ -1,4 +1,5 @@
 import { debounce } from "../debounce.js";
+import { FC } from "../dom/fc.js";
 import { div } from "../dom/html.js";
 
 /**
@@ -154,7 +155,7 @@ export function doScroll(scrollTop, state, get) {
  * @param {VirtualScrollProps<T>} props
  * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
  */
-export const VirtualScroll = (props) => {
+export const VirtualScroll = FC((props) => {
   /** @param {{target?: {scrollTop: number}}} event */
   const scrollTo = ({ target }) => {
     const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
@@ -201,6 +202,6 @@ export const VirtualScroll = (props) => {
 
   viewportElement.state = state;
   return viewportElement;
-};
+});
 
 export default VirtualScroll;

@@ -1,6 +1,6 @@
 /**
  * @template S
- * @typedef {S | import ("./dom").Attrs} Scope
+ * @typedef {S & import ("./dom").Attrs} Scope
  */
 
 import { normalizeArguments } from "./dom.js";

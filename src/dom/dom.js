@@ -123,7 +123,8 @@ function update(
     switch (k) {
       case "class":
         /** @type string */ (v)
-          .split(/\s+/)
+          .split(/\s+/m)
+          .filter((s) => s !== "")
           .forEach((c) => element.classList.add(c));
         break;
       // Some IDL properties require setting them directly

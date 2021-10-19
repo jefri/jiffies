@@ -23,7 +23,7 @@ export class Memory {
    */
   get(index) {
     if (index < 0 || index >= this.size) return 0xffff;
-    return this.#memory[index];
+    return this.#memory[index] ?? 0;
   }
 
   /**
