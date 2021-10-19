@@ -1,4 +1,4 @@
-import { randomByte } from "./random/index";
+import { randomByte } from "./random/index.js";
 
 export const UUID = {
   rvalid:

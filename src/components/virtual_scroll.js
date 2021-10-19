@@ -1,5 +1,5 @@
-import { debounce } from "../debounce";
-import { div } from "../dom/html";
+import { debounce } from "../debounce.js";
+import { div } from "../dom/html.js";
 
 /**
  * @template T
@@ -17,7 +17,7 @@ export function arrayAdapter(data) {
 
 /**
  * @template T
- * @typedef {Object} VirtualScrollProps
+ * @typedef {object} VirtualScrollProps
  * @property {Partial<VirtualScrollSettings>} settings
  * @property {VirtualScrollDataAdapter<T>} get
  * @property {(t: T) => import("../dom/dom").Updatable<Node>} row
@@ -37,7 +37,7 @@ export function arrayAdapter(data) {
  * @param {Partial<VirtualScrollSettings>} settings
  * @returns {VirtualScrollSettings}
  */
-function fillVirtualScrollSettings(settings) {
+export function fillVirtualScrollSettings(settings) {
   const {
     minIndex = 0,
     maxIndex = 1,
@@ -55,7 +55,7 @@ function fillVirtualScrollSettings(settings) {
  * @param {VirtualScrollSettings} settings
  * @returns {VirtualScrollState<T>}
  */
-const initialState = (settings) => {
+export function initialState(settings) {
   // From Denis Hilt, https://blog.logrocket.com/virtual-scrolling-core-principles-and-basic-implementation-in-react/
   const { minIndex, maxIndex, startIndex, itemHeight, count, tolerance } =
     settings;
@@ -82,7 +82,7 @@ const initialState = (settings) => {
     initialPosition,
     data: [],
   };
-};
+}
 
 /**
  * @template T
@@ -93,11 +93,45 @@ const initialState = (settings) => {
  * @param {VirtualScrollDataAdapter<T>} get
  * @returns {T[]}
  */
-function getData(minIndex, maxIndex, offset, limit, get) {
+export function getData(minIndex, maxIndex, offset, limit, get) {
   const start = Math.max(0, minIndex, offset);
   const end = Math.min(maxIndex, offset + limit - 1);
   const data = get(start, end - start);
   return [...data];
+}
+
+/**
+   * @template T
+   * @param {number} scrollTop
+   * @param {VirtualScrollState<T>} state
+   * @param {VirtualScrollDataAdapter<T>} get
+   * @returns {{
+     topPaddingHeight: number,
+     bottomPaddingHeight: number,
+     data: T[]
+   }}
+   */
+export function doScroll(scrollTop, state, get) {
+  const {
+    totalHeight,
+    toleranceHeight,
+    bufferedItems,
+    settings: { itemHeight, minIndex, maxIndex },
+  } = state;
+  const index =
+    minIndex + Math.floor((scrollTop - toleranceHeight) / itemHeight);
+  const data = getData(minIndex, maxIndex, index, bufferedItems, get);
+  const topPaddingHeight = Math.max((index - minIndex) * itemHeight, 0);
+  const bottomPaddingHeight = Math.max(
+    totalHeight - topPaddingHeight - data.length * itemHeight,
+    0
+  );
+
+  return {
+    topPaddingHeight,
+    bottomPaddingHeight,
+    data,
+  };
 }
 
 /**
@@ -118,12 +152,14 @@ function getData(minIndex, maxIndex, offset, limit, get) {
 /**
  * @template T
  * @param {VirtualScrollProps<T>} props
+ * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
  */
-const VirtualScroll = (props) => {
-  /** @param {{target?: HTMLDivElement}} event */
+export const VirtualScroll = (props) => {
+  /** @param {{target?: {scrollTop: number}}} event */
   const scrollTo = ({ target }) => {
     const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
-    doScroll(scrollTop);
+    const updatedSate = doScroll(scrollTop, state, props.get);
+    setState(updatedSate);
   };
 
   const settings = fillVirtualScrollSettings(props.settings);
@@ -161,39 +197,10 @@ const VirtualScroll = (props) => {
     );
   };
 
-  doScroll(state.initialPosition ?? 0);
+  scrollTo({ target: { scrollTop: state.initialPosition ?? 0 } });
 
+  viewportElement.state = state;
   return viewportElement;
-
-  /** @param {number} scrollTop */
-  function doScroll(scrollTop) {
-    const {
-      totalHeight,
-      toleranceHeight,
-      bufferedItems,
-      settings: { itemHeight, minIndex },
-    } = state;
-    const index =
-      minIndex + Math.floor((scrollTop - toleranceHeight) / itemHeight);
-    const data = getData(
-      settings.minIndex,
-      settings.maxIndex,
-      index,
-      bufferedItems,
-      props.get
-    );
-    const topPaddingHeight = Math.max((index - minIndex) * itemHeight, 0);
-    const bottomPaddingHeight = Math.max(
-      totalHeight - topPaddingHeight - data.length * itemHeight,
-      0
-    );
-
-    setState({
-      topPaddingHeight,
-      bottomPaddingHeight,
-      data,
-    });
-  }
 };
 
 export default VirtualScroll;

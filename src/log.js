@@ -36,7 +36,7 @@ export function getLogger(/** @type  {string} */ name) {
      * @returns void
      */
     (message) =>
-      level >= logger.level ? fn(message) : undefined;
+      level >= (logger.level ?? LEVEL.SILENT) ? fn(message) : undefined;
 
   logger.debug = logAt(LEVEL.VERBOSE, console.debug.bind(console));
   logger.info = logAt(LEVEL.INFO, console.info.bind(console));

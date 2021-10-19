@@ -1,6 +1,7 @@
-const __locked = Symbol("__locked");
+/** @type {WeakSet<Function>} */
+const locks = new WeakSet();
+
 /**
- *
  * @param {Function} fn
  * @returns {Function}
  */
@@ -8,15 +9,15 @@ export function lock(fn) {
   return function (/** @type unknown[] */ ...args) {
     let ret = null;
     let ex = null;
-    if (fn[__locked] !== true) {
-      fn[__locked] = true;
+    if (!locks.has(fn)) {
+      locks.add(fn);
       try {
-        ret = fn.apply(this, args);
+        ret = fn(...args);
       } catch (e) {
         ex = e;
       }
     }
-    fn[__locked] = false;
+    locks.delete(fn);
     if (ex !== null) {
       throw ex;
     } else {

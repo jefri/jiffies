@@ -1,17 +1,9 @@
-/**
- * @typedef {{ toString: () => string }} Display
- * /
+/** @typedef {{ toString: () => string }} Display * /
 
-/**
- * @param {unknown} a
- * @returns {a is Display}
- */
-export const isDisplay = (a) =>
+/** @returns {a is Display} */
+export const isDisplay = (/** @type unknown */ a) =>
   typeof (/** @type Display */ (a).toString) === "function";
 
-/**
- *
- * @param {unknown | Display} a
- * @returns {string}
- */
-export const display = (a) => (isDisplay(a) ? a.toString() : JSON.stringify(a));
+/** @returns {string} */
+export const display = (/** @type {unknown | Display} */ a) =>
+  isDisplay(a) ? a.toString() : JSON.stringify(a);

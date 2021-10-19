@@ -1,4 +1,4 @@
-import { getUint8Array } from "./server";
+import { getUint8Array } from "./browser.js";
 
 export function randomByte() {
   const array = getUint8Array(1);

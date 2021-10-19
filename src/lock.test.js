@@ -1,4 +1,5 @@
-import { lock } from "./lock";
+import { describe, it, expect } from "./scope/index.js";
+import { lock } from "./lock.js";
 
 describe("Lock", function () {
   it("prevents reentry", function () {
@@ -11,6 +12,6 @@ describe("Lock", function () {
       count++;
     });
     inc();
-    expect(count).to.equal(1);
+    expect(count).toBe(1);
   });
 });
