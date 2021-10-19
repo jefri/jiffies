@@ -1,6 +1,14 @@
 /** @typedef {import('./link.js').Link} Link */
+/** @typedef {import('../dom/dom.js').Updatable<Node>} UNode */
+
+/**
+ * @typedef {(target: UNode) => UNode} Router
+ * @property {string=} current
+ * @property {(url: string) = (event: Event) => void} navigate
+ */
 
 let baseURI = `${document.baseURI}`;
+/** @type Router */
 let router;
 export const Router = {
   /**
@@ -8,9 +16,9 @@ export const Router = {
    * @param {string} index
    */
   for(links, index) {
-    /** @type {import('../dom/dom.js').Updatable<Node>} */
+    /** @type {UNode} */
     let target;
-    router = (/** @type {import('../dom/dom.js').Updatable<Node>} */ t) => {
+    router = (/** @type {UNode} */ t) => {
       target = t;
       index = baseURI + index;
       doNavigate(index);
@@ -23,19 +31,23 @@ export const Router = {
     /** @param {string} link */
     const doNavigate = (link) => {
       link = link.replace(baseURI, "") || index;
+      if (link === router.current) return false;
+      router.current = link;
       target.update(
         (
           links.find(({ href }) => link.endsWith(href))?.target ??
           (() => undefined)
         )()
       );
+      return true;
     };
 
     const navigate = (/** @type {string} */ url) => {
       return (/** @type {Event} */ event) => {
         event.preventDefault();
-        history.pushState(null, "", url);
-        doNavigate(url || index);
+        if (doNavigate(url || index)) {
+          history.pushState(null, "", url);
+        }
       };
     };
 
@@ -48,7 +60,7 @@ export const Router = {
     return `${baseURI}${link}`;
   },
 
-  navigate(url) {
+  navigate(/** @type string */ url) {
     return router?.navigate(url);
   },
 };

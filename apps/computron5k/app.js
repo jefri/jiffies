@@ -5,7 +5,7 @@ import { Router } from "../../src/router/router.js";
 import urls from "./urls.js";
 
 export const App = () => {
-  const router = Router.for(urls, "cpu");
+  const router = Router.for(urls, "test");
 
   const app = [
     header(
