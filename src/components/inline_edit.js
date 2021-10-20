@@ -14,7 +14,7 @@ const Mode = {
     }
   }} props
  */
-export const InlineEdit = FC((props) => {
+export const InlineEdit = FC("inline-edit", (props) => {
   const state = {
     mode: Mode.VIEW,
   };

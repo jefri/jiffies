@@ -4,7 +4,7 @@ import { button, div, form, input, label, small } from "./html.js";
 
 describe("FC", () => {
   it("creates FCs", () => {
-    const Input = FC((attrs, children) =>
+    const Input = FC("fc-input", (attrs, children) =>
       label(attrs.placeholder ?? attrs.name, input(attrs), ...children)
     );
 

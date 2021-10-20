@@ -13,14 +13,33 @@ import { normalizeArguments } from "./dom.js";
 
 /**
  * @template S
- * @param {(attrs: Scope<S>, children: DenormChildren[]) => Updateable} component
+ * @param {string} name
+ * @param {(attrs: Scope<S>, children: DenormChildren[]) => Updateable|Updateable[]} component
  */
-export function FC(component) {
+export function FC(name, component) {
+  customElements.define(
+    name,
+    class FCImpl extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      update(
+        /** @type {DenormAttrs=} */ attrs,
+        /** @type {DenormChildren[]} */ ...children
+      ) {
+        [attrs, children] = normalizeArguments(attrs, children);
+        this.replaceChildren(...[component(attrs, children)].flat());
+      }
+    }
+  );
+
   return (
     /** @type {DenormAttrs=} */ attrs,
     /** @type {DenormChildren[]} */ ...children
   ) => {
-    [attrs, children] = normalizeArguments(attrs, children);
-    return component(attrs, children);
+    const element = document.createElement(name);
+    element.update(attrs, ...children);
+    return element;
   };
 }

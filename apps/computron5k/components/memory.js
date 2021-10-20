@@ -7,6 +7,7 @@ import InlineEdit from "../../../src/components/inline_edit.js";
 import VirtualScroll from "../../../src/components/virtual_scroll.js";
 import { article, code, header, nav, span, ul } from "../../../src/dom/html.js";
 import { rounded, text, width } from "../../../src/dom/css.js";
+import { FC } from "../../../src/dom/fc.js";
 
 const FORMATS = ["bin", "dec", "hex", "asm"];
 /** @typedef {FORMATS[number]} Formats */
@@ -49,32 +50,32 @@ const MemoryBlock = ({
     onChange?: (v: string) => void;
   }} props
  */
-const MemoryCell = ({
-  index,
-  value,
-  editable = false,
-  onChange = () => {},
-}) => [
-  code(
-    {
-      style: {
-        ...width("1/4"),
-        ...rounded("none"),
+const MemoryCell = FC(
+  "memory-cell",
+  ({ index, value, editable = false, onChange = () => {} }) => [
+    code(
+      {
+        style: {
+          ...width("1/4"),
+          ...rounded("none"),
+        },
       },
-    },
-    hex(index)
-  ),
-  code(
-    {
-      style: {
-        ...width("3/4"),
-        ...rounded("none"),
-        ...text("right"),
+      hex(index)
+    ),
+    code(
+      {
+        style: {
+          ...width("3/4"),
+          ...rounded("none"),
+          ...text("right"),
+        },
       },
-    },
-    editable ? InlineEdit({ value, events: { change: onChange } }) : span(value)
-  ),
-];
+      editable
+        ? InlineEdit({ value, events: { change: onChange } })
+        : span(value)
+    ),
+  ]
+);
 
 /** 
  * @param {{

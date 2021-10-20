@@ -155,7 +155,7 @@ export function doScroll(scrollTop, state, get) {
  * @param {VirtualScrollProps<T>} props
  * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
  */
-export const VirtualScroll = FC((props) => {
+export const VirtualScroll = FC("virtual-scroll", (props) => {
   /** @param {{target?: {scrollTop: number}}} event */
   const scrollTo = ({ target }) => {
     const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
