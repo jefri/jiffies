@@ -2,6 +2,8 @@
   "type": "module",
   "scripts": {
     "start": "node ./server/http/index.js",
-    "dev": "nodemon ./server/http/index.js"
+    "dev": "nodemon ./server/http/index.js",
+    "test": "node ./test.js",
+    "ci": "node ./test.js --mode=junit"
   }
 }

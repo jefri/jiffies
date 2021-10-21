@@ -4,105 +4,108 @@ import {
   beforeall,
   beforeeach,
   rootCases,
-  getTotalCases,
 } from "./describe.js";
 
 /**
- * @typedef {import("./scope").TestErrors} TestErrors
- *
  * @typedef {import("./scope").TestCase} TestCase
- *
- * @typedef TestRun
- * @property {TestErrors} errors
- * @property {number} executed
- * @property {number} passed
- * @property {number} failed
+ * @typedef {import("./scope").TestResult} TestResult
  */
 
 /**
  * @param {string} prefix
  * @param {TestCase} cases
- * @param {TestErrors} errors
- * @returns {Promise<TestRun>}
+ * @returns {Promise<TestResult>}
  */
-
-export async function execute(
-  prefix = "",
-  cases = rootCases(),
-  /** @type import("./scope").TestErrors */ errors = {}
-) {
+export async function execute(prefix = "", cases = rootCases()) {
   const beforeallfn = cases[beforeall] ?? (() => {});
   const beforeeachfn = cases[beforeeach] ?? (() => {});
   const afterallfn = cases[afterall] ?? (() => {});
   const aftereachfn = cases[aftereach] ?? (() => {});
 
-  let executed = 0;
-  let passed = 0;
-  let failed = 0;
-
-  errors = errors[prefix] = {};
+  /** @type {TestResult} */
+  const result = {
+    executed: 0,
+    passed: 0,
+    failed: 0,
+  };
 
   try {
     await beforeallfn();
   } catch (e) {
-    errors["_beforeAll"] = e;
-    return { executed, passed, failed, errors };
+    result["_beforeAll"] = { error: /** @type {Error} */ (e) };
+    return result;
   }
 
   for (const [title, block] of Object.entries(cases)) {
     if (typeof title === "symbol") continue;
     if (block instanceof Function) {
       try {
-        executed += 1;
+        result.executed += 1;
         await beforeeachfn();
         await block();
         await aftereachfn();
-        passed += 1;
+        result.passed += 1;
+        result[title] = { passed: true };
       } catch (e) {
-        errors[title] = e;
-        failed += 1;
+        result.failed += 1;
+        result[title] = { error: /** @type Error */ e };
       }
     } else if (block) {
-      const run = await execute(title, block, (errors[title] = {}));
-      executed += run.executed;
-      passed += run.passed;
-      failed += run.failed;
+      const run = await execute(title, block);
+      result.executed += run.executed;
+      result.passed += run.passed;
+      result.failed += run.failed;
+      result[title] = run;
     }
   }
 
   try {
     await afterallfn();
   } catch (e) {
-    errors["_afterAll"] = e;
+    result["_afterAll"] = { error: /** @type Error */ e };
   }
 
-  return {
-    executed,
-    passed,
-    failed,
-    errors,
-  };
+  return result;
+}
+
+/** @param {TestResult} error */
+export function getError({ error }) {
+  if (typeof error == "string") {
+    return error;
+  } else if (/** @type Error */ (error).message) {
+    return /** @type Error */ (error).stack;
+  } else {
+    return "unknown error";
+  }
 }
 
 /**
- * @param {import("./scope").TestErrors} errors
- * @returns {({test: string, stack?: string })[]}
+ * @typedef {{test: string, stack?: string, stats: {executed: number, failed: number} }} FlatResult
+ * @param {import("./scope").TestResult} results
+ * @returns {FlatResult[]}
  */
-export function prepareErrors(errors, prefix = "") {
-  const errorList = [];
-  for (const [title, err] of Object.entries(errors)) {
-    if (typeof err == "string") {
-      errorList.push({ test: `${prefix} ${title}`, stack: err });
-    } else if (/** @type Error */ (err).message) {
-      errorList.push({
-        test: `${prefix} ${title}`,
-        stack: /** @type Error */ (err).stack,
-      });
-    } else {
-      errorList.push(
-        ...prepareErrors(err, `${prefix}${prefix == "" ? "" : " -> "}${title}`)
-      );
-    }
+export function flattenResults(results, prefix = "") {
+  const arrow = prefix == "" ? "" : " -> ";
+  /** @type {FlatResult[]} */
+  let errorList = [
+    /*
+    {
+      test: prefix,
+      stats: { executed: results.executed, failed: results.failed },
+    },
+    */
+  ];
+  for (const [title, result] of Object.entries(results).filter(
+    ([key]) => !["executed", "passed", "failed"].includes(key)
+  )) {
+    const test = `${prefix}${arrow}${title}`;
+    errorList = errorList.concat(
+      result.error
+        ? [{ test, stack: getError(result), stats: { executed: 1, failed: 1 } }]
+        : result.passed === true
+        ? [{ test: test, stats: { executed: 1, failed: 0 } }]
+        : flattenResults(result, test)
+    );
   }
   return errorList;
 }

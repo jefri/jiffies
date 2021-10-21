@@ -3,6 +3,19 @@ export interface TestCase {
   [k: unique symbol]: Function;
 }
 
-export interface TestErrors {
-  [k: string]: Error | TestErrors | unknown;
+export interface TestResult {
+  executed: number;
+  passed: number;
+  failed: number;
+  [k: string]: TestResult | TestSummary;
+}
+
+export type TestSummary = TestFailed | TestPassed;
+
+export interface TestFailed {
+  error: unknown;
+}
+
+export interface TestPassed {
+  passed: true;
 }
