@@ -8,6 +8,10 @@
  */
 
 let baseURI = `${document.baseURI}`;
+const normalizeHref = () => {
+  return location.href + "/" === baseURI ? baseURI : location.href;
+};
+
 /** @type Router */
 let router;
 export const Router = {
@@ -20,8 +24,9 @@ export const Router = {
     let target;
     router = (/** @type {UNode} */ t) => {
       target = t;
-      index = baseURI + index;
-      doNavigate(index);
+      const href = normalizeHref();
+      const route = href === baseURI ? baseURI + index : href;
+      doNavigate(route);
       window.addEventListener("popstate", () => {
         doNavigate(location.href);
       });

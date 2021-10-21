@@ -1,33 +1,7 @@
 {
-  "name": "jefri-jiffies",
-  "title": "JEFRi Jiffies",
-  "version": "0.2.0",
-  "description": "JEFRi Jiffies: grab bag of helpers.",
-  "homepage": "http://www.jefri.org",
-  "bugs": "https://github.com/jefri/jefri-jiffies/issues",
-  "author": {
-    "name": "David Souther",
-    "email": "davidsouther@gmail.com",
-    "url": "http://davidsouther.com"
-  },
-  "files": [
-    "src/",
-    "package.json"
-  ],
+  "type": "module",
   "scripts": {
-    "start": "npx http-server"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jefri/jefri-jiffies"
-  },
-  "keywords": [],
-  "licenses": [
-    {
-      "type": "MIT"
-    }
-  ],
-  "browser": {},
-  "devDependencies": {},
-  "dependencies": {}
+    "start": "node ./server/http/index.js",
+    "dev": "nodemon ./server/http/index.js"
+  }
 }
