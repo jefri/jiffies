@@ -13,17 +13,20 @@ export const parse = (/** @type string[] */ parseArgs) => {
   const peek = () => parseArgs[index];
   const advance = () => parseArgs[index++];
 
+  const parseLong = (arg) => {
+    if (arg.substr(0, 3) === "no-") {
+      flags.set(arg.substr(3), false);
+    } else if (!arg.includes("=")) {
+      flags.set(arg, true);
+    } else {
+      const [param, ...value] = arg.split("=");
+      params.set(param, value.join("="));
+    }
+  };
+
   while (hasNext()) {
     if (peek().substr(0, 2) == "--") {
-      const arg = advance().substr(2);
-      if (arg.substr(0, 3) === "no-") {
-        flags.set(arg.substr(3), false);
-      } else if (!arg.includes("=")) {
-        flags.set(arg, true);
-      } else {
-        const [param, ...value] = arg.split("=");
-        params.set(param, value.join("="));
-      }
+      parseLong(advance().substr(2));
     } else {
       args.push(advance());
     }

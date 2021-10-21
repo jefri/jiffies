@@ -1,6 +1,3 @@
-import { makeHTMLLogger } from "../components/logger.js";
-import { button } from "../dom/html.js";
-import { DEFAULT_LOGGER, LEVEL } from "../log.js";
 import {
   afterall,
   aftereach,
@@ -10,10 +7,25 @@ import {
   getTotalCases,
 } from "./describe.js";
 
-let executedCases = 0;
-let passedCases = 0;
-let failedCases = 0;
-/** @returns Promise<import("./scope").TestErrors> */
+/**
+ * @typedef {import("./scope").TestErrors} TestErrors
+ *
+ * @typedef {import("./scope").TestCase} TestCase
+ *
+ * @typedef TestRun
+ * @property {TestErrors} errors
+ * @property {number} executed
+ * @property {number} passed
+ * @property {number} failed
+ */
+
+/**
+ * @param {string} prefix
+ * @param {TestCase} cases
+ * @param {TestErrors} errors
+ * @returns {Promise<TestRun>}
+ */
+
 export async function execute(
   prefix = "",
   cases = rootCases(),
@@ -24,47 +36,51 @@ export async function execute(
   const afterallfn = cases[afterall] ?? (() => {});
   const aftereachfn = cases[aftereach] ?? (() => {});
 
+  let executed = 0;
+  let passed = 0;
+  let failed = 0;
+
   errors = errors[prefix] = {};
 
   try {
     await beforeallfn();
   } catch (e) {
     errors["_beforeAll"] = e;
-    return;
+    return { executed, passed, failed, errors };
   }
+
   for (const [title, block] of Object.entries(cases)) {
     if (typeof title === "symbol") continue;
     if (block instanceof Function) {
       try {
-        executedCases += 1;
+        executed += 1;
         await beforeeachfn();
         await block();
         await aftereachfn();
-        passedCases += 1;
+        passed += 1;
       } catch (e) {
         errors[title] = e;
-        failedCases += 1;
+        failed += 1;
       }
     } else if (block) {
-      await execute(title, block, (errors[title] = {}));
+      const run = await execute(title, block, (errors[title] = {}));
+      executed += run.executed;
+      passed += run.passed;
+      failed += run.failed;
     }
   }
+
   try {
     await afterallfn();
   } catch (e) {
     errors["_afterAll"] = e;
-    return;
   }
 
-  return errors;
-}
-
-export function getStatics() {
   return {
-    totalCases: getTotalCases(),
-    executedCases,
-    passedCases,
-    failedCases,
+    executed,
+    passed,
+    failed,
+    errors,
   };
 }
 
@@ -72,7 +88,7 @@ export function getStatics() {
  * @param {import("./scope").TestErrors} errors
  * @returns {({test: string, stack?: string })[]}
  */
-function prepareErrors(errors, prefix = "") {
+export function prepareErrors(errors, prefix = "") {
   const errorList = [];
   for (const [title, err] of Object.entries(errors)) {
     if (typeof err == "string") {
@@ -89,32 +105,4 @@ function prepareErrors(errors, prefix = "") {
     }
   }
   return errorList;
-}
-
-export function makeStatistics(errors = {}) {
-  const topLine = `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`;
-
-  return `${topLine}\n\n${prepareErrors(errors)
-    .map(({ test, stack }) => `${test}\n${stack}`)
-    .join("\n\n")}`;
-}
-
-export function displayStatistics(errors = {}, root = document.body) {
-  const logger = (() => {
-    try {
-      return makeHTMLLogger(
-        `Executed ${executedCases} of ${getTotalCases()}; ${failedCases} failed.`
-      );
-    } catch (e) {
-      return DEFAULT_LOGGER;
-    }
-  })();
-  logger.level = LEVEL.DEBUG;
-  for (const { test, stack } of prepareErrors(errors)) {
-    logger.info(test);
-    logger.debug(`${stack}`);
-  }
-  if (logger.root) {
-    root.appendChild(logger.root);
-  }
 }

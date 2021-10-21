@@ -2,7 +2,7 @@
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
 import * as fs from "fs/promises";
-import { parse } from "./flags.js";
+import { parse } from "../../jiffies/flags.js";
 
 const FLAGS = parse(process.argv);
 
@@ -57,6 +57,7 @@ const error = (res, message) => {
   res.statusCode = 500;
   res.write(message);
   res.end();
+  return true;
 };
 
 const MIME_TYPES = {
@@ -85,34 +86,57 @@ const sendFile = async (res, filepath, stats) => {
   }
   res.end();
   await file.close();
+  return true;
 };
 
 const log = (/** @type {IncomingMessage} */ req) => {
   const when = new Date().toISOString();
   const who = req.socket.remoteAddress;
   const what = req.url;
-  const how = `${req.method} ${what} HTTP/${req.httpVersion}`;
+  const how = `${req.method} ${what}`;
   console.log(`${when}\t${who}\t"${how}"`);
+};
+
+/**
+ * @param {IncomingMessage} req
+ * @param {ServerResponse} res
+ * @param {StaticMiddleware} middleware
+ */
+const handleMiddleware = async (req, res, middleware) => {
+  const [code, filename, stats] = await middleware(req);
+  switch (code) {
+    case 500:
+      return error(res, filename);
+    case 200:
+      try {
+        return await sendFile(res, filename, stats);
+      } catch (e) {
+        return await error(res, e.message);
+      }
+  }
+};
+
+const send404 = async (/** @type {ServerResponse} */ res) => {
+  res.statusCode = 404;
+  const missing = path.join(path.dirname(FLAGS.argv0), "404.html");
+  await sendFile(res, missing, await fs.stat(missing));
 };
 
 const server = createServer(async (req, res) => {
   log(req);
-  for (const middleware of middlewares) {
-    const [code, filename, stats] = await middleware(req);
-    switch (code) {
-      case 500:
-        return error(res, filename);
-      case 200:
-        try {
-          return await sendFile(res, filename, stats);
-        } catch (e) {
-          return await error(res, e.message);
-        }
-    }
+
+  const url = path.join(process.cwd(), req.url ?? "");
+
+  let handled = false;
+  try {
+    const middleware = (await fs.stat(url)).isDirectory()
+      ? findIndex
+      : staticFileServer;
+    handled = (await handleMiddleware(req, res, middleware)) ?? false;
+  } catch {}
+  if (!handled) {
+    send404(res);
   }
-  res.statusCode = 404;
-  const missing = path.join(path.dirname(FLAGS.argv0), "404.html");
-  return await sendFile(res, missing, await fs.stat(missing));
 });
 
 server.on("listening", () => {
