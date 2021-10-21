@@ -1,4 +1,4 @@
-import { describe, it, expect } from "../../../src/scope/index.js";
+import { describe, it, expect } from "../../../jiffies/scope/index.js";
 import { asm } from "./asm.js";
 
 describe("asm", () => {

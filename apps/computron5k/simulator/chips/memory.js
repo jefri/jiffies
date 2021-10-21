@@ -1,4 +1,4 @@
-import { assert } from "../../../../src/assert.js";
+import { assert } from "../../../../jiffies/assert.js";
 
 export class Memory {
   /** @type Int16Array */

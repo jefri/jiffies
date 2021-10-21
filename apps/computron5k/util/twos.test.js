@@ -1,4 +1,4 @@
-import { describe, it, expect } from "../../../src/scope/index.js";
+import { describe, it, expect } from "../../../jiffies/scope/index.js";
 import { bin, dec, hex, int10, int16, int2 } from "./twos.js";
 
 describe("twos", () => {

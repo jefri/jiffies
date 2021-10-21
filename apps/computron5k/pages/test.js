@@ -1,5 +1,5 @@
-import { article, div, header } from "../../../src/dom/html.js";
-import { displayStatistics, execute } from "../../../src/scope/execute.js";
+import { article, div, header } from "../../../jiffies/dom/html.js";
+import { displayStatistics, execute } from "../../../jiffies/scope/execute.js";
 
 import * as twos from "../util/twos.test.js";
 import * as asm from "../util/asm.test.js";

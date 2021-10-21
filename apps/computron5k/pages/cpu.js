@@ -1,4 +1,4 @@
-import { button, div, li, nav, span, ul } from "../../../src/dom/html.js";
+import { button, div, li, nav, span, ul } from "../../../jiffies/dom/html.js";
 import { CPU as CPUChip } from "../simulator/chips/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/chips/memory.js";

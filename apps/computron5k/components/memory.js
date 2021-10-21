@@ -2,12 +2,19 @@ import { Memory as MemoryChip } from "../simulator/chips/memory.js";
 import { asm, op } from "../util/asm.js";
 import { bin, dec, hex, int10, int16, int2 } from "../util/twos.js";
 
-import ButtonBar from "../../../src/components/button_bar.js";
-import InlineEdit from "../../../src/components/inline_edit.js";
-import VirtualScroll from "../../../src/components/virtual_scroll.js";
-import { article, code, header, nav, span, ul } from "../../../src/dom/html.js";
-import { rounded, text, width } from "../../../src/dom/css.js";
-import { FC } from "../../../src/dom/fc.js";
+import ButtonBar from "../../../jiffies/components/button_bar.js";
+import InlineEdit from "../../../jiffies/components/inline_edit.js";
+import VirtualScroll from "../../../jiffies/components/virtual_scroll.js";
+import {
+  article,
+  code,
+  header,
+  nav,
+  span,
+  ul,
+} from "../../../jiffies/dom/html.js";
+import { rounded, text, width } from "../../../jiffies/dom/css.js";
+import { FC } from "../../../jiffies/dom/fc.js";
 
 const FORMATS = ["bin", "dec", "hex", "asm"];
 /** @typedef {FORMATS[number]} Formats */
