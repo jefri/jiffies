@@ -61,14 +61,14 @@ export function initialState(settings) {
   const { minIndex, maxIndex, startIndex, itemHeight, count, tolerance } =
     settings;
   const bufferedItems = count + 2 * tolerance;
-  const itemsAbove = startIndex - tolerance - minIndex;
+  const itemsAbove = Math.max(0, startIndex - tolerance - minIndex);
 
   const viewportHeight = count * itemHeight;
   const totalHeight = (maxIndex - minIndex + 1) * itemHeight;
   const toleranceHeight = tolerance * itemHeight;
   const bufferHeight = viewportHeight + 2 * toleranceHeight;
   const topPaddingHeight = itemsAbove * itemHeight;
-  const bottomPaddingHeight = totalHeight - topPaddingHeight;
+  const bottomPaddingHeight = totalHeight - (topPaddingHeight + bufferHeight);
   const initialPosition = topPaddingHeight + toleranceHeight;
 
   return {
@@ -76,7 +76,6 @@ export function initialState(settings) {
     viewportHeight,
     totalHeight,
     toleranceHeight,
-    bufferHeight,
     bufferedItems,
     topPaddingHeight,
     bottomPaddingHeight,
@@ -124,7 +123,7 @@ export function doScroll(scrollTop, state, get) {
   const data = getData(minIndex, maxIndex, index, bufferedItems, get);
   const topPaddingHeight = Math.max((index - minIndex) * itemHeight, 0);
   const bottomPaddingHeight = Math.max(
-    totalHeight - topPaddingHeight - data.length * itemHeight,
+    totalHeight - (topPaddingHeight + data.length * itemHeight),
     0
   );
 
@@ -145,63 +144,72 @@ export function doScroll(scrollTop, state, get) {
  * @property {number} topPaddingHeight px
  * @property {number} bottomPaddingHeight px
  * @property {number} toleranceHeight px
- * @property {number} bufferHeight px
  * @property {number} initialPosition px
  * @property {T[]} data
  */
 
-/**
- * @template T
- * @param {VirtualScrollProps<T>} props
- * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
- */
-export const VirtualScroll = FC("virtual-scroll", (props) => {
-  /** @param {{target?: {scrollTop: number}}} event */
-  const scrollTo = ({ target }) => {
-    const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
-    const updatedSate = doScroll(scrollTop, state, props.get);
-    setState(updatedSate);
-  };
+export const VirtualScroll = FC(
+  "virtual-scroll",
+  /**
+   * @template T
+   * @param {VirtualScrollProps<T>} props
+   * @param {unknown[]} children
+   * @param {HTMLElement} element
+   * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
+   */
+  (props, children, element) => {
+    const settings = fillVirtualScrollSettings(props.settings);
+    const state = initialState(settings);
+    element.state = state;
 
-  const settings = fillVirtualScrollSettings(props.settings);
-  let state = initialState(settings);
+    /** @param {{target?: {scrollTop: number}}} event */
+    const scrollTo = ({ target }) => {
+      const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
+      const updatedSate = {
+        ...state,
+        ...doScroll(scrollTop, state, props.get),
+      };
+      setState(updatedSate);
+    };
 
-  const viewportElement = div({
-    class: "VirtualScroll__wrapper",
-    style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
-    events: {
-      scroll: debounce(scrollTo, 0),
-    },
-  });
+    const viewportElement = div({
+      style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
+      events: {
+        scroll: debounce(scrollTo, 0),
+      },
+    });
 
-  /** @param {Partial<VirtualScrollState<T>>} newState */
-  const setState = (newState) => {
-    state = { ...state, ...newState };
-    viewportElement.update(
-      div({
-        class: "VirtualScroll__topPadding",
-        style: { height: `${state.topPaddingHeight}px` },
-      }),
-      ...state.data.map((v, i) =>
-        div(
-          {
-            class: `VirtualScroll__item_${i}`,
-            style: { height: `${settings.itemHeight}px` },
-          },
-          props.row(v)
-        )
-      ),
-      div({
-        class: "VirtualScroll__bottomPadding",
-        style: { height: `${state.bottomPaddingHeight}` },
-      })
-    );
-  };
+    /** @param {VirtualScrollState<T>} newState */
+    const setState = (newState) => {
+      state.topPaddingHeight = newState.topPaddingHeight;
+      state.bottomPaddingHeight = newState.bottomPaddingHeight;
+      state.data = newState.data;
 
-  scrollTo({ target: { scrollTop: state.initialPosition ?? 0 } });
+      viewportElement.update(
+        div({
+          class: "VirtualScroll__topPadding",
+          style: { height: `${state.topPaddingHeight}px` },
+        }),
+        ...state.data.map((v, i) =>
+          div(
+            {
+              class: `VirtualScroll__item_${i}`,
+              style: { height: `${settings.itemHeight}px` },
+            },
+            props.row(v)
+          )
+        ),
+        div({
+          class: "VirtualScroll__bottomPadding",
+          style: { height: `${state.bottomPaddingHeight}px` },
+        })
+      );
+    };
 
-  viewportElement.state = state;
-  return viewportElement;
-});
+    scrollTo({ target: { scrollTop: state.initialPosition ?? 0 } });
+
+    return viewportElement;
+  }
+);
 
 export default VirtualScroll;

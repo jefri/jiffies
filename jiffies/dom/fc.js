@@ -14,7 +14,7 @@ import { normalizeArguments } from "./dom.js";
 /**
  * @template S
  * @param {string} name
- * @param {(attrs: Scope<S>, children: DenormChildren[]) => Updateable|Updateable[]} component
+ * @param {(attrs: Scope<S>, children: DenormChildren[], el: HTMLElement) => Updateable|Updateable[]} component
  */
 export function FC(name, component) {
   customElements.define(
@@ -25,17 +25,17 @@ export function FC(name, component) {
       }
 
       update(
-        /** @type {DenormAttrs=} */ attrs,
+        /** @type {Scope<S>=} */ attrs,
         /** @type {DenormChildren[]} */ ...children
       ) {
         [attrs, children] = normalizeArguments(attrs, children);
-        this.replaceChildren(...[component(attrs, children)].flat());
+        this.replaceChildren(...[component(attrs, children, this)].flat());
       }
     }
   );
 
   return (
-    /** @type {DenormAttrs=} */ attrs,
+    /** @type {Scope<S>=} */ attrs,
     /** @type {DenormChildren[]} */ ...children
   ) => {
     const element = document.createElement(name);

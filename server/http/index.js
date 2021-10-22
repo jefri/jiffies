@@ -125,15 +125,15 @@ const send404 = async (/** @type {ServerResponse} */ res) => {
 const server = createServer(async (req, res) => {
   log(req);
 
-  const url = path.join(process.cwd(), req.url ?? "");
-
   let handled = false;
   try {
-    const middleware = (await fs.stat(url)).isDirectory()
-      ? findIndex
-      : staticFileServer;
-    handled = (await handleMiddleware(req, res, middleware)) ?? false;
-  } catch {}
+    handled = (await handleMiddleware(req, res, staticFileServer)) ?? false;
+    if (!handled) {
+      handled = (await handleMiddleware(req, res, findIndex)) ?? false;
+    }
+  } catch (e) {
+    console.error(e);
+  }
   if (!handled) {
     send404(res);
   }

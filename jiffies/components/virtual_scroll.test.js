@@ -15,9 +15,9 @@ describe("VirtualScroll", () => {
     const scroll = VirtualScroll(props);
 
     expect(scroll.state.bufferedItems).toBe(9);
+    expect(scroll.state.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     //expect(scroll.state.topPaddingHeight).toBe(0);
     expect(scroll.state.viewportHeight).toBe(60);
     //expect(scroll.state.totalHeight).toBe(200);
-    expect(scroll.state.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
   });
 });

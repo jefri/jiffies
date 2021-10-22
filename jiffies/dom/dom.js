@@ -50,16 +50,13 @@ function isAttrs(attrs) {
 }
 
 /**
- * @param {DenormAttrs=} attrs
+ * @template {DenormAttrs} TDenormAttrs
+ * @param {TDenormAttrs=} attrs
  * @param {DenormChildren[]=} children
  * @param {Attrs} defaultAttrs
  * @returns {[Attrs, (DenormChildren)[]]}
  */
-export function normalizeArguments(
-  /** @type DenormAttrs= */ attrs,
-  /** @type DenormChildren[]= */ children = [],
-  defaultAttrs = {}
-) {
+export function normalizeArguments(attrs, children = [], defaultAttrs = {}) {
   if (isAttrs(attrs)) {
     attrs ??= defaultAttrs;
   } else {
