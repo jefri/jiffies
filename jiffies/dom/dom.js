@@ -3,28 +3,29 @@
  */
 
 /**
- * @template {Node} N 
+ * @template {Element} N 
  * @typedef {
       N &
       Partial<{
         [Events]: Map<string, EventHandler>,
-        update: (attrs?: DenormAttrs, ...children: DenormChildren[]) => Node
+        update: (attrs?: DenormAttrs<N>, ...children: DenormChildren[]) => Node
       }>
     } Updater
  */
 
 /**
- * @template {Node} N 
+ * @template {Element} N 
  * @typedef {
       N &
       {
         [Events]: Map<string, EventHandler>,
-        update: (attrs?: DenormAttrs, ...children: DenormChildren[]) => Node
+        update: (attrs?: DenormAttrs<N>, ...children: DenormChildrenList) => Node
       }
     } Updatable
  */
 
 /**
+ * @template {Element} E
  * @typedef {
     Partial<{style: string | Partial<{[K in keyof CSSStyleDeclaration]: string}>}> |
     {events?:
@@ -32,15 +33,25 @@
         [K in keyof HTMLElementEventMap]: EventHandler
       }> 
     } |
-    Record<string, string|number|boolean|null>
+    Partial<{[k in keyof E]: E[k]}> |
+    {class?: string}
   } Attrs
+ */
+/**
  * @typedef {Node|string} DenormChildren
- * @typedef {Attrs|DenormChildren} DenormAttrs
+ */
+/**
+ * @typedef {DenormChildren[]|[CLEAR]} DenormChildrenList
+ */
+/**
+ * @template {Element} E
+ * @typedef {Attrs<E>|DenormChildren} DenormAttrs
  */
 
 /**
- * @param {DenormAttrs|undefined} attrs
- * @return {attrs is Attrs}
+ * @template {Element} E
+ * @param {DenormAttrs<E>|undefined} attrs
+ * @return {attrs is Attrs<E>}
  */
 function isAttrs(attrs) {
   return !(
@@ -50,20 +61,23 @@ function isAttrs(attrs) {
 }
 
 /**
- * @template {DenormAttrs} TDenormAttrs
+ * @template {Element} E
+ * @template {DenormAttrs<E>} TDenormAttrs
  * @param {TDenormAttrs=} attrs
- * @param {DenormChildren[]=} children
- * @param {Attrs} defaultAttrs
- * @returns {[Attrs, (DenormChildren)[]]}
+ * @param {DenormChildrenList=} children
+ * @param {Attrs<E>} defaultAttrs
+ * @returns {[Attrs<E>, DenormChildrenList]}
  */
 export function normalizeArguments(attrs, children = [], defaultAttrs = {}) {
+  /** @type {Attrs<E>} */
+  let attributes;
   if (isAttrs(attrs)) {
-    attrs ??= defaultAttrs;
+    attributes = /** @type {Attrs<E>} */ (attrs) ?? defaultAttrs;
   } else {
     children.unshift(/** @type string|Node */ (attrs));
-    attrs = defaultAttrs;
+    attributes = defaultAttrs;
   }
-  return [attrs, children.flat()];
+  return [attributes, children.flat()];
 }
 
 /**
@@ -73,13 +87,14 @@ export function normalizeArguments(attrs, children = [], defaultAttrs = {}) {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function up(
   /** @type E */ element,
-  /** @type DenormAttrs= */ attrs,
-  /** @type DenormChildren[] */ ...children
+  /** @type DenormAttrs<E>= */ attrs,
+  /** @type DenormChildrenList */ ...children
 ) {
   return update(element, ...normalizeArguments(attrs, children));
 }
 
 const Events = Symbol("events");
+export const CLEAR = Symbol("Clear children");
 
 /**
  * @template {Element} E
@@ -87,8 +102,8 @@ const Events = Symbol("events");
  */
 function update(
   /** @type Updater<E> */ element,
-  /** @type Attrs */ attrs,
-  /** @type DenormChildren[] */ children
+  /** @type Attrs<E> */ attrs,
+  /** @type DenormChildrenList */ children
 ) {
   // Track events, to remove later
   const $events = (element[Events] ??= new Map());
@@ -106,7 +121,7 @@ function update(
     }
   });
 
-  const _style = /** @type {CSSStyleDeclaration} */ (element).style;
+  const _style = /** @type {CSSStyleDeclaration} */ (element.style);
   if (_style)
     if (typeof style === "string") {
       _style.cssText = style;
@@ -117,39 +132,39 @@ function update(
     }
 
   Object.entries(rest).forEach(([k, v]) => {
-    switch (k) {
-      case "class":
-        /** @type string */ (v)
-          .split(/\s+/m)
-          .filter((s) => s !== "")
-          .forEach((c) => element.classList.add(c));
-        break;
-      // Some IDL properties require setting them directly
-      case "disabled":
-      case "href":
-      case "name":
-      case "readonly":
-      case "required":
-        element[k] = v;
-        break;
-      default:
-        switch (v) {
-          case false:
-            element.removeAttributeNS(element.namespaceURI, k);
-            break;
-          case true:
-            element.setAttributeNS(element.namespaceURI, k, k);
-            break;
-          default:
-            if (typeof v === "string") {
-              element.setAttributeNS(element.namespaceURI, k, v);
-            }
-        }
+    if (k === "class") {
+      /** @type string */ (v)
+        .split(/\s+/m)
+        .filter((s) => s !== "")
+        .forEach((c) => element.classList.add(c));
+    } else if (k.startsWith("aria-")) {
+      switch (v) {
+        case false:
+          element.removeAttributeNS(element.namespaceURI, k);
+          break;
+        case true:
+          element.setAttributeNS(element.namespaceURI, k, k);
+          break;
+        default:
+          if (typeof v === "string") {
+            element.setAttributeNS(element.namespaceURI, k, v);
+          }
+      }
+    } else {
+      element[k] = v;
     }
   });
-  element.replaceChildren(...children);
+
+  if (children.length > 0) {
+    if (children[0] === CLEAR) {
+      element.replaceChildren();
+    } else {
+      element.replaceChildren(.../** @type DenormChildren[] */ (children));
+    }
+  }
+
   element.update ??= (
-    /** @type DenormAttrs= */ attrs,
+    /** @type DenormAttrs<E>= */ attrs,
     /** @type DenormChildren[] */ ...children
   ) => update(element, ...normalizeArguments(attrs, children));
 

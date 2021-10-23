@@ -1,44 +1,108 @@
 /**
- * @template S
- * @typedef {S & import ("./dom").Attrs} Scope
+ * @template {object} S
+ * @typedef {Partial<S} Scope
  */
 
-import { normalizeArguments } from "./dom.js";
+import { CLEAR, normalizeArguments } from "./dom.js";
 
 /**
- * @typedef {import("./dom").DenormAttrs} DenormAttrs
- * @typedef {import("./dom").DenormChildren} DenormChildren
+ * @template {Element} E
+ * @typedef {import("./dom").DenormAttrs<E>} DenormAttrs
+ */
+/**
+ * @typedef {import("./dom").DenormChildrenList} DenormChildrenList
  * @typedef {import("./dom").Updatable<string|Node>} Updateable
  */
 
 /**
- * @template S
- * @param {string} name
- * @param {(attrs: Scope<S>, children: DenormChildren[], el: HTMLElement) => Updateable|Updateable[]} component
+ * @typedef {object} AttrSet
  */
-export function FC(name, component) {
-  customElements.define(
-    name,
-    class FCImpl extends HTMLElement {
-      constructor() {
-        super();
-      }
 
-      update(
-        /** @type {Scope<S>=} */ attrs,
-        /** @type {DenormChildren[]} */ ...children
-      ) {
-        [attrs, children] = normalizeArguments(attrs, children);
-        this.replaceChildren(...[component(attrs, children, this)].flat());
-      }
+/**
+ * @template {object} S
+ * @template {Element} E
+ * @template {Updateable} E
+ * @typedef {(
+    el: E,
+    attrs: Scope<S>,
+    children: DenormChildrenList
+  ) => Updateable|Updateable[]} RenderFn
+ */
+
+/**
+ * @template {object} S
+ * @template {Element} E
+ * @param {string} name
+ * @param {AttrSet|RenderFn<S, E>} attrSet
+ * @param {RenderFn<S, E>=} component
+ */
+export function FC(name, attrSet, component) {
+  /** @type {RenderFn<S, E>} */
+  let render = component ?? (() => []);
+  if (component === undefined && typeof attrSet === "function") {
+    render = /** @type RenderFn<S, E> */ (attrSet);
+    attrSet = {};
+  }
+
+  class FCImpl extends HTMLElement {
+    constructor() {
+      super();
     }
-  );
+
+    /** @type Scope<S> */
+    #lastAttrs = {};
+
+    update(
+      /** @type {Scope<S>=} */ attrs,
+      /** @type {DenormChildrenList} */ ...children
+    ) {
+      [attrs, children] = /** @type {[Partial<S>, DenormChildrenList]} */ (
+        normalizeArguments(attrs, children)
+      );
+      this.#lastAttrs = { ...this.#lastAttrs, ...attrs };
+      const replace = [render(this, this.#lastAttrs, children)];
+      this.replaceChildren(...replace.flat());
+    }
+  }
+
+  customElements.define(name, FCImpl);
 
   return (
     /** @type {Scope<S>=} */ attrs,
-    /** @type {DenormChildren[]} */ ...children
+    /** @type {DenormChildrenList} */ ...children
   ) => {
-    const element = document.createElement(name);
+    const element = /** @type {FCImpl} */ (document.createElement(name));
+    element.update(attrs, ...children);
+    return element;
+  };
+}
+
+/**
+ * @template {object} S
+ * @template {HTMLElement} E
+ * @typedef {Scope<S> & import("./dom.js").Updatable<E>} Component
+ */
+/**
+ * @template {object} S
+ * @template {HTMLElement} E
+ * @typedef {{new (): Component<S, E>}} ComponentClass
+ * @property {string} name
+ */
+/**
+ * @template {object} S
+ * @template {HTMLElement} E
+ * @param {ComponentClass<S, E>} clazz
+ */
+export function C(clazz) {
+  customElements.define(clazz.name, clazz);
+
+  return (
+    /** @type {Scope<S>=} */ attrs,
+    /** @type {DenormChildrenList} */ ...children
+  ) => {
+    const element = /** @type {Component<E, S>} */ (
+      document.createElement(clazz.name)
+    );
     element.update(attrs, ...children);
     return element;
   };

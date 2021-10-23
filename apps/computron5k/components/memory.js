@@ -17,49 +17,54 @@ import { rounded, text, width } from "../../../jiffies/dom/css.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 
 const FORMATS = ["bin", "dec", "hex", "asm"];
-/** @typedef {FORMATS[number]} Formats */
+/** @typedef {FORMATS[number]} Format */
 
 /**
- * @param { {
-    memory: MemoryChip;
-    highlight?: number;
-    editable?: boolean;
-    format: (v: number) => string;
-    update: (i: number, value: string, previous: number) => void;
-  } } props
+ * @typedef {HTMLElement&{virtualScroll: VirtualScroll<number, MemoryCell>}} MemoryBlock
  */
-const MemoryBlock = ({
-  memory,
-  highlight = -1,
-  editable = false,
-  format,
-  update,
-}) =>
-  VirtualScroll({
-    settings: { count: 20, maxIndex: memory.size, itemHeight: 35 },
-    get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
-    row: ([i, v]) =>
-      MemoryCell({
-        index: i,
-        value: format(v),
-        editable: editable,
-        highlight: i === highlight,
-        onChange: (value) => update(i, value, v),
-      }),
-  });
 
-/**
- * @param {{
-    index: number;
-    value: string;
-    highlight: boolean;
-    editable?: boolean;
-    onChange?: (v: string) => void;
-  }} props
- */
+const MemoryBlock = FC(
+  "memory-block",
+  /**
+   * @param {MemoryBlock} element
+   * @param { {
+      memory: MemoryChip;
+      highlight?: number;
+      editable?: boolean;
+      format: (v: number) => string;
+      update: (i: number, value: string, previous: number) => void;
+    } } props
+  */
+  (element, { memory, highlight = -1, editable = false, format, update }) => {
+    element.virtualScroll ??= VirtualScroll({
+      settings: { count: 20, maxIndex: memory.size, itemHeight: 35 },
+      get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
+      row: ([i, v]) =>
+        MemoryCell({
+          index: i,
+          value: format(v),
+          editable: editable,
+          highlight: i === highlight,
+          onChange: (value) => update(i, value, v),
+        }),
+    });
+    return element.virtualScroll;
+  }
+);
+
 const MemoryCell = FC(
   "memory-cell",
-  ({ index, value, editable = false, onChange = () => {} }) => [
+  /**
+   * @param {HTMLElement} el
+   * @param {{
+      index: number;
+      value: string;
+      highlight: boolean;
+      editable?: boolean;
+      onChange?: (v: string) => void;
+    }} props
+  */
+  (el, { index, value, editable = false, onChange = () => {} }) => [
     code(
       {
         style: {
@@ -99,8 +104,9 @@ const Memory = ({
   memory,
 }) => {
   let format = "dec";
-  const setFormat = (f) => {
+  const setFormat = (/** @type Format */ f) => {
     format = f;
+    buttonBar.update({ value: format });
   };
 
   /**
@@ -144,24 +150,27 @@ const Memory = ({
         current = int10(value);
         break;
     }
+
     if (isFinite(current) && current <= 0xffff) {
       memory.set(cell, current);
     }
   }
 
-  return article(
-    header(
-      nav(
-        ul(span(name)),
-        ButtonBar({
-          value: format,
-          values: FORMATS,
-          events: { click: setFormat },
-        })
-      )
-    ),
-    MemoryBlock({ memory, highlight, editable, format: doFormat, update })
-  );
+  const buttonBar = ButtonBar({
+    value: format,
+    values: FORMATS,
+    events: { click: setFormat },
+  });
+
+  const memoryBlock = MemoryBlock({
+    memory,
+    highlight,
+    editable,
+    format: doFormat,
+    update,
+  });
+
+  return article(header(nav(ul(span(name)), buttonBar)), memoryBlock);
 };
 
 export default Memory;

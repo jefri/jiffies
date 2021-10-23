@@ -5,8 +5,8 @@ const makeSVGElement =
   (/** @type K */ name) =>
   /** @returns {SVGElementTagNameMap[K]} */
   (
-    /** @type Record<string, string>|Node|string= */ attrs,
-    /** @type Array<Node|string> */ ...children
+    /** @type {import ("./dom").DenormAttrs<SVGElementTagNameMap[K]>}= */ attrs,
+    /** @type {import("./dom.js").DenormChildrenList} */ ...children
   ) =>
     up(
       document.createElementNS("http://www.w3.org/2000/svg", name),

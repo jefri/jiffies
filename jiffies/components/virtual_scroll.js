@@ -18,10 +18,11 @@ export function arrayAdapter(data) {
 
 /**
  * @template T
+ * @template {Node} U
  * @typedef {object} VirtualScrollProps
  * @property {Partial<VirtualScrollSettings>} settings
  * @property {VirtualScrollDataAdapter<T>} get
- * @property {(t: T) => import("../dom/dom").Updatable<Node>} row
+ * @property {(t: T) => import("../dom/dom").Updatable<U>} row
  */
 
 /**
@@ -147,17 +148,24 @@ export function doScroll(scrollTop, state, get) {
  * @property {number} initialPosition px
  * @property {T[]} data
  */
+/**
+ * @template T
+ * @template U
+ * @typedef {
+    import("../dom/fc.js").Updateable &
+    {state: VirtualScrollState<T>, rows: U[]}
+  } VirtualScroll
+ */
 
 export const VirtualScroll = FC(
   "virtual-scroll",
   /**
    * @template T
-   * @param {VirtualScrollProps<T>} props
-   * @param {unknown[]} children
-   * @param {HTMLElement} element
-   * @returns {HTMLDivElement&{state: VirtualScrollState<T>}}
+   * @template {Node} U
+   * @param {VirtualScroll<T, U>} element
+   * @param {VirtualScrollProps<T, U>} props
    */
-  (props, children, element) => {
+  (element, props) => {
     const settings = fillVirtualScrollSettings(props.settings);
     const state = initialState(settings);
     element.state = state;
@@ -184,19 +192,20 @@ export const VirtualScroll = FC(
       state.topPaddingHeight = newState.topPaddingHeight;
       state.bottomPaddingHeight = newState.bottomPaddingHeight;
       state.data = newState.data;
+      element.rows = state.data.map(props.row);
 
       viewportElement.update(
         div({
           class: "VirtualScroll__topPadding",
           style: { height: `${state.topPaddingHeight}px` },
         }),
-        ...state.data.map((v, i) =>
+        ...element.rows.map((row, i) =>
           div(
             {
               class: `VirtualScroll__item_${i}`,
               style: { height: `${settings.itemHeight}px` },
             },
-            props.row(v)
+            row
           )
         ),
         div({

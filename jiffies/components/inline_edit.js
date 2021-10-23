@@ -14,9 +14,9 @@ const Mode = {
     }
   }} props
  */
-export const InlineEdit = FC("inline-edit", (props) => {
+export const InlineEdit = FC("inline-edit", (el, props) => {
   const state = {
-    mode: Mode.VIEW,
+    mode: props.mode ?? Mode.VIEW,
   };
 
   const render = () => {
@@ -35,7 +35,10 @@ export const InlineEdit = FC("inline-edit", (props) => {
       {
         style: { cursor: "text" },
         events: {
-          click: () => setState({ mode: Mode.EDIT }),
+          click: () => {
+            state.mode = Mode.EDIT;
+            element.update(render());
+          },
         },
       },
       props.value
@@ -43,15 +46,16 @@ export const InlineEdit = FC("inline-edit", (props) => {
 
   const edit = () =>
     input({
-      style: { zIndex: "z-10" },
+      style: { zIndex: "10", position: "relative", marginTop: "-7px" },
       events: {
         blur: ({ target: { value } }) => update(value),
       },
       type: "text",
-      defaultValue: props.value,
+      value: props.value,
     });
 
   function update(/** @type string */ value) {
+    return;
     props.events.change(value);
     state.mode = Mode.VIEW;
     element.update(render());
