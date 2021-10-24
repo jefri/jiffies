@@ -46,6 +46,7 @@ export const CPU = (
         name: "ROM",
         memory: cpu.ROM,
         highlight: cpu.PC,
+        format: "asm",
         editable: false,
       }))
     )

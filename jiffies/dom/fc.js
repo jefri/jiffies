@@ -3,7 +3,8 @@
  * @typedef {Partial<S} Scope
  */
 
-import { CLEAR, normalizeArguments } from "./dom.js";
+import { CLEAR, normalizeArguments, update } from "./dom.js";
+import { object } from "./html.js";
 
 /**
  * @template {Element} E

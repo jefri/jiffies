@@ -18,8 +18,8 @@ import { rounded, text, width } from "../../../jiffies/dom/css.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 
 /**
- * @typedef {HTMLElement&{virtualScroll: VirtualScroll<number, MemoryCell>}} MemoryBlock
- * @property {VirtualScroll} virtualScroll
+ * @typedef {HTMLElement} MemoryBlock
+ * @property {ReturnType<VirtualScroll<number, MemoryCell>} virtualScroll
  */
 
 const MemoryBlock = FC(
@@ -100,16 +100,19 @@ const MemoryCell = FC(
 const Memory = FC(
   "memory-gui",
   /** 
-   * @param {HTMLElement} el
+   * @param {import("../../../jiffies/dom/dom.js").Updateable<HTMLElement>} el
    * @param {{
        name?: string;
         highlight?: number;
         editable?: boolean;
         memory: MemoryChip;
+        format: Format;
       }} props
    */
-  (el, { name = "Memory", highlight = -1, editable = true, memory }) => {
-    let format = "dec";
+  (
+    el,
+    { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
+  ) => {
     const setFormat = (/** @type Format */ f) => {
       format = f;
       buttonBar.update({ value: format });
