@@ -17,15 +17,10 @@ import {
 import { rounded, text, width } from "../../../jiffies/dom/css.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 
-/**
- * @typedef {HTMLElement} MemoryBlock
- * @property {ReturnType<VirtualScroll<number, MemoryCell>} virtualScroll
- */
-
 const MemoryBlock = FC(
   "memory-block",
   /**
-   * @param {MemoryBlock} element
+   * @param {HTMLElement & {virtualScroll: VirtualScroll<number, MemoryCell>}} element
    * @param { {
       memory: MemoryChip;
       highlight?: number;
@@ -35,18 +30,22 @@ const MemoryBlock = FC(
     } } props
   */
   (element, { memory, highlight = -1, editable = false, format, update }) => {
-    element.virtualScroll ??= VirtualScroll({
-      settings: { count: 20, maxIndex: memory.size, itemHeight: 35 },
-      get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
-      row: ([i, v]) =>
-        MemoryCell({
-          index: i,
-          value: format(v),
-          editable: editable,
-          highlight: i === highlight,
-          onChange: (value) => update(i, value, v),
-        }),
-    });
+    if (element.virtualScroll) {
+      element.virtualScroll.update();
+    } else {
+      element.virtualScroll = VirtualScroll({
+        settings: { count: 20, maxIndex: memory.size, itemHeight: 35 },
+        get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
+        row: ([i, v]) =>
+          MemoryCell({
+            index: i,
+            value: format(v),
+            editable: editable,
+            highlight: i === highlight,
+            onChange: (value) => update(i, value, v),
+          }),
+      });
+    }
     return element.virtualScroll;
   }
 );
@@ -116,7 +115,7 @@ const Memory = FC(
     const setFormat = (/** @type Format */ f) => {
       format = f;
       buttonBar.update({ value: format });
-      memoryBlock.virtualScroll.scrollTo();
+      memoryBlock.update();
     };
 
     const buttonBar = ButtonBar({
