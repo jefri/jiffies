@@ -129,7 +129,10 @@ const Memory = FC(
       highlight,
       editable,
       format: (v) => doFormat(format, v),
-      update: (i, v) => memory.update(i, v, format),
+      update: (i, v) => {
+        memory.update(i, v, format);
+        memoryBlock.update();
+      },
     });
 
     return article(header(nav(ul(span(name)), buttonBar)), memoryBlock);

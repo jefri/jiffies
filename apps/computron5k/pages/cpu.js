@@ -12,12 +12,15 @@ export const CPU = (
   const A = span();
   const D = span();
   /** @type {ReturnType<MemoryGUI>} */
+  let RAM;
+  /** @type {ReturnType<MemoryGUI>} */
   let ROM;
 
   const setState = () => {
     PC.update(`PC: ${cpu.PC}`);
     A.update(`A: ${cpu.A}`);
     D.update(`D: ${cpu.D}`);
+    if (RAM) RAM.update({ highlight: cpu.A });
     if (ROM) ROM.update({ highlight: cpu.PC });
   };
 
@@ -41,7 +44,7 @@ export const CPU = (
     ),
     div(
       { class: "grid" },
-      MemoryGUI({ name: "RAM", memory: cpu.RAM }),
+      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
       (ROM = MemoryGUI({
         name: "ROM",
         memory: cpu.ROM,

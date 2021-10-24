@@ -7,62 +7,65 @@ const Mode = {
 };
 
 /**
- * @param {{
-    value: string;
-    events: {
-      change: (value: string) => void;
-    }
-  }} props
+ * @typedef InlineEditState
+ * @property {number} mode
+ * @property {string} value
  */
-export const InlineEdit = FC("inline-edit", (el, props) => {
-  const state = {
-    mode: props.mode ?? Mode.VIEW,
-  };
 
-  const render = () => {
-    switch (state.mode) {
-      case Mode.EDIT:
-        return edit();
-      case Mode.VIEW:
-        return view();
-      default:
-        return span();
-    }
-  };
+export const InlineEdit = FC(
+  "inline-edit",
+  /**
+   * @param {HTMLElement & {state?: InlineEditState}} el
+   * @param {
+    {
+      mode?: number,
+      value: string,
+      events: {
+        change: (value: string) => void;
+      }
+    }} props
+  */
+  (el, { mode = Mode.VIEW, value, events }) => {
+    const state = (el.state ??= { mode, value });
 
-  const view = () =>
-    span(
-      {
-        style: { cursor: "text" },
-        events: {
-          click: () => {
-            state.mode = Mode.EDIT;
-            element.update(render());
+    const render = () => {
+      switch (state.mode) {
+        case Mode.EDIT:
+          return edit();
+        case Mode.VIEW:
+          return view();
+        default:
+          return span();
+      }
+    };
+
+    const view = () =>
+      span(
+        {
+          style: { cursor: "text" },
+          events: {
+            click: () => {
+              state.mode = Mode.EDIT;
+              element.update(render());
+            },
           },
         },
-      },
-      props.value
-    );
+        state.value
+      );
 
-  const edit = () =>
-    input({
-      style: { zIndex: "10", position: "relative", marginTop: "-7px" },
-      events: {
-        blur: ({ target: { value } }) => update(value),
-      },
-      type: "text",
-      value: props.value,
-    });
+    const edit = () =>
+      input({
+        style: { zIndex: "10", position: "relative", marginTop: "-7px" },
+        events: {
+          blur: ({ target }) => events.change(target?.value ?? ""),
+        },
+        type: "text",
+        value: state.value,
+      });
 
-  function update(/** @type string */ value) {
-    return;
-    props.events.change(value);
-    state.mode = Mode.VIEW;
-    element.update(render());
+    const element = span(render());
+    return element;
   }
-
-  const element = span(render());
-  return element;
-});
+);
 
 export default InlineEdit;
