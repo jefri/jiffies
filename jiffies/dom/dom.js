@@ -100,7 +100,7 @@ export const CLEAR = Symbol("Clear children");
  * @template {Element} E
  * @returns {Updatable<E>}
  */
-function update(
+export function update(
   /** @type Updater<E> */ element,
   /** @type Attrs<E> */ attrs,
   /** @type DenormChildrenList */ children

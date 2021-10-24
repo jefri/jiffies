@@ -1,4 +1,9 @@
 import { assert } from "../../../../jiffies/assert.js";
+import { asm, op } from "../../util/asm.js";
+import { bin, dec, hex, int10, int16, int2 } from "../../util/twos.js";
+
+export const FORMATS = ["bin", "dec", "hex", "asm"];
+/** @typedef {FORMATS[number]} Format */
 
 export class Memory {
   /** @type Int16Array */
@@ -33,6 +38,35 @@ export class Memory {
   set(index, value) {
     if (index < 0 || index >= this.size) return 0xffff;
     this.#memory[index] = value & 0xffff;
+  }
+
+  /**
+   * @param {number} cell
+   * @param {string} value
+   * @param {Format} format
+   */
+  update(cell, value, format) {
+    /** @type number */
+    let current;
+    switch (format) {
+      case "asm":
+        current = op(value);
+        break;
+      case "bin":
+        current = int2(value);
+        break;
+      case "hex":
+        current = int16(value);
+        break;
+      case "dec":
+      default:
+        current = int10(value);
+        break;
+    }
+
+    if (isFinite(current) && current <= 0xffff) {
+      this.set(cell, current);
+    }
   }
 
   /**

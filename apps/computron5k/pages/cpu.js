@@ -11,14 +11,14 @@ export const CPU = (
   const PC = span();
   const A = span();
   const D = span();
-  /** @type {MemoryGUI} */
+  /** @type {ReturnType<MemoryGUI>} */
   let ROM;
 
   const setState = () => {
     PC.update(`PC: ${cpu.PC}`);
     A.update(`A: ${cpu.A}`);
     D.update(`D: ${cpu.D}`);
-    if (ROM) ROM.highlight = PC;
+    if (ROM) ROM.update({ highlight: cpu.PC });
   };
 
   const tick = () => {
@@ -45,7 +45,7 @@ export const CPU = (
       (ROM = MemoryGUI({
         name: "ROM",
         memory: cpu.ROM,
-        highlight: PC,
+        highlight: cpu.PC,
         editable: false,
       }))
     )

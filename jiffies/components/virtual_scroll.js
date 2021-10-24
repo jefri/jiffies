@@ -148,6 +148,7 @@ export function doScroll(scrollTop, state, get) {
  * @property {number} initialPosition px
  * @property {T[]} data
  */
+
 /**
  * @template T
  * @template U
@@ -155,6 +156,7 @@ export function doScroll(scrollTop, state, get) {
     import("../dom/fc.js").Updateable &
     {state: VirtualScrollState<T>, rows: U[]}
   } VirtualScroll
+ @property (to?: {target?: {scrollTop: number}}) => void}) scrollTo
  */
 
 export const VirtualScroll = FC(
@@ -171,7 +173,7 @@ export const VirtualScroll = FC(
     element.state = state;
 
     /** @param {{target?: {scrollTop: number}}} event */
-    const scrollTo = ({ target }) => {
+    const scrollTo = ({ target } = {}) => {
       const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
       const updatedSate = {
         ...state,
@@ -217,6 +219,7 @@ export const VirtualScroll = FC(
 
     scrollTo({ target: { scrollTop: state.initialPosition ?? 0 } });
 
+    element.scrollTo = scrollTo;
     return viewportElement;
   }
 );
