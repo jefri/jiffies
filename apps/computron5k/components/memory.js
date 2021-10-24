@@ -112,14 +112,15 @@ const Memory = FC(
     el,
     { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
   ) => {
+    const state = (el.state ??= { format });
     const setFormat = (/** @type Format */ f) => {
-      format = f;
-      buttonBar.update({ value: format });
+      state.format = f;
+      buttonBar.update({ value: state.format });
       memoryBlock.update();
     };
 
     const buttonBar = ButtonBar({
-      value: format,
+      value: state.format,
       values: FORMATS,
       events: { click: setFormat },
     });
@@ -128,9 +129,9 @@ const Memory = FC(
       memory,
       highlight,
       editable,
-      format: (v) => doFormat(format, v),
+      format: (v) => doFormat(state.format, v),
       update: (i, v) => {
-        memory.update(i, v, format);
+        memory.update(i, v, state.format);
         memoryBlock.update();
       },
     });

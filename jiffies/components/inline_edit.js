@@ -1,5 +1,6 @@
+import { width } from "../dom/css.js";
 import { FC } from "../dom/fc.js";
-import { input, span } from "../dom/html.js";
+import { blockquote, input, span } from "../dom/html.js";
 
 const Mode = {
   VIEW: 0,
@@ -15,7 +16,7 @@ const Mode = {
 export const InlineEdit = FC(
   "inline-edit",
   /**
-   * @param {HTMLElement & {state?: InlineEditState}} el
+   * @param {import("../dom/dom.js").Updatable<{state?: InlineEditState}>} el
    * @param {
     {
       mode?: number,
@@ -42,29 +43,50 @@ export const InlineEdit = FC(
     const view = () =>
       span(
         {
-          style: { cursor: "text" },
+          style: {
+            cursor: "text",
+            ...width("full", "inline"),
+          },
           events: {
             click: () => {
               state.mode = Mode.EDIT;
-              element.update(render());
+              el.update(render());
             },
           },
         },
         state.value
       );
 
-    const edit = () =>
-      input({
-        style: { zIndex: "10", position: "relative", marginTop: "-7px" },
-        events: {
-          blur: ({ target }) => events.change(target?.value ?? ""),
+    const edit = () => {
+      const edit = span(
+        {
+          style: {
+            display: "block",
+            position: "relative",
+          },
         },
-        type: "text",
-        value: state.value,
+        input({
+          style: {
+            zIndex: "10",
+            position: "absolute",
+            left: "0",
+            marginTop: "-0.375rem",
+          },
+          events: {
+            blur: ({ target }) => events.change(target?.value ?? ""),
+          },
+          type: "text",
+          value: state.value,
+        }),
+        "\u00a0" // Hack to get the span to take up space
+      );
+      setTimeout(() => {
+        edit.focus();
       });
+      return edit;
+    };
 
-    const element = span(render());
-    return element;
+    return render();
   }
 );
 

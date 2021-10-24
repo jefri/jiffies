@@ -78,10 +78,23 @@ const Widths = {
   "1/4": "25%",
   "1/2": "50%",
   "3/4": "75%",
+  full: "100%",
 };
 
-export function width(amount) {
-  return { width: Widths[amount] ?? "0" };
+export function width(
+  /** @type {keyof Widths} */ amount,
+  /** @type {"inline"=} */ block
+) {
+  if (
+    amount === undefined &&
+    Widths[/** @type keyof Widths */ (block)] !== undefined
+  ) {
+    amount = /** @type keyof Widths */ (block);
+  }
+  return {
+    ...(block === "inline" ? { display: "inline-block" } : {}),
+    width: Widths[amount] ?? "0",
+  };
 }
 
 /** @param {'left'|'center'|'right'|'justify'} align */
