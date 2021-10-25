@@ -1,5 +1,12 @@
 import { FC } from "../../../jiffies/dom/fc.js";
-import { button, li, nav, ul } from "../../../jiffies/dom/html.js";
+import {
+  button,
+  li,
+  nav,
+  option,
+  select,
+  ul,
+} from "../../../jiffies/dom/html.js";
 import { Timer } from "../simulator/timer.js";
 
 /** @typedef {import("../../../jiffies/dom/dom.js").DenormChildren} DenormChildren */
@@ -25,6 +32,32 @@ export const Runbar = FC(
               },
             },
             runner.running ? "⏸" : "\u25B6️"
+          )
+        ),
+        li(
+          select(
+            {
+              name: "speed",
+              events: {
+                change: (e) =>
+                  (runner.speed = Number(e.target?.value ?? runner.speed)),
+              },
+              disabled: runner.running,
+            },
+            ...[
+              ["16", "60FPS"],
+              ["500", "Fast"],
+              ["1000", "Normal"],
+              ["2000", "Slow"],
+            ].map(([value, name]) =>
+              option(
+                {
+                  value,
+                  selected: `${runner.speed}` === value,
+                },
+                `${name}`
+              )
+            )
           )
         )
       ),

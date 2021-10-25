@@ -33,7 +33,6 @@ export const CPU = (
     D.update(`D: ${cpu.D}`);
     RAM?.update({ highlight: cpu.A });
     ROM?.update({ highlight: cpu.PC });
-    runbar?.update(ul(li(PC), li(A), li(D)));
   };
 
   const runner = new (class CPURunner extends Timer {
@@ -48,13 +47,13 @@ export const CPU = (
     }
 
     toggle() {
-      setState();
+      runbar.update();
     }
   })();
 
   return div(
     { class: "View__CPU" },
-    (runbar = Runbar({ runner })),
+    (runbar = Runbar({ runner }, ul(li(PC), li(A), li(D)))),
     div(
       { class: "grid" },
       (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
