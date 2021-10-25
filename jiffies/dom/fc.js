@@ -52,16 +52,23 @@ export function FC(name, attrSet, component) {
 
     /** @type Scope<S> */
     #lastAttrs = {};
+    /** @type DenormChildrenList */
+    #lastChildren = [];
 
     update(
-      /** @type {Scope<S>=} */ attrs,
+      /** @type {Scope<S>|import("./dom.js").DenormChildren=} */ attrs,
       /** @type {DenormChildrenList} */ ...children
     ) {
       [attrs, children] = /** @type {[Partial<S>, DenormChildrenList]} */ (
         normalizeArguments(attrs, children)
       );
+      if (children[0] === CLEAR) {
+        this.#lastChildren = [];
+      } else if (children.length > 0) {
+        this.#lastChildren = children;
+      }
       this.#lastAttrs = { ...this.#lastAttrs, ...attrs };
-      const replace = [render(this, this.#lastAttrs, children)];
+      const replace = [render(this, this.#lastAttrs, this.#lastChildren)];
       this.replaceChildren(...replace.flat());
     }
   }

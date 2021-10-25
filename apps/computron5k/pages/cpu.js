@@ -3,6 +3,8 @@ import { CPU as CPUChip } from "../simulator/chips/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/chips/memory.js";
 import { HACK } from "../testing/mult.js";
+import { Runbar } from "../components/runbar.js";
+import { Timer } from "../simulator/timer.js";
 
 /** @param {{cpu: CPUChip}} props */
 export const CPU = (
@@ -15,33 +17,44 @@ export const CPU = (
   let RAM;
   /** @type {ReturnType<MemoryGUI>} */
   let ROM;
+  /** @type {ReturnType<Runbar>} */
+  let runbar;
+
+  const resetRAM = () => {
+    cpu.RAM.set(0, 3);
+    cpu.RAM.set(1, 2);
+    if (RAM) RAM.update();
+  };
+  resetRAM();
 
   const setState = () => {
     PC.update(`PC: ${cpu.PC}`);
     A.update(`A: ${cpu.A}`);
     D.update(`D: ${cpu.D}`);
-    if (RAM) RAM.update({ highlight: cpu.A });
-    if (ROM) ROM.update({ highlight: cpu.PC });
+    RAM?.update({ highlight: cpu.A });
+    ROM?.update({ highlight: cpu.PC });
+    runbar?.update(ul(li(PC), li(A), li(D)));
   };
 
-  const tick = () => {
-    cpu.tick();
-    setState();
-  };
-  const reset = () => {
-    cpu.reset();
-    setState();
-  };
+  const runner = new (class CPURunner extends Timer {
+    tick() {
+      cpu.tick();
+      setState();
+    }
+
+    reset() {
+      cpu.reset();
+      setState();
+    }
+
+    toggle() {
+      setState();
+    }
+  })();
 
   return div(
     { class: "View__CPU" },
-    nav(
-      ul(
-        li(button({ events: { click: tick } }, "➡️")),
-        li(button({ events: { click: reset } }, "⏪"))
-      ),
-      ul(li(PC), li(A), li(D))
-    ),
+    (runbar = Runbar({ runner })),
     div(
       { class: "grid" },
       (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
