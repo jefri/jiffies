@@ -1,9 +1,13 @@
 import { assert } from "../../../../jiffies/assert.js";
-import { asm, op } from "../../util/asm.js";
-import { bin, dec, hex, int10, int16, int2 } from "../../util/twos.js";
+import { op } from "../../util/asm.js";
+import { int10, int16, int2 } from "../../util/twos.js";
 
 export const FORMATS = ["bin", "dec", "hex", "asm"];
 /** @typedef {FORMATS[number]} Format */
+
+export const SCREEN = 0x4000;
+export const SCREEN_ROWS = 512;
+export const SCREEN_COLS = 256;
 
 export class Memory {
   /** @type Int16Array */
