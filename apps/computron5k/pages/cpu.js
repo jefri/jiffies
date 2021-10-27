@@ -45,25 +45,6 @@ export const CPU = (
     screen?.update();
   };
 
-  const tickScreen = (() => {
-    let row = 0;
-    let col = 0;
-    let color = 0xffff;
-    return () => {
-      const index = SCREEN + col + row * 32;
-      cpu.RAM.set(index, color);
-      col += 1;
-      if (col >= 32) {
-        col = 0;
-        row += 1;
-        if (row >= 256) {
-          row = 0;
-          color = color === 0x0000 ? 0xffff : 0x0000;
-        }
-      }
-    };
-  })();
-
   const runner = new (class CPURunner extends Timer {
     tick() {
       cpu.tick();
