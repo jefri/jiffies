@@ -8,6 +8,8 @@ import { Timer } from "../simulator/timer.js";
 import { Screen } from "../components/screen.js";
 /** @typedef {import("../components/screen").Screen} Screen */
 
+import { TickScreen } from "../testing/fill.js";
+
 /** @param {{cpu: CPUChip}} props */
 export const CPU = (
   { cpu } = { cpu: new CPUChip({ ROM: new Memory(HACK) }) }
@@ -27,11 +29,12 @@ export const CPU = (
   const resetRAM = () => {
     cpu.RAM.set(0, 3);
     cpu.RAM.set(1, 2);
-    cpu.RAM.set(SCREEN, 0xf5f5);
     RAM?.update();
     screen?.update();
   };
   resetRAM();
+
+  const tickScreen = TickScreen(cpu);
 
   const setState = () => {
     PC.update(`PC: ${cpu.PC}`);
@@ -64,7 +67,7 @@ export const CPU = (
   const runner = new (class CPURunner extends Timer {
     tick() {
       cpu.tick();
-      tickScreen();
+      // tickScreen();
       setState();
     }
 

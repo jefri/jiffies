@@ -11,14 +11,14 @@ const Sizes = {
 };
 const Sides = {
   "": "",
-  t: "top",
-  r: "right",
-  l: "left",
-  b: "bottom",
-  tl: "top-left",
-  tr: "top-right",
-  bl: "bottom-left",
-  br: "bottom-right",
+  t: "Top",
+  r: "Right",
+  l: "Left",
+  b: "Bottom",
+  tl: "TopLeft",
+  tr: "TopRight",
+  bl: "BottomLeft",
+  br: "BottomRight",
 };
 
 /** @typedef {keyof typeof Sizes} Size */
@@ -66,12 +66,12 @@ export function rounded(size = "", side = "") {
   const sized = getSize(size);
   return getSide(side).reduce((prev, curr) => {
     if (curr === "") {
-      prev["border-radius"] = sized;
+      prev.borderRadius = sized;
     } else {
-      prev[`border-${curr}-radius`] = sized;
+      prev[`border${curr}Radius`] = sized;
     }
     return prev;
-  }, /** @type Record<string, string> */ ({}));
+  }, /** @type {CSSStyleDeclaration} */ ({}));
 }
 
 const Widths = {
@@ -99,5 +99,36 @@ export function width(
 
 /** @param {'left'|'center'|'right'|'justify'} align */
 export function text(align) {
-  return { "text-align": align };
+  return { textAlign: align };
+}
+
+/**
+ * @param {{
+  side?: Side,
+  style?: 'solid'|'dotted'|'dashed'|'double'|'none',
+  radius?: Size,
+  width?: 0|1|2|4|8,
+  color?: string
+ }} param0 
+ * @returns 
+ */
+export function border({
+  side = "",
+  style = "solid",
+  radius = "",
+  width = 1,
+  color = "black",
+}) {
+  return {};
+}
+
+export function inset(
+  /** @type {0|1|2|4|8} */ width,
+  /** @type string */ color1 = "gray",
+  /** @type string */ color2 = "lightgray"
+) {
+  return {
+    ...border({ side: "tl", width, color: color1, radius: "none" }),
+    ...border({ side: "br", width, color: color2, radius: "none" }),
+  };
 }

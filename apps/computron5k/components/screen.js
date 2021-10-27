@@ -1,5 +1,5 @@
 import { FC } from "../../../jiffies/dom/fc.js";
-import { article, canvas, header } from "../../../jiffies/dom/html.js";
+import { article, canvas, figure, header } from "../../../jiffies/dom/html.js";
 import { Memory, SCREEN } from "../simulator/chips/memory.js";
 
 const WHITE = "white";
@@ -52,6 +52,19 @@ export const Screen = FC(
       el.ctx.putImageData(image, 0, 0);
     }
 
-    return article(header("Display"), screen);
+    return article(
+      header("Display"),
+      figure(
+        {
+          style: {
+            borderTop: "2px solid gray",
+            borderLeft: "2px solid gray",
+            borderBottom: "2px solid lightgray",
+            borderRight: "2px solid lightgray",
+          },
+        },
+        screen
+      )
+    );
   }
 );
