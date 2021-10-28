@@ -49,6 +49,9 @@ export const CPU = (
     tick() {
       cpu.tick();
       // tickScreen();
+    }
+
+    finishFrame() {
       setState();
     }
 

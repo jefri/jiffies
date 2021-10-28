@@ -1,12 +1,6 @@
+import { Select } from "../../../jiffies/components/select.js";
 import { FC } from "../../../jiffies/dom/fc.js";
-import {
-  button,
-  li,
-  nav,
-  option,
-  select,
-  ul,
-} from "../../../jiffies/dom/html.js";
+import { button, li, nav, ul } from "../../../jiffies/dom/html.js";
 import { Timer } from "../simulator/timer.js";
 
 /** @typedef {import("../../../jiffies/dom/dom.js").DenormChildren} DenormChildren */
@@ -22,8 +16,8 @@ export const Runbar = FC(
   (el, { runner }, children) =>
     nav(
       ul(
-        li(button({ events: { click: runner.tick } }, "➡️")),
-        li(button({ events: { click: runner.reset } }, "⏪")),
+        li(button({ events: { click: () => runner.frame() } }, "➡️")),
+        li(button({ events: { click: () => runner.reset() } }, "⏪")),
         li(
           button(
             {
@@ -35,30 +29,38 @@ export const Runbar = FC(
           )
         ),
         li(
-          select(
-            {
-              name: "speed",
-              events: {
-                change: (e) =>
-                  (runner.speed = Number(e.target?.value ?? runner.speed)),
-              },
-              disabled: runner.running,
+          Select({
+            name: "speed",
+            events: {
+              change: (e) =>
+                (runner.speed = Number(e.target?.value ?? runner.speed)),
             },
-            ...[
+            disabled: runner.running,
+            value: runner.speed,
+            options: [
               ["16", "60FPS"],
               ["500", "Fast"],
               ["1000", "Normal"],
               ["2000", "Slow"],
-            ].map(([value, name]) =>
-              option(
-                {
-                  value,
-                  selected: `${runner.speed}` === value,
-                },
-                `${name}`
-              )
-            )
-          )
+            ],
+          })
+        ),
+        li(
+          Select({
+            name: "steps",
+            events: {
+              change: (e) =>
+                (runner.steps = Number(e.target?.value ?? runner.steps)),
+            },
+            disabled: runner.running,
+            value: runner.steps,
+            options: [
+              ["1", "1 Step"],
+              ["500", "500"],
+              ["1000", "1000"],
+              ["2000", "2000"],
+            ],
+          })
         )
       ),
       ...children

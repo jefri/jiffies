@@ -1,10 +1,19 @@
+export const MAX_STEPS = 1000;
 export class Timer {
+  frame() {
+    this.tick();
+    this.finishFrame();
+  }
+
   tick() {}
+
+  finishFrame() {}
 
   reset() {}
 
   toggle() {}
 
+  steps = 1; // How many steps to take per update
   speed = 1000; // how often to update, in ms
   get running() {
     return this.#running;
@@ -20,7 +29,10 @@ export class Timer {
     this.#lastUpdate = now;
     this.#sinceLastFrame += delta;
     if (this.#sinceLastFrame > this.speed) {
-      this.tick();
+      for (let i = 0; i < Math.min(this.steps, MAX_STEPS); i++) {
+        this.tick();
+      }
+      this.finishFrame();
       this.#sinceLastFrame -= this.speed;
     }
     requestAnimationFrame(this.#run);
