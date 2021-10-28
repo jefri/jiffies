@@ -1,6 +1,6 @@
-import { width } from "../dom/css.js";
+import { width } from "../dom/css/sizing.js";
 import { FC } from "../dom/fc.js";
-import { blockquote, input, span } from "../dom/html.js";
+import { input, span } from "../dom/html.js";
 
 const Mode = {
   VIEW: 0,

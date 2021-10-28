@@ -14,7 +14,9 @@ import {
   span,
   ul,
 } from "../../../jiffies/dom/html.js";
-import { rounded, text, width } from "../../../jiffies/dom/css.js";
+import { rounded } from "../../../jiffies/dom/css/border.js";
+import { width } from "../../../jiffies/dom/css/sizing.js";
+import { text } from "../../../jiffies/dom/css/typography.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 
 const MemoryBlock = FC(
