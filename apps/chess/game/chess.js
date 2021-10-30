@@ -56,6 +56,7 @@ const MOVES = [
 ];
 
 export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
+/** @typedef {P|R|N|B|Q|K} Piece */
 
 /** @returns {[number, string, string]} */
 export const Piece = (/** @type {number} */ piece) => {
@@ -158,7 +159,10 @@ export class ChessGame {
         const rankOf = Number(r);
         if (file && fileOf !== file) return;
         if (rank && rankOf !== rank) return;
-        const moves = this.moves(fileOf, rankOf);
+        const moves = this.moves(
+          /** @type {File} */ (fileOf),
+          /** @type {Rank} */ (rankOf)
+        );
         return moves.find((m) => m.destination === destination);
       }),
     ];
@@ -195,16 +199,15 @@ export class ChessGame {
     }
     const color = /** @type {WHITE|BLACK} */ (Math.sign(piece));
     const pieceType = Math.abs(piece);
-    return MOVES[pieceType - 1]
-      .map((ray) => [
-        ...takeWhile(moveFilter(this, idx, color, rank), ray),
-        ...takeWhile(
-          moveFilter(this, idx, color, rank),
-          ray.map((i) => -i)
-        ),
-      ])
-      .flat()
-      .map((i) => idx + i)
+    /** @type {() => (i: number) => boolean} */
+    const moveFilter =
+      pieceType === PAWN
+        ? () => pawnFilter(this, idx, color, rank)
+        : pieceType === KING
+        ? () => kingFilter(this, idx, color, rank)
+        : () => rnbqFilter(this, idx, color, rank);
+
+    return moveHandler(/** @type Piece */ (pieceType), idx, moveFilter)
       .map(
         (destination) =>
           new Move({
@@ -215,7 +218,8 @@ export class ChessGame {
             destination,
             pieceType,
           })
-      );
+      )
+      .filter(checkCheck(this));
   }
 }
 
@@ -320,7 +324,24 @@ Move.parse = function parse(
 const FIDE_REGEX =
   /(?<move>\d+\.(?:\.\.)? )?(?:(?<piece>[RBNQK])?(?<file>[a-h])?(?<rank>[1-8])?(?<capture>x)?(?<destination>[a-h][1-8])(?<promotion>=?[RBNQK])?(?<check>[+#])?|(?<castle>O-O(?:-O)?)|(?<result>1-0|0-0|1\/2-1\/2))(?: \{(?<comment>[^}]*)}|)?/;
 
-function moveFilter(
+function moveHandler(
+  /** @type {P|R|N|B|Q|K} */ pieceType,
+  /** @type number */ idx,
+  /** @type {() => (i: number) => boolean} */ filterFactory
+) {
+  return MOVES[pieceType - 1]
+    .map((ray) => [
+      ...takeWhile(filterFactory(), ray),
+      ...takeWhile(
+        filterFactory(),
+        ray.map((i) => -i)
+      ),
+    ])
+    .flat()
+    .map((i) => idx + i);
+}
+
+function rnbqFilter(
   /** @type ChessGame */ board,
   /** @type number */ idx,
   /** @type {WHITE|BLACK} */ color,
@@ -334,35 +355,59 @@ function moveFilter(
     if (piece === INVALID) edge = true; // Detected an edge
     if (edge) return false; // Stop after detecting an edge
     const isEmpty = piece === EMPTY;
-    if (Math.abs(board.board[idx]) === PAWN) {
-      // If the ray is the wrong direction, ignore it
-      if (Math.sign(i) !== color) return false;
-      let j = Math.abs(i); // Get the magnitude of the move
-      if (j === 10 || j === 20) {
-        if (j === 10) return isEmpty;
-        if (j === 20 && rank === (color === WHITE ? 2 : 7)) return isEmpty;
-        return false;
-      }
-      if (isEmpty) {
-        // en passant - TODO assert history
-        if (board.board[i + color * 10] === -color * PAWN) {
-          capture = true;
-          return true;
-        } else {
-          return false;
-        }
-      } else if (Math.sign(piece) !== color) {
-        capture = true;
-        return true;
-      }
-    }
+    const pieceType = Math.abs(board.board[idx]);
     if (piece === EMPTY) return true;
-    // TODO Ensure king does not move into check
-    // TODO Allow castling
     if (Math.sign(piece) !== color) {
       capture = true;
       return true;
     }
     return false;
   };
+}
+
+function pawnFilter(
+  /** @type ChessGame */ board,
+  /** @type number */ idx,
+  /** @type {WHITE|BLACK} */ color,
+  /** @type number */ rank
+) {
+  let edge = false;
+  return (/** @type number */ i) => {
+    const piece = board.board[idx + i];
+    if (piece === INVALID) edge = true; // Detected an edge
+    if (edge) return false; // Stop after detecting an edge
+    const isEmpty = piece === EMPTY;
+    // If the ray is the wrong direction, ignore it
+    if (Math.sign(i) !== color) return false;
+    let j = Math.abs(i); // Get the magnitude of the move
+    if (j === 10 || j === 20) {
+      if (j === 10) return isEmpty;
+      if (j === 20 && rank === (color === WHITE ? 2 : 7)) return isEmpty;
+      return false;
+    }
+    if (isEmpty) {
+      // en passant - TODO assert history
+      if (board.board[i + color * 10] === -color * PAWN) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (Math.sign(piece) !== color) {
+      return true;
+    }
+    return false;
+  };
+}
+
+function kingFilter(
+  /** @type ChessGame */ board,
+  /** @type number */ idx,
+  /** @type {WHITE|BLACK} */ color,
+  /** @type number */ rank
+) {
+  return () => false;
+}
+
+function checkCheck(/** @type ChessGame */ board) {
+  return (/** @type Move */ move) => true;
 }
