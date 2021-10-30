@@ -1,3 +1,9 @@
+import { Err, Ok } from "../../../jiffies/result.js";
+/**
+ * @template T
+ * @template E
+ * @typedef {import('../../../jiffies/result.js').Result<T, E>} Result
+ */
 import { assert } from "../../../jiffies/assert.js";
 import { takeWhile } from "../../../jiffies/generator.js";
 
@@ -46,8 +52,10 @@ const MOVES = [
   // Queen moves
   [ray(1), ray(9), ray(10), ray(11)],
   // King moves
-  [[1], [9], [10], [11]],
+  [[1], [9], [10], [11], [2], [3]],
 ];
+
+export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
 
 /** @returns {[number, string, string]} */
 export const Piece = (/** @type {number} */ piece) => {
@@ -95,7 +103,7 @@ export const Piece = (/** @type {number} */ piece) => {
 const NEW_GAME = [
   [I, I, I, I, I, I, I, I, I, I],
   [I, I, I, I, I, I, I, I, I, I],
-  [R, N, B, K, Q, B, N, R, I, I].map((p) => p * L),
+  [R, N, B, Q, K, B, N, R, I, I].map((p) => p * L),
   [P, P, P, P, P, P, P, P, I, I].map((p) => p * L),
   [E, E, E, E, E, E, E, E, I, I],
   [E, E, E, E, E, E, E, E, I, I],
@@ -108,9 +116,12 @@ const NEW_GAME = [
   [I, I, I, I, I, I, I, I, I, I],
 ].flat();
 
-export class Board {
+export class ChessGame {
   /** @type {typeof NEW_GAME} */
   board = [];
+  toPlay = WHITE;
+  /** @type {Move[]} */
+  history = [];
 
   constructor() {
     this.reset();
@@ -124,16 +135,67 @@ export class Board {
     return this.board[index(file, rank)];
   }
 
+  do(/** @type Move */ move) {
+    if (move.color !== this.toPlay) return;
+    this.history.push(move);
+    this.board[move.destination] = this.board[move.source];
+    this.board[move.source] = EMPTY;
+    // TODO handle castling
+    // TODO handle en passant
+    this.toPlay = this.toPlay === WHITE ? BLACK : WHITE;
+  }
+
+  /**
+   * @param {{destination: number, rank: Rank, file: File, piece: number}} move
+   * @returns {Result<Move, Error>}
+   */
+  findMove({ destination, rank, file, piece }) {
+    // Find the piece that could have moved to this destination
+    const maybe = [
+      ...this.findAll((i) => {
+        if (this.board[i] !== piece) return;
+        let [fileOf, r] = square(i).split("");
+        const rankOf = Number(r);
+        if (file && fileOf !== file) return;
+        if (rank && rankOf !== rank) return;
+        const moves = this.moves(fileOf, rankOf);
+        return moves.find((m) => m.destination === destination);
+      }),
+    ];
+    if (maybe.length === 1) {
+      return Ok(/** @type Move */ (maybe[0]));
+    } else {
+      return Err(
+        `Ambiguous move: ${Pieces[piece] ?? ""}${file ?? ""}${
+          rank ?? ""
+        }${square(destination)}`
+      );
+    }
+  }
+
+  /**
+   * @template T
+   * @returns Iterator<T>
+   */
+  *findAll(/** @type {(i: number) => T} */ fn) {
+    for (let r = 20; r < 100; r += 10) {
+      for (let c = 0; c < 8; c++) {
+        const y = fn(r + c);
+        if (y) yield y;
+      }
+    }
+  }
+
+  /** @returns {Move[]} */
   moves(/** @type File */ file, /** @type Rank */ rank) {
     const idx = index(file, rank);
     const piece = this.board[idx];
-    assert(
-      piece !== INVALID && piece !== EMPTY,
-      `${file}${rank} has invalid piece ${piece}`
-    );
+    if (piece === INVALID || piece === EMPTY) {
+      return [];
+    }
     const color = /** @type {WHITE|BLACK} */ (Math.sign(piece));
-    const pieceType = Math.abs(piece) - 1;
-    const moves = MOVES[pieceType]
+    const pieceType = Math.abs(piece);
+    return MOVES[pieceType - 1]
       .map((ray) => [
         ...takeWhile(moveFilter(this, idx, color, rank), ray),
         ...takeWhile(
@@ -145,9 +207,15 @@ export class Board {
       .map((i) => idx + i)
       .map(
         (destination) =>
-          new Move({ file, rank, color, capture: false, destination })
+          new Move({
+            file,
+            rank,
+            color,
+            capture: false,
+            destination,
+            pieceType,
+          })
       );
-    return moves;
   }
 }
 
@@ -173,7 +241,7 @@ export class Move {
   /** @type {number} */
   destination;
   isCapture = false;
-  // pieceType;
+  pieceType;
   // promotion;
   // check = "";
   // castle = "";
@@ -187,48 +255,76 @@ export class Move {
           capture: boolean,
           destination: number,
           color: WHITE|BLACK,
+          pieceType: number,
         }}
-        */ { file, rank, capture, destination, color }
+        */ { file, rank, capture, destination, color, pieceType }
   ) {
     this.color = color;
     this.destination = destination;
     this.source = index(file, rank);
     this.capture = capture;
+    this.pieceType = pieceType;
+  }
+
+  toString() {
+    const piece = Pieces[this.pieceType];
+    const src = square(this.source);
+    const dest = square(this.destination);
+    if (piece === "P") {
+      return `${dest}`;
+    } else if (piece === "Q" || piece === "K") {
+      return `${piece}${dest}`;
+    } else {
+      return `${piece}${src}${dest}`;
+    }
   }
 }
 
-Move.parse =
-  /**
-   * @param {string} fide
-   * @param {WHITE|BLACK=} color
-   */
-  function parse(fide, color) {
-    const {
-      move,
-      piece,
+/** @returns {Result<Move, Error>} */
+Move.parse = function parse(
+  /** @type string */ fide,
+  /** @type {WHITE|BLACK=}*/
+  color,
+  /** @type {ChessGame} */ board
+) {
+  const {
+    move,
+    piece,
+    file,
+    rank,
+    capture,
+    destination,
+    promotion,
+    check,
+    castle,
+    result,
+    comment,
+  } =
+    /** @type {{move?: string, piece?: string, file?: string, rank?: string, capture?: string, destination?: string, promotion?: string, check?: string, castle?: string, result?: string, comment?: string}}*/ (
+      FIDE_REGEX.exec(fide)
+    )?.groups ?? {};
+  if (destination) {
+    const pieceNo = Pieces.indexOf(piece ?? "P");
+    return board.findMove({
       file,
       rank,
-      capture,
-      destination,
-      promotion,
-      check,
-      castle,
-      result,
-      comment,
-    } =
-      /** @type {{move?: string, piece?: string, file?: string, rank?: string, capture?: string, destination?: string, promotion?: string, check?: string, castle?: string, result?: string, comment?: string}}*/ (
-        FIDE_REGEX.exec(fide)
-      ) ?? {};
-  };
+      piece:
+        pieceNo *
+        (color ?? (move === "." ? WHITE : move === "..." ? BLACK : 0)),
+      destination: index(destination.charAt(0), destination.charAt(1)),
+    });
+  }
+  return Err(`Missing destination in ${fide}`);
+};
 
 const FIDE_REGEX =
   /(?<move>\d+\.(?:\.\.)? )?(?:(?<piece>[RBNQK])?(?<file>[a-h])?(?<rank>[1-8])?(?<capture>x)?(?<destination>[a-h][1-8])(?<promotion>=?[RBNQK])?(?<check>[+#])?|(?<castle>O-O(?:-O)?)|(?<result>1-0|0-0|1\/2-1\/2))(?: \{(?<comment>[^}]*)}|)?/;
 
 function moveFilter(
-  /** @type Board */ board,
+  /** @type ChessGame */ board,
   /** @type number */ idx,
   /** @type {WHITE|BLACK} */ color,
-  /**@type number */ rank
+  /** @type number */ rank
 ) {
   let capture = false;
   let edge = false;
@@ -242,20 +338,27 @@ function moveFilter(
       // If the ray is the wrong direction, ignore it
       if (Math.sign(i) !== color) return false;
       let j = Math.abs(i); // Get the magnitude of the move
-      if (j % 10 === 0) {
+      if (j === 10 || j === 20) {
         if (j === 10) return isEmpty;
         if (j === 20 && rank === (color === WHITE ? 2 : 7)) return isEmpty;
         return false;
       }
-      // en passant - TODO assert history
-      if (board.board[i + color * 10] === -color * PAWN) {
+      if (isEmpty) {
+        // en passant - TODO assert history
+        if (board.board[i + color * 10] === -color * PAWN) {
+          capture = true;
+          return true;
+        } else {
+          return false;
+        }
+      } else if (Math.sign(piece) !== color) {
         capture = true;
         return true;
-      } else {
-        return false;
       }
     }
     if (piece === EMPTY) return true;
+    // TODO Ensure king does not move into check
+    // TODO Allow castling
     if (Math.sign(piece) !== color) {
       capture = true;
       return true;

@@ -3,7 +3,7 @@ import { expect } from "../../../jiffies/scope/expect.js";
 import {
   BISHOP,
   BLACK,
-  Board,
+  ChessGame,
   E,
   I,
   index,
@@ -15,8 +15,12 @@ import {
   WHITE,
 } from "./chess.js";
 
-function movesFor(board, file, rank) {
-  return board
+function movesFor(
+  /** @type ChessGame */ game,
+  /** @type import("./chess.js").File */ file,
+  /** @type import("./chess.js").Rank */ rank
+) {
+  return game
     .moves(file, rank)
     .map((m) => m.destination)
     .map(square)
@@ -25,17 +29,17 @@ function movesFor(board, file, rank) {
 
 describe("Chess Board", () => {
   it("Sets up for black and white", () => {
-    const board = new Board();
+    const board = new ChessGame();
 
     expect(board.at("d", 1)).toBe(WHITE * QUEEN);
     expect(board.at("e", 1)).toBe(WHITE * KING);
-    expect(board.at("d", 8)).toBe(BLACK * KING);
-    expect(board.at("e", 8)).toBe(BLACK * QUEEN);
+    expect(board.at("e", 8)).toBe(BLACK * KING);
+    expect(board.at("d", 8)).toBe(BLACK * QUEEN);
   });
 
   describe("moves", () => {
     it("generates valid pawn moves", () => {
-      const board = new Board();
+      const board = new ChessGame();
       const moves = movesFor(board, "e", 2);
       expect(moves.length).toBe(2);
       expect(moves).toEqual(["e3", "e4"]);
@@ -90,7 +94,7 @@ const CLEAR_GAME = [
   [I, I, I, I, I, I, I, I, I, I],
 ].flat();
 
-class TestBoard extends Board {
+class TestBoard extends ChessGame {
   clear() {
     this.board = CLEAR_GAME;
   }

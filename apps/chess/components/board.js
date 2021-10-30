@@ -1,6 +1,6 @@
 import { FC } from "../../../jiffies/dom/fc.js";
 import { span, table, td, tr } from "../../../jiffies/dom/html.js";
-import { Board, index, Piece } from "../game/chess.js";
+import { ChessGame, index, Piece } from "../game/chess.js";
 
 /** @type [8, 7, 6, 5, 4, 3, 2, 1] */
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -14,7 +14,7 @@ const parity = (
 
 export const ChessBoard = FC(
   "chess-board",
-  (el, /** @type {{board: Board}} */ { board }) =>
+  (el, /** @type {{game: ChessGame}} */ { game }) =>
     table(
       {
         style: {
@@ -66,7 +66,7 @@ export const ChessBoard = FC(
                 },
                 `${index(file, rank)}`
               ),
-              Piece(board.at(file, rank))[2]
+              Piece(game.at(file, rank))[2]
             )
           )
         )
