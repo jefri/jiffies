@@ -42,12 +42,14 @@ export const Some = (t) => {
  * @returns {t is import("./result").Ok<T>}
  */
 export const isOk = (t) => t.ok !== undefined;
+
 /**
  * @template {Error} E
  * @param {import("./result").Result<unknown, E>} e
  * @returns {e is Err<E>}
  */
 export const isErr = (e) => e.err !== undefined;
+
 /**
  * @template T
  * @template {Error} E = Error

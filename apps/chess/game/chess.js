@@ -30,6 +30,8 @@ export const I = INVALID;
 
 /** @typedef {'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'} File */
 /** @typedef {1|2|3|4|5|6|7|8} Rank */
+/** @typedef {P|R|N|B|Q|K} Piece */
+/** @typedef {W|L} Color */
 
 const ray = (/** @type number */ stride) => {
   const /** @type number[] */ ray = [];
@@ -56,7 +58,6 @@ const MOVES = [
 ];
 
 export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
-/** @typedef {P|R|N|B|Q|K} Piece */
 
 /** @returns {[number, string, string]} */
 export const Piece = (/** @type {number} */ piece) => {

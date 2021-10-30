@@ -1,5 +1,5 @@
 import { FC } from "../../../jiffies/dom/fc.js";
-import { Err, isOk, Ok } from "../../../jiffies/result.js";
+import { Err, Ok, isOk } from "../../../jiffies/result.js";
 import { range } from "../../../jiffies/range.js";
 import {
   input,
@@ -23,16 +23,18 @@ export const history = FC(
       events,
     }
   ) => {
-    const tryInput = (color) => (e) => {
-      notification.update("");
-      const { value } = e?.target ?? { value: "" };
-      const move = Move.parse(value, color, game);
-      if (isOk(move)) {
-        (events?.move ?? (() => {}))(Ok(move));
-      } else {
-        notification.update(`${Err(move).message}`);
-      }
-    };
+    const tryInput =
+      (/** @type import("../game/chess.js").Color */ color) =>
+      (/** @type Event */ e) => {
+        notification.update("");
+        const { value = "" } = /** @type HTMLInputElement */ (e?.target);
+        const move = Move.parse(value, color, game);
+        if (isOk(move)) {
+          (events?.move ?? (() => {}))(Ok(move));
+        } else {
+          notification.update(`${Err(move).message}`);
+        }
+      };
     const whiteInput = input({
       name: "WhiteMove",
       disabled: game.toPlay === BLACK,
@@ -52,6 +54,10 @@ export const history = FC(
       )
     );
     const notification = span();
+
+    setTimeout(() => {
+      (game.toPlay === WHITE ? whiteInput : blackInput).focus();
+    });
 
     return table(
       thead(tr(th("White"), th("Black"))),
