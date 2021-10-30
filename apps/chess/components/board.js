@@ -1,7 +1,8 @@
 import { FC } from "../../../jiffies/dom/fc.js";
-import { table, td, tr } from "../../../jiffies/dom/html.js";
-import { Board, Piece } from "../game/chess.js";
+import { span, table, td, tr } from "../../../jiffies/dom/html.js";
+import { Board, index, Piece } from "../game/chess.js";
 
+/** @type [8, 7, 6, 5, 4, 3, 2, 1] */
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 /** @type ['a','b','c','d','e','f','g','h'] */
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -20,6 +21,7 @@ export const ChessBoard = FC(
           width: "inherit",
           color: "black",
           fontSize: "2em",
+          fontFamily: "sans-serif",
         },
       },
       ...RANKS.map((rank) =>
@@ -27,14 +29,43 @@ export const ChessBoard = FC(
           ...FILES.map((file) =>
             td(
               {
+                square: `${file}${rank}`,
                 style: {
+                  position: "relative",
                   width: "2em",
                   height: "2em",
                   color: "black",
                   textAlign: "center",
                   backgroundColor: parity(file, rank) ? "white" : "lightgray",
+                  border: "none",
                 },
               },
+              span(
+                {
+                  style: {
+                    display: "block",
+                    position: "absolute",
+                    bottom: "0",
+                    left: "0",
+                    fontSize: "0.5em",
+                    opacity: "0.2",
+                  },
+                },
+                `${file}${rank}`
+              ),
+              span(
+                {
+                  style: {
+                    display: "block",
+                    position: "absolute",
+                    bottom: "0",
+                    right: "0",
+                    fontSize: "0.5em",
+                    opacity: "0.2",
+                  },
+                },
+                `${index(file, rank)}`
+              ),
               Piece(board.at(file, rank))[2]
             )
           )

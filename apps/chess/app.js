@@ -4,7 +4,7 @@ import { Router } from "../../jiffies/router/router.js";
 import urls from "./urls.js";
 
 export const App = () => {
-  const router = Router.for(urls, "test");
+  const router = Router.for(urls, "chess");
 
   const app = [
     header(
