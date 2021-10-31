@@ -123,31 +123,45 @@ const NEW_GAME = [
 
 export class ChessGame {
   /** @type {typeof NEW_GAME} */
-  board = [];
-  toPlay = WHITE;
+  board;
+  /** @type {Color} */
+  toPlay;
+  /** @type {ChessGame|null} */
+  previous;
   /** @type {Move[]} */
   history = [];
 
-  constructor() {
-    this.reset();
-  }
-
-  reset() {
-    this.board = NEW_GAME;
+  constructor(
+    /** @type {typeof NEW_GAME} */ board = NEW_GAME,
+    /** @type {Color} */
+    toPlay = WHITE,
+    /** @type {Move|null} */
+    lastMove = null,
+    /** @type {ChessGame|null} */
+    previous = null
+  ) {
+    this.board = board;
+    this.toPlay = toPlay;
+    if (lastMove !== null && previous !== null) {
+      this.history = [...previous.history, lastMove];
+    }
+    this.previous = previous;
   }
 
   at(/** @type File */ file, /** @type Rank */ rank) {
     return this.board[index(file, rank)];
   }
 
+  /** @returns {ChessGame} */
   do(/** @type Move */ move) {
-    if (move.color !== this.toPlay) return;
-    this.history.push(move);
-    this.board[move.destination] = this.board[move.source];
-    this.board[move.source] = EMPTY;
+    if (move.color !== this.toPlay) return this;
+    const board = [...this.board];
+    board[move.destination] = board[move.source];
+    board[move.source] = EMPTY;
     // TODO handle castling
     // TODO handle en passant
-    this.toPlay = this.toPlay === WHITE ? BLACK : WHITE;
+    const toPlay = this.toPlay === WHITE ? BLACK : WHITE;
+    return new ChessGame(board, toPlay, move, this);
   }
 
   /**

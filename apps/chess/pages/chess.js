@@ -6,14 +6,23 @@ import { ChessGame, Move } from "../game/chess.js";
 import { Test } from "./test.js";
 
 export const Chess = FC("chess-game", () => {
-  const game = new ChessGame();
+  let game = new ChessGame();
   const board = ChessBoard({ game });
   const move = (/** @type Move */ m) => {
-    game.do(m);
+    game = game.do(m);
+    update();
+  };
+  const undo = () => {
+    if (game.previous !== null) {
+      game = game.previous;
+      update();
+    }
+  };
+  const update = () => {
     board.update({ game });
     input.update({ game });
   };
-  const input = history({ game, events: { move } });
+  const input = history({ game, events: { move, undo } });
   const test = div();
 
   const layout = div(

@@ -2,6 +2,7 @@ import { FC } from "../../../jiffies/dom/fc.js";
 import { Err, Ok, isOk } from "../../../jiffies/result.js";
 import { range } from "../../../jiffies/range.js";
 import {
+  button,
   input,
   span,
   table,
@@ -18,7 +19,7 @@ export const history = FC(
   "chess-history",
   (
     el,
-    /** @type {{game: ChessGame, events?: {move?: (m: Move) => void}}} */ {
+    /** @type {{game: ChessGame, events?: {move?: (m: Move) => void, undo?: () => {}}}} */ {
       game,
       events,
     }
@@ -64,7 +65,8 @@ export const history = FC(
       body,
       tfoot(
         tr(td(whiteInput), td(blackInput)),
-        tr(td({ colSpan: 2 }, notification))
+        tr(td({ colSpan: 2 }, notification)),
+        tr(td(button({ events: { click: events?.undo } }, "Undo")), td())
       )
     );
   }
