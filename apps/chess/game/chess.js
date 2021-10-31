@@ -28,10 +28,15 @@ export const Q = QUEEN;
 export const K = KING;
 export const I = INVALID;
 
+/** @typedef {P|R|N|B|Q|K|I|-1|-2|-3|-4|-5|-6|-7|0} ColorPiece */
 /** @typedef {'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'} File */
 /** @typedef {1|2|3|4|5|6|7|8} Rank */
 /** @typedef {P|R|N|B|Q|K} Piece */
 /** @typedef {W|L} Color */
+
+export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
+export const Ranks = [1, 2, 3, 4, 5, 6, 7, 8];
+export const Files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 const ray = (/** @type number */ stride) => {
   const /** @type number[] */ ray = [];
@@ -57,9 +62,7 @@ const MOVES = [
   [[1], [9], [10], [11], [2], [3]],
 ];
 
-export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
-
-/** @returns {[number, string, string]} */
+/** @returns {[Color|0, string, string]} */
 export const Piece = (/** @type {number} */ piece) => {
   if (Math.sign(piece) === WHITE) {
     switch (Math.abs(piece)) {
