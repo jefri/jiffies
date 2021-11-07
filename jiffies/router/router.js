@@ -62,7 +62,7 @@ export const Router = {
   },
 
   href(/** @type {string} */ link) {
-    return `${baseURI}${link}`;
+    return `${baseURI}${link.replace(/^\//, "")}`;
   },
 
   navigate(/** @type string */ url) {

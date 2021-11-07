@@ -6,7 +6,12 @@
     <link rel="stylesheet" href="/pico/pico-1.4.1.css" />
   </head>
   <body>
-    <main id="test_output"></main>
+    <header id="menu" class="container-fluid"></header>
+
+    <main class="container">
+      <article id="test_output"></article>
+    </main>
+
     <div style="display: none" id="status"></div>
     <div style="display: none" id="json"></div>
     <div style="display: none" id="xml"></div>
@@ -28,7 +33,7 @@
         ).innerHTML = `\n${start}\n${value}\n${end}\n`;
       }
 
-      (async function test() {
+      (async () => {
         const results = await execute();
         displayStatistics(results, document.getElementById("test_output"));
         onConsole(results);
@@ -36,6 +41,39 @@
         write("json", JSON.stringify(results));
         write("xml", asXML(results));
       })();
+    </script>
+    <script type="module">
+      import { nav, ul, li, strong } from "./jiffies/dom/html.js";
+      import { link } from "./jiffies/router/link.js";
+
+      const getUrls = async () => {
+        const sitemap = await fetch("/sitemap.json");
+        if (sitemap.ok) {
+          return await sitemap.json();
+        } else {
+          return [
+            "/index.html",
+            "/apps/computron5k/index.html",
+            "/apps/chess/index.html",
+          ];
+        }
+      };
+
+      const urls = (await getUrls()).map((url) => ({
+        href: url.replace("index.html", ""),
+        link:
+          url.match(/\/(?<link>[^\/]+)(\/index\.html)?$/)?.groups["link"] ??
+          url.replace("index.html", ""),
+      }));
+
+      document
+        .getElementById("menu")
+        .appendChild(
+          nav(
+            ul(li(strong("Jiffy Apps"))),
+            ul(...urls.map((url) => li(link(url))))
+          )
+        );
     </script>
   </body>
 </html>

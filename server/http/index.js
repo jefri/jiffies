@@ -3,6 +3,8 @@ import { createServer, IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
 import * as fs from "fs/promises";
 import { parse } from "../../jiffies/flags.js";
+import { sitemap } from "./sitemap.js";
+import { Stats } from "fs";
 
 const FLAGS = parse(process.argv);
 
@@ -50,7 +52,7 @@ const findIndex = async (req) => {
 };
 
 /** @type {StaticMiddleware[]}  */
-const middlewares = [staticFileServer, findIndex];
+const middlewares = [sitemap, staticFileServer, findIndex];
 
 /**
  * @param {ServerResponse} res
@@ -82,9 +84,9 @@ const mime = (/** @type string */ basename) => {
  * @param {Stats} stats
  */
 const sendFile = async (res, filepath, stats) => {
+  const file = await fs.open(filepath, "r");
   res.setHeader("content-length", "" + stats.size);
   res.setHeader("content-type", mime(path.basename(filepath)));
-  const file = await fs.open(filepath, "r");
   /** @type Buffer */ let buffer;
   /** @type number */ let bytesRead;
   while ((({ buffer, bytesRead } = await file.read()), bytesRead > 0)) {
@@ -92,6 +94,15 @@ const sendFile = async (res, filepath, stats) => {
   }
   res.end();
   await file.close();
+  return true;
+};
+
+const sendContent = async (res, filepath, obj) => {
+  const content = obj instanceof String ? obj : JSON.stringify(obj);
+  res.setHeader("content-length", "" + content.length);
+  res.setHeader("content-type", mime(path.basename(filepath)));
+  await res.write(content);
+  res.end();
   return true;
 };
 
@@ -115,7 +126,11 @@ const handleMiddleware = async (req, res, middleware) => {
       return error(res, filename);
     case 200:
       try {
-        return await sendFile(res, filename, stats);
+        if (stats instanceof Stats) {
+          return await sendFile(res, filename, stats);
+        } else {
+          return await sendContent(res, filename, stats);
+        }
       } catch (e) {
         return await error(res, e.message);
       }
@@ -133,10 +148,12 @@ const server = createServer(async (req, res) => {
 
   let handled = false;
   try {
-    handled =
-      (await handleMiddleware(req, res, staticFileServer)) ??
-      (await handleMiddleware(req, res, findIndex)) ??
-      false;
+    for (const middleware of middlewares) {
+      handled = (await handleMiddleware(req, res, middleware)) ?? false;
+      if (handled) {
+        break;
+      }
+    }
   } catch (e) {
     console.error(e);
   }
