@@ -6,6 +6,7 @@ import { Err, Ok } from "../../../jiffies/result.js";
  */
 import { assert } from "../../../jiffies/assert.js";
 import { takeWhile } from "../../../jiffies/generator.js";
+import { range } from "../../../jiffies/range.js";
 
 export const WHITE = -1;
 export const BLACK = 1;
@@ -37,6 +38,8 @@ export const I = INVALID;
 export const Pieces = ["E", "P", "R", "N", "B", "Q", "K", "I"];
 export const Ranks = [1, 2, 3, 4, 5, 6, 7, 8];
 export const Files = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+/** @typedef {{[K in Color]: Move[]}} Threat */
 
 const ray = (/** @type number */ stride) => {
   const /** @type number[] */ ray = [];
@@ -121,6 +124,10 @@ const NEW_GAME = [
   [I, I, I, I, I, I, I, I, I, I],
 ].flat();
 
+/** @type {() => Threat[][]} */
+const noThreat = () =>
+  range(0, 8).map(() => range(0, 8).map(() => ({ [W]: [], [L]: [] })));
+
 export class ChessGame {
   /** @type {typeof NEW_GAME} */
   board;
@@ -130,6 +137,9 @@ export class ChessGame {
   previous;
   /** @type {Move[]} */
   history = [];
+  /** @type {Threat[][]} */
+  threat = noThreat();
+  mate = false;
 
   constructor(
     /** @type {typeof NEW_GAME} */ board = NEW_GAME,
@@ -138,7 +148,9 @@ export class ChessGame {
     /** @type {Move|null} */
     lastMove = null,
     /** @type {ChessGame|null} */
-    previous = null
+    previous = null,
+    /** @type boolean */
+    updateThreat = true
   ) {
     this.board = board;
     this.toPlay = toPlay;
@@ -146,6 +158,25 @@ export class ChessGame {
       this.history = [...previous.history, lastMove];
     }
     this.previous = previous;
+    if (updateThreat) {
+      this.calcThreat();
+      lastMove?.verifyCheck(this);
+    }
+  }
+
+  calcThreat() {
+    for (let i = 20; i < 100; i++) {
+      const piece = this.board[i];
+      if (piece === E || Math.abs(piece) === I) continue;
+      const [file, rank] = fileRank(i);
+      const moves = this.moves(file, rank, true);
+      for (const move of moves) {
+        const { color, destination } = move;
+        const [file, rank] = fileRank(destination);
+        this.threat[asNum(file)][rank - 1][color].push(move);
+        // TODO: Count pawn threat correctly
+      }
+    }
   }
 
   at(/** @type File */ file, /** @type Rank */ rank) {
@@ -153,7 +184,7 @@ export class ChessGame {
   }
 
   /** @returns {ChessGame} */
-  do(/** @type Move */ move) {
+  do(/** @type Move */ move, updateThreat = true) {
     if (move.color !== this.toPlay) return this;
     const board = [...this.board];
     board[move.destination] = board[move.source];
@@ -161,7 +192,7 @@ export class ChessGame {
     // TODO handle castling
     // TODO handle en passant
     const toPlay = this.toPlay === WHITE ? BLACK : WHITE;
-    return new ChessGame(board, toPlay, move, this);
+    return new ChessGame(board, toPlay, move, this, updateThreat);
   }
 
   /**
@@ -209,7 +240,7 @@ export class ChessGame {
   }
 
   /** @returns {Move[]} */
-  moves(/** @type File */ file, /** @type Rank */ rank) {
+  moves(/** @type File */ file, /** @type Rank */ rank, calcThreat = false) {
     const idx = index(file, rank);
     const piece = this.board[idx];
     if (piece === INVALID || piece === EMPTY) {
@@ -220,24 +251,38 @@ export class ChessGame {
     /** @type {() => (i: number) => boolean} */
     const moveFilter =
       pieceType === PAWN
-        ? () => pawnFilter(this, idx, color, rank)
+        ? () => pawnFilter(this, idx, color, rank, calcThreat)
         : pieceType === KING
-        ? () => kingFilter(this, idx, color, rank)
-        : () => rnbqFilter(this, idx, color, rank);
+        ? () => kingFilter(this, idx, color, calcThreat)
+        : () => rnbqFilter(this, idx, color, calcThreat);
 
     return moveHandler(/** @type Piece */ (pieceType), idx, moveFilter)
-      .map(
-        (destination) =>
-          new Move({
-            file,
-            rank,
-            color,
-            capture: false,
-            destination,
-            pieceType,
-          })
-      )
-      .filter(checkCheck(this));
+      .map((destination) => {
+        const m = new Move({
+          file,
+          rank,
+          color,
+          capture: false,
+          destination,
+          pieceType,
+        });
+        return m;
+      })
+      .filter((m) => filterCheck(this.do(m, false), color));
+  }
+
+  allMoves(/** @type Color */ color) {
+    /** @type {Move[]} */
+    let moves = [];
+    for (let i = 20; i < 100; i++) {
+      const pieceColor = Math.sign(this.board[i]);
+      const piece = Math.abs(this.board[i]);
+      if (piece === E || piece === I) continue;
+      if (pieceColor === color) {
+        moves = moves.concat(this.moves(...fileRank(i)));
+      }
+    }
+    return moves;
   }
 }
 
@@ -250,9 +295,19 @@ export function index(/** @type File */ file, /** @type Rank */ rank) {
 }
 
 export function square(/** @type number */ idx) {
+  const [file, rank] = fileRank(idx);
+  return `${file}${rank}`;
+}
+
+/** @returns {[File, Rank]} */
+export function fileRank(/** @type number */ idx) {
   const file = idx % 10;
   const rank = 10 - (((idx - file) / 10) | 0);
-  return String.fromCharCode(file + 97) + `${rank}`;
+  return [String.fromCharCode(file + 97), rank];
+}
+
+export function asNum(/** @type File */ file) {
+  return file.charCodeAt(0) - 97;
 }
 
 export class Move {
@@ -265,7 +320,8 @@ export class Move {
   isCapture = false;
   pieceType;
   // promotion;
-  // check = "";
+  check = false;
+  mate = false;
   // castle = "";
   // comment = "";
 
@@ -288,16 +344,23 @@ export class Move {
     this.pieceType = pieceType;
   }
 
+  verifyCheck(/** @type ChessGame */ board) {
+    const color = /** @type Color */ (-1 * this.color);
+    this.check = checkCheck(board, color);
+    this.mate = board.allMoves(color).length === 0;
+  }
+
   toString() {
     const piece = Pieces[this.pieceType];
     const src = square(this.source);
     const dest = square(this.destination);
+    const check = this.mate ? "#" : this.check ? "+" : "";
     if (piece === "P") {
-      return `${dest}`;
+      return `${dest}${check}`;
     } else if (piece === "Q" || piece === "K") {
-      return `${piece}${dest}`;
+      return `${piece}${dest}${check}`;
     } else {
-      return `${piece}${src}${dest}`;
+      return `${piece}${src}${dest}${check}`;
     }
   }
 }
@@ -363,20 +426,21 @@ function rnbqFilter(
   /** @type ChessGame */ board,
   /** @type number */ idx,
   /** @type {WHITE|BLACK} */ color,
-  /** @type number */ rank
+  /** @type boolean */ calcThreat
 ) {
   let capture = false;
+  let defend = false;
   let edge = false;
   return (/** @type number */ i) => {
     const piece = board.board[idx + i];
-    if (capture) return false; // Stop if there has been a capture
-    if (piece === INVALID) edge = true; // Detected an edge
-    if (edge) return false; // Stop after detecting an edge
-    const isEmpty = piece === EMPTY;
-    const pieceType = Math.abs(board.board[idx]);
+    if (Math.abs(piece) === INVALID) edge = true; // Detected an edge
+    if (capture || defend || edge) return false; // Stop if there has been a capture
     if (piece === EMPTY) return true;
     if (Math.sign(piece) !== color) {
       capture = true;
+      return true;
+    } else if (calcThreat) {
+      defend = true;
       return true;
     }
     return false;
@@ -387,18 +451,20 @@ function pawnFilter(
   /** @type ChessGame */ board,
   /** @type number */ idx,
   /** @type {WHITE|BLACK} */ color,
-  /** @type number */ rank
+  /** @type number */ rank,
+  threatOnly = false
 ) {
   let edge = false;
   return (/** @type number */ i) => {
     const piece = board.board[idx + i];
+    // If the ray is the wrong direction, ignore it
+    if (Math.sign(i) !== color) return false;
     if (piece === INVALID) edge = true; // Detected an edge
     if (edge) return false; // Stop after detecting an edge
     const isEmpty = piece === EMPTY;
-    // If the ray is the wrong direction, ignore it
-    if (Math.sign(i) !== color) return false;
     let j = Math.abs(i); // Get the magnitude of the move
     if (j === 10 || j === 20) {
+      if (threatOnly) return false;
       if (j === 10) return isEmpty;
       if (j === 20 && rank === (color === WHITE ? 2 : 7)) return isEmpty;
       return false;
@@ -408,9 +474,9 @@ function pawnFilter(
       if (board.board[i + color * 10] === -color * PAWN) {
         return true;
       } else {
-        return false;
+        return threatOnly;
       }
-    } else if (Math.sign(piece) !== color) {
+    } else if (Math.sign(piece) !== color || threatOnly) {
       return true;
     }
     return false;
@@ -421,11 +487,30 @@ function kingFilter(
   /** @type ChessGame */ board,
   /** @type number */ idx,
   /** @type {WHITE|BLACK} */ color,
-  /** @type number */ rank
+  /** @type boolean */ calcThreat
 ) {
   return () => false;
 }
 
-function checkCheck(/** @type ChessGame */ board) {
-  return (/** @type Move */ move) => true;
+function filterCheck(/** @type ChessGame */ board, /** @type Color */ color) {
+  return !checkCheck(board, color);
+}
+
+function checkCheck(/** @type ChessGame */ board, /** @type Color */ color) {
+  for (let i = 20; i < 100; i++) {
+    const piece = board.board[i];
+    if (Math.abs(piece) === KING) {
+      const pieceColor = Math.sign(piece);
+      const [file, rank] = fileRank(i);
+      if (color === pieceColor) {
+        if (
+          board.threat[asNum(file)][rank - 1][/** @type Color */ (-1 * color)]
+            .length > 0
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
