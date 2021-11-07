@@ -34,6 +34,10 @@ const staticFileServer = async (req) => {
  * */
 const findIndex = async (req) => {
   let filename = path.join(process.cwd(), req.url ?? "");
+  let basename = path.basename(filename);
+  if (basename.match(/\.[a-z]{2,3}$/)) {
+    return [404];
+  }
   while (filename.startsWith(process.cwd())) {
     const index = path.join(filename, "index.html");
     try {
@@ -61,7 +65,9 @@ const error = (res, message) => {
 };
 
 const MIME_TYPES = {
-  js: "application/javascript",
+  js: "text/javascript",
+  json: "text/javascript",
+  css: "text/css",
   html: "text/html",
 };
 
@@ -127,10 +133,10 @@ const server = createServer(async (req, res) => {
 
   let handled = false;
   try {
-    handled = (await handleMiddleware(req, res, staticFileServer)) ?? false;
-    if (!handled) {
-      handled = (await handleMiddleware(req, res, findIndex)) ?? false;
-    }
+    handled =
+      (await handleMiddleware(req, res, staticFileServer)) ??
+      (await handleMiddleware(req, res, findIndex)) ??
+      false;
   } catch (e) {
     console.error(e);
   }

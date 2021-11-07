@@ -1,0 +1,247 @@
+/*!
+ * Pico.css v1.4.1 (https://picocss.com)
+ * Copyright 2019-2021 - Licensed under MIT
+ */
+
+/**
+   * Document
+   * Content-box & Responsive typography
+   */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+::before,
+::after {
+  text-decoration: inherit;
+  vertical-align: inherit;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -ms-text-size-adjust: 100%;
+  background-color: var(--background-color);
+  color: var(--color);
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight);
+  line-height: var(--line-height);
+  text-rendering: optimizeLegibility;
+  cursor: default;
+}
+
+/**
+   * Sectioning
+   * Container and responsive spacings for header, main, footer
+   */
+main {
+  display: block;
+}
+
+body {
+  width: 100%;
+  margin: 0;
+}
+body > header,
+body > main,
+body > footer {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding: var(--block-spacing-vertical) 0;
+}
+
+/**
+  * Container
+  */
+.container,
+.container-fluid {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: var(--spacing);
+  padding-left: var(--spacing);
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 510px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    max-width: 700px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    max-width: 920px;
+  }
+}
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1130px;
+  }
+}
+
+/**
+   * Section
+   * Responsive spacings for section
+   */
+section {
+  margin-bottom: var(--block-spacing-vertical);
+}
+
+/**
+  * Grid
+  * Minimal grid system with auto-layout columns
+  */
+.grid {
+  grid-column-gap: var(--grid-spacing-horizontal);
+  grid-row-gap: var(--grid-spacing-vertical);
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+@media (min-width: 992px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(0%, 1fr));
+  }
+}
+.grid > * {
+  min-width: 0;
+}
+
+/**
+   * Horizontal scroller (<figure>)
+   */
+figure {
+  display: block;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+}
+figure figcaption {
+  padding: calc(var(--spacing) * 0.5) 0;
+  color: var(--muted-color);
+}
+
+/**
+   * Embedded content
+   */
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+  vertical-align: middle;
+}
+
+audio,
+video {
+  display: inline-block;
+}
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+iframe {
+  border-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-style: none;
+}
+
+svg:not([fill]) {
+  fill: currentColor;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/**
+   * Table
+   */
+table {
+  width: 100%;
+  border-color: inherit;
+  border-collapse: collapse;
+  border-spacing: 0;
+  text-indent: 0;
+}
+
+th,
+td {
+  padding: calc(var(--spacing) / 2) var(--spacing);
+  border-bottom: var(--border-width) solid var(--table-border-color);
+  color: var(--color);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight);
+  text-align: left;
+  text-align: start;
+}
+
+tr {
+  background-color: var(--background-color);
+}
+
+table[role="grid"] tbody tr:nth-child(odd) {
+  --background-color: var(--table-row-stripped-background-color);
+}
+
+/**
+   * Miscs
+   */
+hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+  border: none;
+  border-top: 1px solid var(--muted-border-color);
+}
+
+[hidden],
+template {
+  display: none !important;
+}
+
+dialog {
+  display: block;
+  position: absolute;
+  right: 0;
+  left: 0;
+  width: -moz-fit-content;
+  width: -webkit-fit-content;
+  width: fit-content;
+  height: -moz-fit-content;
+  height: -webkit-fit-content;
+  height: fit-content;
+  margin: auto;
+  padding: 1em;
+  border: solid;
+  background-color: white;
+  color: black;
+}
+
+dialog:not([open]) {
+  display: none;
+}
+
+canvas {
+  display: inline-block;
+}

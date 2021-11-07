@@ -1,0 +1,61 @@
+/*!
+ * Pico.css v1.4.1 (https://picocss.com)
+ * Copyright 2019-2021 - Licensed under MIT
+ */
+
+/**
+   * Accessibility & User interaction
+   */
+[aria-controls] {
+  cursor: pointer;
+}
+
+[aria-disabled="true"],
+[disabled] {
+  cursor: not-allowed;
+}
+
+[aria-hidden="false"][hidden] {
+  display: initial;
+}
+
+[aria-hidden="false"][hidden]:not(:focus) {
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+}
+
+a,
+area,
+button,
+input,
+label,
+select,
+summary,
+textarea,
+[tabindex] {
+  -ms-touch-action: manipulation;
+}
+
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/**
+   * Reduce Motion Features
+   */
+@media (prefers-reduced-motion: reduce) {
+  *:not([aria-busy="true"]),
+  :not([aria-busy="true"])::before,
+  :not([aria-busy="true"])::after {
+    background-attachment: initial !important;
+    -webkit-animation-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    -webkit-animation-delay: -1ms !important;
+    animation-delay: -1ms !important;
+    -webkit-animation-iteration-count: 1 !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
