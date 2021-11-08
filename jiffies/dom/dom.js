@@ -155,7 +155,7 @@ export function update(
     }
   });
 
-  if (children.length > 0) {
+  if (children?.length > 0) {
     if (children[0] === CLEAR) {
       element.replaceChildren();
     } else {
