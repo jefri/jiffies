@@ -4,7 +4,6 @@
  */
 
 import { CLEAR, normalizeArguments, update } from "./dom.js";
-import { object } from "./html.js";
 
 /**
  * @template {Element} E
@@ -68,6 +67,7 @@ export function FC(name, attrSet, component) {
         this.#lastChildren = children;
       }
       this.#lastAttrs = { ...this.#lastAttrs, ...attrs };
+      update(this, this.#lastAttrs);
       const replace = [render(this, this.#lastAttrs, this.#lastChildren)];
       this.replaceChildren(...replace.flat());
     }

@@ -67,17 +67,28 @@ export const CPU = (
 
   return div(
     { class: "View__CPU" },
-    (runbar = Runbar({ runner }, ul(li(PC), li(A), li(D)))),
+    (runbar = Runbar(
+      { class: "container", style: { display: "block" }, runner },
+      ul(li(PC), li(A), li(D))
+    )),
     div(
-      { class: "grid" },
-      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
-      (ROM = MemoryGUI({
-        name: "ROM",
-        memory: cpu.ROM,
-        highlight: cpu.PC,
-        format: "asm",
-        editable: false,
-      })),
+      {
+        class: "grid",
+      },
+      div(
+        {
+          class: "grid",
+          style: { display: "flex", justifyContent: "flex-end" },
+        },
+        (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
+        (ROM = MemoryGUI({
+          name: "ROM",
+          memory: cpu.ROM,
+          highlight: cpu.PC,
+          format: "asm",
+          editable: false,
+        }))
+      ),
       (screen = Screen({ memory: cpu.RAM }))
     )
   );

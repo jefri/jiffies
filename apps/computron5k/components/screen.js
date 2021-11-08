@@ -39,7 +39,7 @@ export const Screen = FC(
   (el, { memory }) => {
     const screen = (el.screen ??= canvas({ width: 512, height: 256 }));
     el.ctx ??= screen.getContext("2d") ?? undefined;
-    el.style.minWidth = "calc(512px + 2 * var(--block-spacing-horizontal))";
+    el.style.width = "calc(512px + 2 * var(--block-spacing-horizontal))";
 
     if (el.ctx) {
       const image = el.ctx.getImageData(0, 0, 512, 256);
