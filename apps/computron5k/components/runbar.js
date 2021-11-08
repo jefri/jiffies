@@ -5,6 +5,15 @@ import { Timer } from "../simulator/timer.js";
 
 /** @typedef {import("../../../jiffies/dom/dom.js").DenormChildren} DenormChildren */
 
+const runButton = {
+  fontSize: "2rem",
+  margin: "0",
+  padding: "0",
+  lineHeight: "2rem",
+  background: "none",
+  border: "none",
+};
+
 export const Runbar = FC(
   "run-bar",
   /**
@@ -16,16 +25,33 @@ export const Runbar = FC(
   (el, { runner }, children) =>
     nav(
       ul(
-        li(button({ events: { click: () => runner.frame() } }, "➡️")),
-        li(button({ events: { click: () => runner.reset() } }, "⏪")),
         li(
           button(
             {
+              style: { ...runButton },
+              events: { click: () => runner.frame() },
+            },
+            "➡️"
+          )
+        ),
+        li(
+          button(
+            {
+              style: { ...runButton },
+              events: { click: () => runner.reset() },
+            },
+            "⏪"
+          )
+        ),
+        li(
+          button(
+            {
+              style: { ...runButton },
               events: {
                 click: () => (runner.running ? runner.stop() : runner.start()),
               },
             },
-            runner.running ? "⏸" : "\u25B6️"
+            runner.running ? "⏸" : "▶️"
           )
         ),
         li(
@@ -36,7 +62,7 @@ export const Runbar = FC(
                 (runner.speed = Number(e.target?.value ?? runner.speed)),
             },
             disabled: runner.running,
-            value: runner.speed,
+            value: `${runner.speed}`,
             options: [
               ["16", "60FPS"],
               ["500", "Fast"],
@@ -53,7 +79,7 @@ export const Runbar = FC(
                 (runner.steps = Number(e.target?.value ?? runner.steps)),
             },
             disabled: runner.running,
-            value: runner.steps,
+            value: `${runner.steps}`,
             options: [
               ["1", "1 Step"],
               ["500", "500"],

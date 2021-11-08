@@ -114,6 +114,7 @@ const Memory = FC(
     el,
     { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
   ) => {
+    el.style.width = "16em";
     const state = (el.state ??= { format });
     const setFormat = (/** @type Format */ f) => {
       state.format = f;

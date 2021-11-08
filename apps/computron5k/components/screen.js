@@ -31,7 +31,7 @@ function set(
 }
 
 export const Screen = FC(
-  "hack-scren",
+  "hack-screen",
   /**
    * @param {HTMLElement&{screen?:HTMLCanvasElement, ctx?: CanvasRenderingContext2D}} el
    * @param {{memory: Memory}} param1

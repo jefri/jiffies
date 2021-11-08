@@ -15,7 +15,7 @@ export const App = () => {
         ul(...urls.map((url) => li(link(url))))
       )
     ),
-    router(main({ class: "container" })),
+    router(main({ class: "container-fluid" })),
   ];
   return app;
 };
