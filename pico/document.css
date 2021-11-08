@@ -3,10 +3,7 @@
  * Copyright 2019-2021 - Licensed under MIT
  */
 
-/**
-   * Document
-   * Content-box & Responsive typography
-   */
+/** Content-box & Responsive typography */
 *,
 *::before,
 *::after {
@@ -174,9 +171,7 @@ svg:not(:root) {
   overflow: hidden;
 }
 
-/**
-   * Table
-   */
+/** Table */
 table {
   width: 100%;
   border-color: inherit;
@@ -204,9 +199,7 @@ table[role="grid"] tbody tr:nth-child(odd) {
   --background-color: var(--table-row-stripped-background-color);
 }
 
-/**
-   * Miscs
-   */
+/** Misc */
 hr {
   box-sizing: content-box;
   height: 0;

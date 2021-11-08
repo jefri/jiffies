@@ -3,9 +3,7 @@
  * Copyright 2019-2021 - Licensed under MIT
  */
 
-/**
-   * Accessibility & User interaction
-   */
+/** Accessibility & User interaction */
 [aria-controls] {
   cursor: pointer;
 }
@@ -40,9 +38,6 @@ textarea,
   direction: rtl;
 }
 
-/**
-   * Reduce Motion Features
-   */
 @media (prefers-reduced-motion: reduce) {
   *:not([aria-busy="true"]),
   :not([aria-busy="true"])::before,

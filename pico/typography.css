@@ -3,9 +3,6 @@
  * Copyright 2019-2021 - Licensed under MIT
  */
 
-/**
-   * Typography
-   */
 b,
 strong {
   font-weight: bolder;
@@ -294,9 +291,7 @@ del {
   background-color: var(--primary-focus);
 }
 
-/**
-   * Code
-   */
+/** Code */
 pre,
 code,
 kbd,

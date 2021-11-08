@@ -4,9 +4,9 @@
  */
 
 /**
-   * Accordion (<details>)
-   * Inspiration: https://codepen.io/koca/pen/RyeLLV
-   */
+ * Accordion (<details>)
+ * Inspiration: https://codepen.io/koca/pen/RyeLLV
+ */
 details {
   display: block;
   margin-bottom: var(--spacing);
@@ -67,9 +67,7 @@ details[open] > summary::after {
   float: left;
 }
 
-/**
-   * Card (<article>)
-   */
+/** Card (<article>) */
 article {
   margin: var(--block-spacing-vertical) 0;
   padding: var(--block-spacing-vertical) var(--block-spacing-horizontal);
@@ -97,9 +95,7 @@ article > footer {
   border-top: var(--border-width) solid var(--card-border-color);
 }
 
-/**
-   * Nav
-   */
+/** Nav */
 nav,
 nav ul {
   display: flex;
@@ -159,9 +155,7 @@ aside li a {
   padding: calc(var(--spacing) * 0.5);
 }
 
-/**
-   * Progress
-   */
+/** Progress */
 progress {
   display: inline-block;
   vertical-align: baseline;
@@ -228,9 +222,8 @@ progress::-moz-progress-bar {
     background-position: -200% 0;
   }
 }
-/**
-   * Loading ([aria-busy=true])
-   */
+
+/** Loading ([aria-busy=true]) */
 [aria-busy="true"] {
   cursor: progress;
 }
@@ -280,9 +273,8 @@ a[aria-busy="true"] {
     transform: rotate(360deg);
   }
 }
-/**
-   * Tooltip ([data-tooltip])
-   */
+
+/** Tooltip ([data-tooltip]) */
 [data-tooltip] {
   position: relative;
 }
