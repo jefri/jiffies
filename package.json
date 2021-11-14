@@ -5,5 +5,8 @@
     "dev": "nodemon ./server/http/index.js",
     "test": "node ./test.js",
     "ci": "node ./test.js --mode=junit"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
   }
 }

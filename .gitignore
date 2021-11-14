@@ -10,3 +10,4 @@ build/
 dist
 dist
 .parcel-cache
+node-modules

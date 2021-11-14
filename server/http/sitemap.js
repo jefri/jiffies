@@ -1,7 +1,9 @@
 import * as fs from "fs/promises";
 import path from "path";
+import { contentResponse } from "./index.js";
 
 const findSiteMap = async (root) => {
+  if (root.startsWith("node_modules")) return [];
   console.log(`Looking in ${root}`);
   return (await fs.readdir(root, { withFileTypes: true })).map(
     async (entry) => {
@@ -29,8 +31,8 @@ export const sitemap = await (async () => {
   /** @type import("./index.js").StaticMiddleware */
   return (req) => {
     if ((req.url ?? "").endsWith("sitemap.json")) {
-      return Promise.resolve([200, "sitemap.json", apps]);
+      return contentResponse(JSON.stringify(apps), "application/json");
     }
-    return Promise.resolve([404]);
+    return undefined;
   };
 })();
