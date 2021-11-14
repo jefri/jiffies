@@ -17,12 +17,8 @@
 }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  -moz-tab-size: 4;
-  -o-tab-size: 4;
+  text-size-adjust: 100%;
   tab-size: 4;
-  -ms-text-size-adjust: 100%;
   background-color: var(--background-color);
   color: var(--color);
   font-family: var(--font-family);
@@ -218,11 +214,7 @@ dialog {
   position: absolute;
   right: 0;
   left: 0;
-  width: -moz-fit-content;
-  width: -webkit-fit-content;
   width: fit-content;
-  height: -moz-fit-content;
-  height: -webkit-fit-content;
   height: fit-content;
   margin: auto;
   padding: 1em;

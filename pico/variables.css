@@ -3,9 +3,11 @@
  * Copyright 2019-2021 - Licensed under MIT
  */
 
-/**
- * Theme: default
+/** 
+ * Breakpoints
+ *   xs 576px sm 768px md 992px lg 1200px xl
  */
+
 :root {
   --font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
     "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
@@ -26,6 +28,8 @@
   --form-element-spacing-horizontal: 1rem;
   --transition: 0.2s ease-in-out;
 }
+
+/**
 @media (min-width: 576px) {
   :root {
     --font-size: 17px;
@@ -46,6 +50,7 @@
     --font-size: 20px;
   }
 }
+*/
 
 @media (min-width: 576px) {
   body > header,

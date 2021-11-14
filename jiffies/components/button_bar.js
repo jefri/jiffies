@@ -10,7 +10,7 @@ const ButtonBar = FC(
       value: T;
       values: T[];
       events: {
-        click: (current: T) => void;
+        onSelect: (current: T) => void;
       }
     }}  props
   */
@@ -30,7 +30,7 @@ const ButtonBar = FC(
               events: {
                 click: (e) => {
                   e.preventDefault();
-                  events.click(option);
+                  events.onSelect(option);
                 },
               },
             },

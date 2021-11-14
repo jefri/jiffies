@@ -28,15 +28,15 @@ const MemoryBlock = FC(
       highlight?: number;
       editable?: boolean;
       format: (v: number) => string;
-      update: (i: number, value: string, previous: number) => void;
+      onChange: (i: number, value: string, previous: number) => void;
     } } props
   */
-  (element, { memory, highlight = -1, editable = false, format, update }) => {
+  (element, { memory, highlight = -1, editable = false, format, onChange }) => {
     if (element.virtualScroll) {
       element.virtualScroll.update();
     } else {
       element.virtualScroll = VirtualScroll({
-        settings: { count: 20, maxIndex: memory.size, itemHeight: 35 },
+        settings: { count: 20, maxIndex: memory.size, itemHeight: 28 },
         get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
         row: ([i, v]) =>
           MemoryCell({
@@ -44,7 +44,7 @@ const MemoryBlock = FC(
             value: format(v),
             editable: editable,
             highlight: i === highlight,
-            onChange: (value) => update(i, value, v),
+            onChange: (value) => onChange(i, value, v),
           }),
       });
     }
@@ -114,7 +114,7 @@ const Memory = FC(
     el,
     { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
   ) => {
-    el.style.width = "16em";
+    el.style.width = "256px";
     const state = (el.state ??= { format });
     const setFormat = (/** @type Format */ f) => {
       state.format = f;
@@ -125,7 +125,7 @@ const Memory = FC(
     const buttonBar = ButtonBar({
       value: state.format,
       values: FORMATS,
-      events: { click: setFormat },
+      events: { onSelect: setFormat },
     });
 
     const memoryBlock = MemoryBlock({
@@ -133,7 +133,7 @@ const Memory = FC(
       highlight,
       editable,
       format: (v) => doFormat(state.format, v),
-      update: (i, v) => {
+      onChange: (i, v) => {
         memory.update(i, v, state.format);
         memoryBlock.update();
       },

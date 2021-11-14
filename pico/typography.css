@@ -63,15 +63,13 @@ a {
   outline: none;
   background-color: var(--background-color);
   color: var(--color);
-  -webkit-text-decoration: var(--text-decoration);
   text-decoration: var(--text-decoration);
   transition: background-color var(--transition), color var(--transition),
-    box-shadow var(--transition), -webkit-text-decoration var(--transition);
+    box-shadow var(--transition);
   transition: background-color var(--transition), color var(--transition),
     text-decoration var(--transition), box-shadow var(--transition);
   transition: background-color var(--transition), color var(--transition),
-    text-decoration var(--transition), box-shadow var(--transition),
-    -webkit-text-decoration var(--transition);
+    text-decoration var(--transition), box-shadow var(--transition);
 }
 a:hover,
 a:active,
@@ -231,9 +229,7 @@ ul,
 ol {
   padding-right: 0;
   padding-left: var(--spacing);
-  -webkit-padding-end: 0;
   padding-inline-end: 0;
-  -webkit-padding-start: var(--spacing);
   padding-inline-start: var(--spacing);
 }
 ul li,
@@ -258,9 +254,7 @@ blockquote {
   padding: var(--spacing);
   border-right: none;
   border-left: 0.25rem solid var(--blockquote-border-color);
-  -webkit-border-end: none;
   border-inline-end: none;
-  -webkit-border-start: 0.25rem solid var(--blockquote-border-color);
   border-inline-start: 0.25rem solid var(--blockquote-border-color);
 }
 blockquote footer {
@@ -283,10 +277,6 @@ del {
   color: var(--del-color);
 }
 
-::-moz-selection {
-  background-color: var(--primary-focus);
-}
-
 ::selection {
   background-color: var(--primary-focus);
 }
@@ -301,7 +291,6 @@ samp {
 }
 
 pre {
-  -ms-overflow-style: scrollbar;
   overflow: auto;
 }
 

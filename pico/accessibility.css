@@ -31,7 +31,7 @@ select,
 summary,
 textarea,
 [tabindex] {
-  -ms-touch-action: manipulation;
+  touch-action: manipulation;
 }
 
 [dir="rtl"] {
@@ -43,11 +43,8 @@ textarea,
   :not([aria-busy="true"])::before,
   :not([aria-busy="true"])::after {
     background-attachment: initial !important;
-    -webkit-animation-duration: 1ms !important;
     animation-duration: 1ms !important;
-    -webkit-animation-delay: -1ms !important;
     animation-delay: -1ms !important;
-    -webkit-animation-iteration-count: 1 !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-delay: 0s !important;

@@ -1,7 +1,7 @@
 import { div, li, span, ul } from "../../../jiffies/dom/html.js";
 import { CPU as CPUChip } from "../simulator/chips/cpu.js";
 import MemoryGUI from "../components/memory.js";
-import { Memory, SCREEN } from "../simulator/chips/memory.js";
+import { Memory } from "../simulator/chips/memory.js";
 import { HACK } from "../testing/mult.js";
 import { Runbar } from "../components/runbar.js";
 import { Timer } from "../simulator/timer.js";
@@ -74,22 +74,23 @@ export const CPU = (
     div(
       {
         class: "grid",
-      },
-      div(
-        {
-          class: "grid",
-          style: { display: "flex", justifyContent: "flex-end" },
+        style: {
+          gridTemplateColumns: "repeat(4, 256px)",
+          justifyContent: "center",
         },
-        (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
-        (ROM = MemoryGUI({
-          name: "ROM",
-          memory: cpu.ROM,
-          highlight: cpu.PC,
-          format: "asm",
-          editable: false,
-        }))
-      ),
-      (screen = Screen({ memory: cpu.RAM }))
+      },
+      (ROM = MemoryGUI({
+        name: "ROM",
+        memory: cpu.ROM,
+        highlight: cpu.PC,
+        format: "asm",
+        editable: false,
+      })),
+      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
+      (screen = Screen({
+        style: { gridColumn: "3 / span 2" },
+        memory: cpu.RAM,
+      }))
     )
   );
 };
