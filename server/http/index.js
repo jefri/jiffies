@@ -72,7 +72,7 @@ const tsFileServer = async (req) => {
     const stat = await fs.stat(filename);
     if (stat.isFile()) {
       const source = (await fs.readFile(filename)).toString("utf-8");
-      const js = compile(source);
+      const js = compile(filename, source);
       return contentResponse(js, "application/javascript");
     }
   }

@@ -1,10 +1,9 @@
 import { makeHTMLLogger } from "../../components/logger.js";
 import { DEFAULT_LOGGER, LEVEL } from "../../log.js";
 import { getTotalCases } from "../describe.js";
-import { flattenResults } from "../execute.js";
+import { flattenResults, TestResult } from "../execute.js";
 
-/** @param {import("../execute.js").TestResult} results */
-export function displayStatistics(results, root = document.body) {
+export function displayStatistics(results: TestResult, root = document.body) {
   const { executed, failed } = results;
   const logger = (() => {
     try {
