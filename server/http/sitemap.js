@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import path from "path";
-import { contentResponse } from "./index.js";
+import { contentResponse } from "./response.js";
 
 const findSiteMap = async (root) => {
   if (root.startsWith("node_modules")) return [];
