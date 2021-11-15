@@ -1,5 +1,5 @@
 import { describe, it, expect } from "../../../jiffies/scope/index.js";
-import { ASSIGN, COMMANDS, JUMP } from "../simulator/chips/alu.js";
+import { ASSIGN, COMMANDS, JUMP } from "../simulator/cpu/alu.js";
 
 /** @typedef {keyof typeof COMMANDS.op} CommandOps */
 /** @typedef {keyof typeof JUMP.op} JumpOps */

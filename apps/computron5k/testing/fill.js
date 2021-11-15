@@ -1,7 +1,7 @@
-import { SCREEN } from "../simulator/chips/memory.js";
+import { SCREEN } from "../simulator/cpu/memory.js";
 
 export const TickScreen = (
-  /** @type {import("../simulator/chips/cpu.js").CPU} */ cpu
+  /** @type {import("../simulator/cpu/cpu.js").CPU} */ cpu
 ) => {
   let row = 0;
   let col = 0;
