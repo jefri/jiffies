@@ -1,4 +1,4 @@
-import { up } from "./dom.js";
+import { up } from "./dom.ts";
 
 /** @template {keyof SVGElementTagNameMap} K */
 const makeSVGElement =
