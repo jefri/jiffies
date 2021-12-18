@@ -1,6 +1,6 @@
 import { article, header } from "../../../jiffies/dom/html.js";
 import { execute } from "../../../jiffies/scope/execute.js";
-import { displayStatistics } from "../../../jiffies/scope/display/dom.js";
+import { displayStatistics } from "../../../jiffies/scope/display/dom.ts";
 import { onConsole } from "../../../jiffies/scope/display/console.js";
 
 import * as chess from "../game/chess.test.js";

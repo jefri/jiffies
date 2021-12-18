@@ -1,7 +1,7 @@
-import { FORMATS, Memory as MemoryChip } from "../simulator/chips/memory.js";
+import { FORMATS, Memory as MemoryChip } from "../simulator/cpu/memory.js";
 import { asm } from "../util/asm.js";
 import { bin, dec, hex } from "../util/twos.js";
-/** @typedef {import("../simulator/chips/memory.js").Format} Format */
+/** @typedef {import("../simulator/cpu/memory.js").Format} Format */
 
 import ButtonBar from "../../../jiffies/components/button_bar.js";
 import InlineEdit from "../../../jiffies/components/inline_edit.js";

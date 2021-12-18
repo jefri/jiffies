@@ -1,6 +1,6 @@
 import { FC } from "../../../jiffies/dom/fc.js";
 import { article, canvas, figure, header } from "../../../jiffies/dom/html.js";
-import { Memory, SCREEN } from "../simulator/chips/memory.js";
+import { Memory, SCREEN } from "../simulator/cpu/memory.js";
 
 const WHITE = "white";
 const BLACK = "black";

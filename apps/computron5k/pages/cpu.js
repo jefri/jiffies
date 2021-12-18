@@ -1,7 +1,7 @@
 import { div, li, span, ul } from "../../../jiffies/dom/html.js";
-import { CPU as CPUChip } from "../simulator/chips/cpu.js";
+import { CPU as CPUChip } from "../simulator/cpu/cpu.js";
 import MemoryGUI from "../components/memory.js";
-import { Memory } from "../simulator/chips/memory.js";
+import { Memory } from "../simulator/cpu/memory.js";
 import { HACK } from "../testing/mult.js";
 import { Runbar } from "../components/runbar.js";
 import { Timer } from "../simulator/timer.js";
