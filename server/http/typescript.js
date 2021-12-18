@@ -23,14 +23,15 @@ export function compile(
  * @type import("./index.js").StaticMiddleware
  */
 export const tsFileServer = async (req) => {
-  if (req.url?.endsWith(".ts")) {
-    const filename = path.join(process.cwd(), req.url ?? "");
+  const url = req.url?.endsWith(".ts") ? req.url : `${req.url}.ts`;
+  const filename = path.join(process.cwd(), url);
+  try {
     const stat = await fs.stat(filename);
     if (stat.isFile()) {
       const source = (await fs.readFile(filename)).toString("utf-8");
       const js = compile(filename, source);
       return contentResponse(js, "application/javascript");
     }
-  }
+  } catch {}
   return undefined;
 };
