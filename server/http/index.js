@@ -91,4 +91,4 @@ server.on("listening", () => {
 
 const FLAGS = parse(process.argv);
 console.log(`Starting in ${process.cwd()}`);
-server.listen(FLAGS.asNumber("port"), FLAGS.asString("host", "0.0.0.0"));
+server.listen(FLAGS.asNumber("port", 8080), FLAGS.asString("host", "0.0.0.0"));
