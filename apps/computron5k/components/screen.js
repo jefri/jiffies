@@ -1,5 +1,5 @@
-import { FC } from "../../../jiffies/dom/fc.js";
-import { article, canvas, figure, header } from "../../../jiffies/dom/html.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
+import { article, canvas, figure, header } from "../../../jiffies/dom/html.ts";
 import { Memory, SCREEN } from "../simulator/cpu/memory.js";
 
 const WHITE = "white";

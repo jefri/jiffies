@@ -1,5 +1,5 @@
-import { FC } from "../dom/fc.js";
-import { option, select } from "../dom/html.js";
+import { FC } from "../dom/fc.ts";
+import { option, select } from "../dom/html.ts";
 
 export const Select = FC(
   "jiffies-select",

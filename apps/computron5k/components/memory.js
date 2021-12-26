@@ -13,11 +13,11 @@ import {
   nav,
   span,
   ul,
-} from "../../../jiffies/dom/html.js";
+} from "../../../jiffies/dom/html.ts";
 import { rounded } from "../../../jiffies/dom/css/border.js";
 import { width } from "../../../jiffies/dom/css/sizing.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
-import { FC } from "../../../jiffies/dom/fc.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
 
 const MemoryBlock = FC(
   "memory-block",

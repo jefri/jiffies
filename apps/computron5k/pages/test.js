@@ -1,4 +1,4 @@
-import { article, header } from "../../../jiffies/dom/html.js";
+import { article, header } from "../../../jiffies/dom/html.ts";
 import { execute } from "../../../jiffies/scope/execute.js";
 import { displayStatistics } from "../../../jiffies/scope/display/dom";
 import { onConsole } from "../../../jiffies/scope/display/console.js";

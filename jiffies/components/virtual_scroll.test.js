@@ -1,4 +1,4 @@
-import { div } from "../dom/html.js";
+import { div } from "../dom/html.ts";
 import { describe, it, expect } from "../scope/index.js";
 import VirtualScroll, { arrayAdapter } from "./virtual_scroll.js";
 

@@ -1,4 +1,4 @@
-import { header, li, main, nav, strong, ul } from "../../jiffies/dom/html.js";
+import { header, li, main, nav, strong, ul } from "../../jiffies/dom/html.ts";
 import { link } from "../../jiffies/router/link.js";
 import { Router } from "../../jiffies/router/router.js";
 import urls from "./urls.js";

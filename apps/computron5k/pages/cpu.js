@@ -1,4 +1,4 @@
-import { div, li, span, ul } from "../../../jiffies/dom/html.js";
+import { div, li, span, ul } from "../../../jiffies/dom/html.ts";
 import { CPU as CPUChip } from "../simulator/cpu/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/cpu/memory.js";

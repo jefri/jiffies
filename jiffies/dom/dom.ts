@@ -14,13 +14,12 @@ export type Updatable<E extends Element> = E & {
   update: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
 };
 
-export type Attrs<E extends Element> = {
-  [k in keyof E]?: E[k];
-} & {
-  class?: string;
-  style?: string | Partial<{ [K in keyof CSSStyleDeclaration]: string }>;
-  events?: Partial<{ [K in keyof HTMLElementEventMap]: EventHandler }>;
-};
+export type Attrs<E extends Element> = Partial<E> &
+  Partial<{
+    class: string;
+    style: string | Partial<{ [K in keyof CSSStyleDeclaration]: string }>;
+    events: Partial<{ [K in keyof HTMLElementEventMap]: EventHandler }>;
+  }>;
 
 export type DenormAttrs<E extends Element> = Attrs<E> | DenormChildren;
 

@@ -1,5 +1,5 @@
-import { FC } from "../dom/fc.js";
-import { a, li, ul } from "../dom/html.js";
+import { FC } from "../dom/fc.ts";
+import { a, li, ul } from "../dom/html.ts";
 
 const ButtonBar = FC(
   "button-bar",

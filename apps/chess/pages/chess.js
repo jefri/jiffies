@@ -1,5 +1,5 @@
-import { FC } from "../../../jiffies/dom/fc.js";
-import { article, details, div, summary } from "../../../jiffies/dom/html.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
+import { article, details, div, summary } from "../../../jiffies/dom/html.ts";
 import { ChessBoard } from "../components/board.js";
 import { history } from "../components/history.js";
 import { ChessGame, Move } from "../game/chess.js";

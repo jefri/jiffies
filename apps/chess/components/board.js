@@ -1,5 +1,5 @@
-import { FC } from "../../../jiffies/dom/fc.js";
-import { span, table, td, tr } from "../../../jiffies/dom/html.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
+import { span, table, td, tr } from "../../../jiffies/dom/html.ts";
 import { asNum, ChessGame, index, L, Piece, W } from "../game/chess.js";
 
 /** @type [8, 7, 6, 5, 4, 3, 2, 1] */

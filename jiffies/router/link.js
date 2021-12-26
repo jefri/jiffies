@@ -5,7 +5,7 @@
  * @property {() => Node} target
  */
 
-import { a } from "../dom/html.js";
+import { a } from "../dom/html.ts";
 import { Router } from "./router.js";
 
 /**

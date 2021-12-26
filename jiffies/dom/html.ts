@@ -1,12 +1,10 @@
-import { up } from "./dom.ts";
+import { DenormAttrs, DenormChildren, up } from "./dom";
 
-/** @template {keyof HTMLElementTagNameMap} K */
 const makeHTMLElement =
-  (/** @type K */ name) =>
-  /** @returns {import("./dom.js").Updatable<HTMLElementTagNameMap[K]>} */
+  <K extends keyof HTMLElementTagNameMap>(name: K) =>
   (
-    /** @type {import ("./dom").DenormAttrs<HTMLElementTagNameMap[K]>}= */ attrs,
-    /** @type {import("./dom.js").DenormChildrenList} */ ...children
+    attrs?: DenormAttrs<HTMLElementTagNameMap[K]>,
+    ...children: DenormChildren[]
   ) =>
     up(document.createElement(name), attrs, ...children);
 

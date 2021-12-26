@@ -1,4 +1,4 @@
-import { FC } from "../../../jiffies/dom/fc.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
 import { Err, Ok, isOk } from "../../../jiffies/result.js";
 import { range } from "../../../jiffies/range.js";
 import {
@@ -12,7 +12,7 @@ import {
   th,
   thead,
   tr,
-} from "../../../jiffies/dom/html.js";
+} from "../../../jiffies/dom/html.ts";
 import { BLACK, ChessGame, Move, WHITE } from "../game/chess.js";
 
 export const history = FC(

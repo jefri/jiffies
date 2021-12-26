@@ -1,6 +1,6 @@
 import { debounce } from "../debounce.js";
-import { FC } from "../dom/fc.js";
-import { div } from "../dom/html.js";
+import { FC } from "../dom/fc.ts";
+import { div } from "../dom/html.ts";
 
 /**
  * @template T
@@ -154,7 +154,7 @@ export function doScroll(scrollTop, state, get) {
  * @template T
  * @template U
  * @typedef {
-    import("../dom/fc.js").Updateable &
+    import("../dom/fc.ts").Updateable &
     {state: VirtualScrollState<T>, rows: U[]}
   } VirtualScroll
  @property (to?: {target?: {scrollTop: number}}) => void}) scrollTo

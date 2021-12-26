@@ -1,12 +1,10 @@
-import { up } from "./dom.ts";
+import { DenormAttrs, DenormChildren, up } from "./dom";
 
-/** @template {keyof SVGElementTagNameMap} K */
 const makeSVGElement =
-  (/** @type K */ name) =>
-  /** @returns {SVGElementTagNameMap[K]} */
+  <K extends keyof SVGElementTagNameMap>(name: K) =>
   (
-    /** @type {import ("./dom").DenormAttrs<SVGElementTagNameMap[K]>}= */ attrs,
-    /** @type {import("./dom.js").DenormChildrenList} */ ...children
+    attrs?: DenormAttrs<SVGElementTagNameMap[K]>,
+    ...children: DenormChildren[]
   ) =>
     up(
       document.createElementNS("http://www.w3.org/2000/svg", name),

@@ -1,11 +1,22 @@
 import { describe, it, expect } from "../scope/index.js";
-import { FC } from "./fc.js";
-import { button, div, form, input, label, small } from "./html.js";
+import { DenormAttrs } from "./dom.js";
+import { FC } from "./fc.ts";
+import { button, div, form, input, label, small } from "./html.ts";
 
 describe("FC", () => {
   it("creates FCs", () => {
-    const Input = FC("fc-input", (attrs, children) =>
-      label(attrs.placeholder ?? attrs.name, input(attrs), ...children)
+    const Input = FC(
+      "fc-input",
+      (
+        el,
+        attrs: Partial<{
+          placeholder: string;
+          name: string;
+          required: boolean;
+        }> &
+          DenormAttrs<HTMLInputElement>,
+        children
+      ) => label(attrs.placeholder ?? attrs.name, input(attrs), ...children)
     );
 
     const f = form(

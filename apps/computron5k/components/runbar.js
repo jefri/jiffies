@@ -1,6 +1,6 @@
 import { Select } from "../../../jiffies/components/select.js";
-import { FC } from "../../../jiffies/dom/fc.js";
-import { button, li, nav, ul } from "../../../jiffies/dom/html.js";
+import { FC } from "../../../jiffies/dom/fc.ts";
+import { button, li, nav, ul } from "../../../jiffies/dom/html.ts";
 import { Timer } from "../simulator/timer.js";
 
 /** @typedef {import("../../../jiffies/dom/dom.js").DenormChildren} DenormChildren */
