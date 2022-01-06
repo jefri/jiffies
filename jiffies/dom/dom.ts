@@ -4,7 +4,11 @@ export const CLEAR = Symbol("Clear children");
 export type EventHandler = EventListenerOrEventListenerObject;
 export type DenormChildren = Node | string | typeof CLEAR;
 
-export type Updater<E extends Element> = E & {
+export type DOMElement = Element &
+  DocumentAndElementEventHandlers &
+  ElementCSSInlineStyle;
+
+export type Updater<E extends DOMElement> = E & {
   [Events]?: Map<string, EventHandler>;
   update?: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
 };
@@ -14,14 +18,17 @@ export type Updatable<E extends Element> = E & {
   update: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
 };
 
-export type Attrs<E extends Element> = Partial<E> &
-  Partial<{
-    class: string;
-    style: string | Partial<{ [K in keyof CSSStyleDeclaration]: string }>;
-    events: Partial<{ [K in keyof HTMLElementEventMap]: EventHandler }>;
-  }>;
+export type DomAttrs = {
+  class: string;
+  style: string | Partial<{ [K in keyof CSSStyleDeclaration]: string }>;
+  events: Partial<{ [K in keyof HTMLElementEventMap]: EventHandler }>;
+};
 
-export type DenormAttrs<E extends Element> = Attrs<E> | DenormChildren;
+export type Attrs<E extends Element, S = {}> = Partial<E & S & DomAttrs>;
+
+export type DenormAttrs<E extends Element, S = {}> =
+  | Attrs<E, S>
+  | DenormChildren;
 
 function isAttrs<E extends Element>(
   attrs: DenormAttrs<E> | undefined
@@ -48,7 +55,7 @@ export function normalizeArguments<E extends Element>(
   return [attributes, children.flat()];
 }
 
-export function up<E extends Element>(
+export function up<E extends DOMElement>(
   element: E,
   attrs?: DenormAttrs<E>,
   ...children: DenormChildren[]
@@ -56,7 +63,7 @@ export function up<E extends Element>(
   return update(element, ...normalizeArguments(attrs, children));
 }
 
-export function update<E extends Element>(
+export function update<E extends DOMElement>(
   element: Updater<E>,
   attrs: Attrs<E>,
   children: DenormChildren[]
@@ -65,24 +72,29 @@ export function update<E extends Element>(
   const $events = (element[Events] ??= new Map<string, EventHandler>());
   const { style = {}, events = {}, ...rest } = attrs;
 
-  Object.entries(events).forEach(([k, v]) => {
-    if (v === null && $events.has(k)) {
-      const listener = $events.get(k)!;
-      element.removeEventListener(k, listener);
-    } else if (!$events.has(k)) {
-      element.addEventListener(k, v);
-      $events.set(k, v);
+  Object.entries(events as NonNullable<typeof attrs.events>).forEach(
+    ([k, v]) => {
+      if (v === null && $events.has(k)) {
+        const listener = $events.get(k)!;
+        element.removeEventListener(k, listener);
+      } else if (!$events.has(k)) {
+        element.addEventListener(k as keyof ElementEventMap, v);
+        $events.set(k, v);
+      }
     }
-  });
+  );
 
   const _style = (element as { style?: Partial<CSSStyleDeclaration> }).style;
   if (_style) {
     if (typeof style === "string") {
       _style.cssText = style;
     } else {
-      Object.entries(style).forEach(([k, v]) => {
-        _style[k] = v;
-      });
+      Object.entries(style as Partial<CSSStyleDeclaration>).forEach(
+        ([k, v]) => {
+          // @ts-ignore Object.entries is unable to statically look into args
+          _style[k] = v;
+        }
+      );
     }
   }
 
@@ -105,6 +117,7 @@ export function update<E extends Element>(
           }
       }
     } else {
+      // @ts-ignore Object.entries is unable to statically look into args
       element[k] = v;
     }
   });

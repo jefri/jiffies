@@ -1,12 +1,14 @@
 import {
   CLEAR,
+  DenormAttrs,
   DenormChildren,
+  DomAttrs,
   normalizeArguments,
   Updatable,
   update,
 } from "./dom";
 
-export type Scope<S> = Partial<S>;
+export type Scope<S> = Partial<S & DomAttrs>;
 export type AttrSet = object;
 
 export interface RenderFn<S extends object, E extends Element> {
@@ -45,7 +47,9 @@ export function FC<S extends object, E extends Element>(
         this.#lastChildren = children;
       }
       this.#lastAttrs = { ...this.#lastAttrs, ...(attrs as Scope<S>) };
+      // @ts-ignore
       update(this, this.#lastAttrs, []);
+      // @ts-ignore
       const replace = [render(this, this.#lastAttrs, this.#lastChildren)];
       this.replaceChildren(...replace.flat());
     }
@@ -73,7 +77,7 @@ export function C<S extends object, E extends HTMLElement>(
 ) {
   customElements.define(clazz.name, clazz);
 
-  return (attrs?: Scope<S> | DenormChildren, ...children: DenormChildren[]) => {
+  return (attrs?: DenormAttrs<E, S>, ...children: DenormChildren[]) => {
     const element = document.createElement(clazz.name) as Component<S, E>;
     element.update(attrs, ...children);
     return element;

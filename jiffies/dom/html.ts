@@ -3,7 +3,7 @@ import { DenormAttrs, DenormChildren, up } from "./dom";
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>
   (
-    attrs?: DenormAttrs<HTMLElementTagNameMap[K]>,
+    attrs?: DenormAttrs<Omit<HTMLElementTagNameMap[K], "style">>,
     ...children: DenormChildren[]
   ) =>
     up(document.createElement(name), attrs, ...children);
