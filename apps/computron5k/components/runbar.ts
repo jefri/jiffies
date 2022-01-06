@@ -1,9 +1,8 @@
 import { Select } from "../../../jiffies/components/select.js";
-import { FC } from "../../../jiffies/dom/fc.ts";
-import { button, li, nav, ul } from "../../../jiffies/dom/html.ts";
+import { DenormChildren } from "../../../jiffies/dom/dom.js";
+import { FC } from "../../../jiffies/dom/fc";
+import { button, li, nav, ul } from "../../../jiffies/dom/html";
 import { Timer } from "../simulator/timer.js";
-
-/** @typedef {import("../../../jiffies/dom/dom.js").DenormChildren} DenormChildren */
 
 const runButton = {
   fontSize: "2rem",
@@ -16,13 +15,7 @@ const runButton = {
 
 export const Runbar = FC(
   "run-bar",
-  /**
-   * @param {HTMLElement} el
-   * @param {{ runner: Timer; }} param1
-   * @param {DenormChildren[]} children
-   * @returns
-   */
-  (el, { runner }, children) =>
+  (el, { runner }: { runner: Timer }, children: DenormChildren[]) =>
     nav(
       ul(
         li(
@@ -58,8 +51,10 @@ export const Runbar = FC(
           Select({
             name: "speed",
             events: {
-              change: (e) =>
-                (runner.speed = Number(e.target?.value ?? runner.speed)),
+              change: (e: InputEvent) =>
+                (runner.speed = Number(
+                  (e.target as HTMLSelectElement)?.value ?? runner.speed
+                )),
             },
             disabled: runner.running,
             value: `${runner.speed}`,
@@ -75,8 +70,10 @@ export const Runbar = FC(
           Select({
             name: "steps",
             events: {
-              change: (e) =>
-                (runner.steps = Number(e.target?.value ?? runner.steps)),
+              change: (e: InputEvent) =>
+                (runner.steps = Number(
+                  (e.target as HTMLSelectElement)?.value ?? runner.steps
+                )),
             },
             disabled: runner.running,
             value: `${runner.steps}`,

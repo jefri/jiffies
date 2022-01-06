@@ -1,9 +1,9 @@
-import { div, li, span, ul } from "../../../jiffies/dom/html.ts";
+import { div, li, span, ul } from "../../../jiffies/dom/html";
 import { CPU as CPUChip } from "../simulator/cpu/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/cpu/memory.js";
 import { HACK } from "../testing/mult.js";
-import { Runbar } from "../components/runbar.js";
+import { Runbar } from "../components/runbar";
 import { Timer } from "../simulator/timer.js";
 import { Screen } from "../components/screen.js";
 /** @typedef {import("../components/screen").Screen} Screen */
