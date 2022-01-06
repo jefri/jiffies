@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["builtins", "middlewares", "nand", "tock"]
+  "cSpell.words": [
+    "builtins",
+    "Denorm",
+    "htmlvar",
+    "middlewares",
+    "nand",
+    "testsuite",
+    "testsuites",
+    "tock"
+  ]
 }
