@@ -9,6 +9,7 @@ import {
   index,
   KING,
   KNIGHT,
+  PAWN,
   QUEEN,
   ROOK,
   square,
@@ -73,6 +74,38 @@ describe("Chess Board", () => {
       const moves = movesFor(board, "a", 1);
       expect(moves).toEqual(["b2", "c3", "d4"]);
     });
+
+    it("stops movement at friendly", () => {
+      const board = new TestBoard();
+      board.clear();
+      board.set("a", 1, WHITE * BISHOP);
+      board.set("d", 4, WHITE * BISHOP);
+
+      const moves = movesFor(board, "a", 1);
+      expect(moves).toEqual(["b2", "c3"]);
+    });
+
+    it("finds check", () => {
+      const board = new TestBoard();
+      board.clear();
+
+      board.set("a", 1, WHITE * KING);
+      board.set("c", 2, BLACK * ROOK);
+
+      board.set("c", 3, BLACK * PAWN);
+      board.set("d", 2, BLACK * PAWN);
+
+      const rookMoves = movesFor(board, "c", 2);
+      expect(rookMoves).toEqual(["a2", "b2", "c1x"]);
+    });
+
+    it("finds mate", () => {});
+
+    it("accepts kingside castle O-O", () => {});
+
+    it("accepts queenside castle O-O-O", () => {});
+
+    it("stops moves that are pinned to king", () => {});
 
     it("parses PGN movesets", () => {});
   });

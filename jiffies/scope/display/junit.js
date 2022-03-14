@@ -1,4 +1,4 @@
-import { xml } from "../../dom/xml.js";
+import { xml } from "../../dom/xml";
 import { flattenResults } from "../execute.js";
 
 /** @param {import("../execute.js").TestResult} results */
