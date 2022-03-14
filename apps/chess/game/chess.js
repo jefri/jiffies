@@ -262,7 +262,10 @@ export class ChessGame {
           file,
           rank,
           color,
-          capture: false,
+          capture:
+            this.board[destination] != EMPTY &&
+            Math.sign(this.board[destination]) != color,
+          ambiguous: false,
           destination,
           pieceType,
         });
@@ -299,11 +302,27 @@ export function square(/** @type number */ idx) {
   return `${file}${rank}`;
 }
 
+/** @returns File */
+function verifyFile(/** @type number */ file) {
+  if (file < 0 || file > 7) {
+    throw new Error(`Invalid File number: ${file}`);
+  }
+  return /* @type File */ String.fromCharCode(file + 97);
+}
+
+/** @returns Rank */
+function verifyRank(/** @type number */ rank) {
+  if (rank < 1 || rank > 8) {
+    throw new Error(`Invalid rank number: ${rank}`);
+  }
+  return /* @type Rank */ rank;
+}
+
 /** @returns {[File, Rank]} */
 export function fileRank(/** @type number */ idx) {
   const file = idx % 10;
   const rank = 10 - (((idx - file) / 10) | 0);
-  return [String.fromCharCode(file + 97), rank];
+  return [verifyFile(file), verifyRank(rank)];
 }
 
 export function asNum(/** @type File */ file) {
@@ -322,6 +341,7 @@ export class Move {
   // promotion;
   check = false;
   mate = false;
+  ambiguous = false;
   // castle = "";
   // comment = "";
 
@@ -334,14 +354,16 @@ export class Move {
           destination: number,
           color: WHITE|BLACK,
           pieceType: number,
+          ambiguous: boolean,
         }}
-        */ { file, rank, capture, destination, color, pieceType }
+        */ { file, rank, capture, destination, color, pieceType, ambiguous }
   ) {
     this.color = color;
     this.destination = destination;
     this.source = index(file, rank);
     this.capture = capture;
     this.pieceType = pieceType;
+    this.ambiguous = ambiguous;
   }
 
   verifyCheck(/** @type ChessGame */ board) {
@@ -351,17 +373,12 @@ export class Move {
   }
 
   toString() {
-    const piece = Pieces[this.pieceType];
-    const src = square(this.source);
+    const piece = this.pieceType == PAWN ? "" : Pieces[this.pieceType];
     const dest = square(this.destination);
     const check = this.mate ? "#" : this.check ? "+" : "";
-    if (piece === "P") {
-      return `${dest}${check}`;
-    } else if (piece === "Q" || piece === "K") {
-      return `${piece}${dest}${check}`;
-    } else {
-      return `${piece}${src}${dest}${check}`;
-    }
+    const capture = this.capture ? "x" : "";
+    const ambiguous = this.ambiguous ? square(this.source) : "";
+    return `${piece}${ambiguous}${capture}${dest}${check}`;
   }
 }
 

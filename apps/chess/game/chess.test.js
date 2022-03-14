@@ -23,8 +23,7 @@ function movesFor(
 ) {
   return game
     .moves(file, rank)
-    .map((m) => m.destination)
-    .map(square)
+    .map((m) => m.toString())
     .sort();
 }
 
@@ -62,7 +61,7 @@ describe("Chess Board", () => {
 
       const moves = movesFor(board, "d", 2);
       expect(moves.length).toBe(6);
-      expect(moves).toEqual(["b1", "b3", "c4", "e4", "f1", "f3"]);
+      expect(moves).toEqual(["Nb1", "Nb3", "Nc4", "Ne4", "Nf1", "Nf3"]);
     });
 
     it("stops movement at capture", () => {
@@ -72,7 +71,7 @@ describe("Chess Board", () => {
       board.set("d", 4, BLACK * BISHOP);
 
       const moves = movesFor(board, "a", 1);
-      expect(moves).toEqual(["b2", "c3", "d4"]);
+      expect(moves).toEqual(["Bb2", "Bc3", "Bxd4"]);
     });
 
     it("stops movement at friendly", () => {
@@ -82,7 +81,7 @@ describe("Chess Board", () => {
       board.set("d", 4, WHITE * BISHOP);
 
       const moves = movesFor(board, "a", 1);
-      expect(moves).toEqual(["b2", "c3"]);
+      expect(moves).toEqual(["Bb2", "Bc3"]);
     });
 
     it("finds check", () => {
@@ -96,7 +95,7 @@ describe("Chess Board", () => {
       board.set("d", 2, BLACK * PAWN);
 
       const rookMoves = movesFor(board, "c", 2);
-      expect(rookMoves).toEqual(["a2", "b2", "c1x"]);
+      expect(rookMoves).toEqual(["Ra2", "Rb2", "Rc1x"]);
     });
 
     it("finds mate", () => {});
@@ -104,6 +103,12 @@ describe("Chess Board", () => {
     it("accepts kingside castle O-O", () => {});
 
     it("accepts queenside castle O-O-O", () => {});
+
+    it("finds castles", () => {});
+
+    it("accepts en passant", () => {});
+
+    it("finds enpassant", () => {});
 
     it("stops moves that are pinned to king", () => {});
 

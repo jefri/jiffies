@@ -56,6 +56,8 @@ export const ChessBoard = FC(
     )
 );
 
+const CORNER_PADDING = "2px";
+
 const corner = (/** @type {'tl'|'tr'|'bl'|'br'} */ c) => {
   const block = {
     display: "block",
@@ -63,9 +65,9 @@ const corner = (/** @type {'tl'|'tr'|'bl'|'br'} */ c) => {
     fontSize: "0.5em",
     opacity: "0.2",
   };
-  if (c.includes("t")) block.top = "0";
-  if (c.includes("l")) block.left = "0";
-  if (c.includes("b")) block.bottom = "0";
-  if (c.includes("r")) block.right = "0";
+  if (c.includes("t")) block.top = CORNER_PADDING;
+  if (c.includes("l")) block.left = CORNER_PADDING;
+  if (c.includes("b")) block.bottom = CORNER_PADDING;
+  if (c.includes("r")) block.right = CORNER_PADDING;
   return block;
 };

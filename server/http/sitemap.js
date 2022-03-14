@@ -7,7 +7,10 @@ const findSiteMap = async (root) => {
   console.log(`Looking in ${root}`);
   return (await fs.readdir(root, { withFileTypes: true })).map(
     async (entry) => {
-      const next = path.join(root, entry.name);
+      const next = path
+        .join(root, entry.name)
+        // Normalize separators for web
+        .replace(path.sep, "/");
       if (entry.isFile()) {
         if (entry.name === "index.html") {
           console.log(`Found ${next}`);
