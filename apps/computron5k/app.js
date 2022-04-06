@@ -9,7 +9,7 @@ export const App = () => {
 
   const app = [
     header(
-      { class: "container-fluid" },
+      // { class: "container-fluid" },
       nav(
         ul(li(strong("CPU Emulator"))),
         ul(...urls.map((url) => li(link(url))))

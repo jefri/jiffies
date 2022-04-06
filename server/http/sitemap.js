@@ -10,7 +10,7 @@ const findSiteMap = async (root) => {
       const next = path
         .join(root, entry.name)
         // Normalize separators for web
-        .replace(path.sep, "/");
+        .replaceAll(path.sep, "/");
       if (entry.isFile()) {
         if (entry.name === "index.html") {
           console.log(`Found ${next}`);

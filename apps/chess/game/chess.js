@@ -29,7 +29,7 @@ export const Q = QUEEN;
 export const K = KING;
 export const I = INVALID;
 
-/** @typedef {P|R|N|B|Q|K|I|-1|-2|-3|-4|-5|-6|-7|0} ColorPiece */
+/** @typedef {P|R|N|B|Q|K|I|-1|-2|-3|-4|-5|-6|0} ColorPiece */
 /** @typedef {'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'} File */
 /** @typedef {1|2|3|4|5|6|7|8} Rank */
 /** @typedef {P|R|N|B|Q|K} Piece */
@@ -124,12 +124,14 @@ const NEW_GAME = [
   [I, I, I, I, I, I, I, I, I, I],
 ].flat();
 
+/** @typedef {typeof NEW_GAME} Board */
+
 /** @type {() => Threat[][]} */
 const noThreat = () =>
   range(0, 8).map(() => range(0, 8).map(() => ({ [W]: [], [L]: [] })));
 
 export class ChessGame {
-  /** @type {typeof NEW_GAME} */
+  /** @type {Board} */
   board;
   /** @type {Color} */
   toPlay;
@@ -268,6 +270,7 @@ export class ChessGame {
           ambiguous: false,
           destination,
           pieceType,
+          previous: this,
         });
         return m;
       })
@@ -344,6 +347,8 @@ export class Move {
   ambiguous = false;
   // castle = "";
   // comment = "";
+  /** @type ChessGame */
+  previous;
 
   constructor(
     /**
@@ -355,8 +360,18 @@ export class Move {
           color: WHITE|BLACK,
           pieceType: number,
           ambiguous: boolean,
+          previous: ChessGame,
         }}
-        */ { file, rank, capture, destination, color, pieceType, ambiguous }
+        */ {
+      file,
+      rank,
+      capture,
+      destination,
+      color,
+      pieceType,
+      ambiguous,
+      previous,
+    }
   ) {
     this.color = color;
     this.destination = destination;
@@ -364,9 +379,12 @@ export class Move {
     this.capture = capture;
     this.pieceType = pieceType;
     this.ambiguous = ambiguous;
+    this.previous = previous;
+    this.verifyCheck();
   }
 
-  verifyCheck(/** @type ChessGame */ board) {
+  verifyCheck() {
+    const board = this.previous.do(this, true);
     const color = /** @type Color */ (-1 * this.color);
     this.check = checkCheck(board, color);
     this.mate = board.allMoves(color).length === 0;

@@ -26,6 +26,18 @@ export function assertExists(
 }
 
 /**
+ * @param {*} n
+ * @returns string
+ */
+export function assertString(
+  /** {*} */ n,
+  message = `Assertion failed: ${n} is not a string`
+) {
+  assert(typeof n == "string");
+  return /** {string} */ n;
+}
+
+/**
  * Compile time assertion that no value will used at this point in control flow.
  *
  * @returns {never}

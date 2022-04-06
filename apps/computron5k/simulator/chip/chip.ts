@@ -1,71 +1,71 @@
-import { assert } from "../../../../jiffies/assert.js";
+import { assert, assertString } from "../../../../jiffies/assert.js";
 import { range } from "../../../../jiffies/range.js";
 
-const HIGH = 1;
-const LOW = 0;
-type Voltage = typeof HIGH | typeof LOW;
+export const HIGH = 1;
+export const LOW = 0;
+export type Voltage = typeof HIGH | typeof LOW;
 
 export interface Pin {
-  width: number;
-  pullHigh(bit?: number): void;
-  pullLow(bit?: number): void;
+  readonly name: string;
+  readonly width: number;
+  pull(voltage: Voltage, bit?: number): void;
   voltage(bit?: number): Voltage;
   connect(pin: Pin): void;
 }
 
+function nameOf(pin: string | Pin): string {
+  return typeof pin === "string" ? pin : pin.name;
+}
+
 export class Bus implements Pin {
-  state: (0 | 1)[];
-  next?: Pin;
-  constructor(readonly width = 1) {
+  state: Voltage[];
+  next: Pin[] = [];
+  constructor(readonly name: string, readonly width = 1) {
     this.state = range(0, this.width).map(() => 0);
   }
 
   connect(next: Pin) {
-    this.next = next;
+    this.next.push(next);
   }
 
-  pullHigh(bit = 0) {
+  pull(voltage: Voltage, bit = 0) {
     assert(bit >= 0 && bit < this.width);
-    this.state[bit] = 1;
-    this.next?.pullHigh(bit);
+    this.state[bit] = voltage;
+    this.next.forEach((n) => n.pull(voltage, bit));
   }
 
-  pullLow(bit = 0) {
-    assert(bit >= 0 && bit < this.width);
-    this.state[bit] = 0;
-    this.next?.pullHigh(bit);
-  }
-
-  voltage(bit = 0): 0 | 1 {
+  voltage(bit = 0): Voltage {
     assert(bit >= 0 && bit < this.width);
     return this.state[bit];
   }
 }
 
 export class SubBus implements Pin {
+  readonly name: string;
   constructor(private bus: Pin, private start: number, readonly width = 1) {
+    this.name = bus.name;
     assert(start >= 0 && start + width <= bus.width);
   }
 
-  pullHigh(bit = 0) {
+  pull(voltage: Voltage, bit = 0) {
     assert(bit >= 0 && bit < this.width);
-    this.bus.pullHigh(this.start + bit);
-  }
-
-  pullLow(bit = 0) {
-    assert(bit >= 0 && bit < this.width);
-    this.bus.pullLow(this.start + bit);
+    this.bus.pull(voltage, this.start + bit);
   }
 
   voltage(bit = 0): Voltage {
     assert(bit >= 0 && bit < this.width);
     return this.bus.voltage(this.start + bit);
   }
+
+  connect(bus: Pin): void {
+    assert(this.start + this.width <= bus.width);
+    this.bus = bus;
+  }
 }
 
 export class TrueBus extends Bus {
-  constructor() {
-    super(16);
+  constructor(name: string) {
+    super(name, 16);
   }
   pullHigh(_ = 0) {}
   pullLow(_ = 0) {}
@@ -75,8 +75,8 @@ export class TrueBus extends Bus {
 }
 
 export class FalseBus extends Bus {
-  constructor() {
-    super(16);
+  constructor(name: string) {
+    super(name, 16);
   }
   pullHigh(_ = 0) {}
   pullLow(_ = 0) {}
@@ -100,22 +100,54 @@ export function parseToPin(toPin: string): {
   };
 }
 
+export class Pins {
+  private readonly map = new Map<string, Pin>();
+
+  insert(pin: Pin) {
+    let { name } = pin;
+    assert(!this.map.has(name), `Pins already has ${name}!`);
+    this.map.set(name, pin);
+  }
+
+  emplace(name: string) {
+    if (this.has(name)) {
+      return this.get(name)!;
+    } else {
+      const pin = new Bus(name);
+      this.insert(pin);
+      return pin;
+    }
+  }
+
+  has(pin: string | Pin): boolean {
+    return this.map.has(nameOf(pin));
+  }
+
+  get(pin: string | Pin): Pin | undefined {
+    return this.map.get(nameOf(pin));
+  }
+
+  entries(): Iterable<Pin> {
+    return this.map.values();
+  }
+}
+
 let id = 0;
 export class Chip {
   readonly id = id++;
-  ins = new Map<string, Pin>();
-  outs = new Map<string, Pin>();
-  pins = new Map<string, Pin>();
+  ins = new Pins();
+  outs = new Pins();
+  pins = new Pins();
   parts = new Set<Chip>();
 
   constructor(ins: string[], outs: string[], readonly name?: string) {
     for (const inn of ins) {
       const { pin, start = 1 } = parseToPin(inn);
-      this.ins.set(pin, new Bus(start));
+      this.ins.insert(new Bus(pin, start));
     }
     for (const out of outs) {
       const { pin, start = 1 } = parseToPin(out);
-      this.outs.set(pin, new Bus(start));
+      this.outs.insert(new Bus(pin, start));
     }
   }
 
@@ -129,6 +161,11 @@ export class Chip {
     return this.outs.get(pin)!;
   }
 
+  pin(name: string): Pin {
+    assert(this.pins.has(name));
+    return this.pins.get(name)!;
+  }
+
   isOutPin(pin: string): boolean {
     return this.outs.has(pin);
   }
@@ -136,12 +173,13 @@ export class Chip {
   wire(chip: Chip, connections: Connection[]) {
     this.parts.add(chip);
     for (const { to, from } of connections) {
-      if (chip.isOutPin(to)) {
-        const source = this.findBus(from);
-        source.connect(chip.outs.get(to)!);
+      if (chip.isOutPin(nameOf(to))) {
+        const output = this.findPin(nameOf(from));
+        chip.outs.get(to)!.connect(output);
       } else {
-        const { pin, start, end } = parseToPin(to);
-        let sink = this.findBus(from);
+        let toParse = assertString(nameOf(to));
+        const { pin, start, end } = parseToPin(toParse);
+        let input = this.findPin(nameOf(from));
         /*
         if (start) {
           if (end) {
@@ -153,24 +191,25 @@ export class Chip {
           }
         }
         */
-        sink.connect(chip.ins.get(pin)!);
+        input.connect(chip.ins.get(pin)!);
       }
     }
   }
 
-  private findBus(from: string): Pin {
-    if (from === "true" || from === "1") return new TrueBus();
-    if (from === "false" || from === "0") return new FalseBus();
+  private findPin(from: string): Pin {
+    if (from === "True" || from === "1") return new TrueBus("True");
+    if (from === "false" || from === "0") return new FalseBus("False");
     if (this.ins.has(from)) return this.ins.get(from)!;
     if (this.outs.has(from)) return this.outs.get(from)!;
-    if (!this.pins.has(from)) this.pins.set(from, new Bus());
-    return this.pins.get(from)!;
+    return this.pins.emplace(from);
   }
 
   eval() {
     for (const chip of this.parts) {
       // TODO topological sort
+      // eval chip input busses
       chip.eval();
+      // eval output busses
     }
   }
 
@@ -184,8 +223,8 @@ export class Chip {
 }
 
 export interface Connection {
-  to: string;
-  from: string;
+  to: string | Pin;
+  from: string | Pin;
 }
 
 export class Nand extends Chip {
@@ -197,15 +236,15 @@ export class Nand extends Chip {
     const a = this.in("a").voltage();
     const b = this.in("b").voltage();
     if (a === 1 && b === 1) {
-      this.out().pullLow();
+      this.out().pull(LOW);
     } else {
-      this.out().pullHigh();
+      this.out().pull(HIGH);
     }
   }
 }
 
 export class DFF extends Chip {
-  private t: 0 | 1 = 0;
+  private t: Voltage = LOW;
 
   constructor() {
     super(["in"], ["out"]);
@@ -218,28 +257,26 @@ export class DFF extends Chip {
 
   tock() {
     // write t into out
-    if (this.t === 1) {
-      this.out().pullHigh();
-    } else {
-      this.out().pullLow();
-    }
+    this.out().pull(this.t);
   }
 }
 
 export type Pinout = Record<string, Voltage>;
-export interface SerChip {
+export interface SerializedChip {
   id: number;
   name: string;
   ins: Pinout;
   outs: Pinout;
   pins: Pinout;
-  children: SerChip[];
+  children: SerializedChip[];
 }
-function setBus(busses: Pinout, [name, pin]: [string, Pin]) {
-  busses[name] = pin.voltage();
+
+function setBus(busses: Pinout, pin: Pin) {
+  busses[pin.name] = pin.voltage();
   return busses;
 }
-export function printChip(chip: Chip): SerChip {
+
+export function printChip(chip: Chip): SerializedChip {
   return {
     id: chip.id,
     name: chip.name ?? chip.constructor.name,

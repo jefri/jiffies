@@ -42,13 +42,14 @@ body {
   margin: 0;
 }
 body > header,
-body > main,
+body > main
 body > footer {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
-  padding: var(--block-spacing-vertical) 0;
-}
+  padding: 0 0.75rem;
+  /* padding: var(--block-spacing-vertical) 0; */
+
 
 /**
   * Container
