@@ -125,7 +125,7 @@ describe("Chip", () => {
     };
 
     describe("not", () => {
-      it("compiles and can eval a not gate", () => {
+      it("evaluates a not gate", () => {
         const notChip = makeNot();
 
         notChip.eval();
@@ -138,7 +138,7 @@ describe("Chip", () => {
     });
 
     describe("and", () => {
-      it("compiles and can eval an and gate", () => {
+      it("evaluates an and gate", () => {
         const andChip = makeAnd();
 
         const a = andChip.in("a")!;
@@ -162,7 +162,7 @@ describe("Chip", () => {
     });
 
     describe("or", () => {
-      it("compiles and can eval an or gate", () => {
+      it("evaluates an or gate", () => {
         const orChip = makeOr();
 
         const a = orChip.in("a")!;
@@ -187,7 +187,7 @@ describe("Chip", () => {
     });
 
     describe("xor", () => {
-      it("compiles and can eval an xor gate", () => {
+      it("evaluates an xor gate", () => {
         const xorChip = makeXor();
 
         const a = xorChip.in("a")!;
@@ -212,25 +212,41 @@ describe("Chip", () => {
     });
   });
 
-  describe("dff", () => {
-    it("flips and flops", () => {
-      const dff = new DFF();
+  describe("wide", () => {
+    describe("nand16", () => {});
+  });
 
-      dff.tick();
-      expect(dff.out().voltage()).toBe(LOW);
-      dff.tock();
-      expect(dff.out().voltage()).toBe(LOW);
+  describe("arithmetic", () => {
+    describe("half adder", () => {
+      it("compiles a half adder", () => {
+        const halfAdder = new Chip(["a", "b"], ["h", "l"], "HalfAdder");
 
-      dff.tick();
-      expect(dff.out().voltage()).toBe(LOW);
-      dff.in().pull(HIGH);
-      dff.tock();
-      expect(dff.out().voltage()).toBe(LOW);
+        // halfAdder.compile(["And(a=a, b=b, out=h)", "Xor(a=a, b=b, out=l)"]);
+      });
+    });
+  });
 
-      dff.tick();
-      expect(dff.out().voltage()).toBe(LOW);
-      dff.tock();
-      expect(dff.out().voltage()).toBe(HIGH);
+  describe("sequential", () => {
+    describe("dff", () => {
+      it("flips and flops", () => {
+        const dff = new DFF();
+
+        dff.tick();
+        expect(dff.out().voltage()).toBe(LOW);
+        dff.tock();
+        expect(dff.out().voltage()).toBe(LOW);
+
+        dff.tick();
+        expect(dff.out().voltage()).toBe(LOW);
+        dff.in().pull(HIGH);
+        dff.tock();
+        expect(dff.out().voltage()).toBe(LOW);
+
+        dff.tick();
+        expect(dff.out().voltage()).toBe(LOW);
+        dff.tock();
+        expect(dff.out().voltage()).toBe(HIGH);
+      });
     });
   });
 });
