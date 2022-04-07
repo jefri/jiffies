@@ -3,6 +3,7 @@ import { createServer, IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
 import { parse } from "../../jiffies/flags.js";
 import { findIndex } from "./apps.js";
+import { jsFileServer } from "./javascript.js";
 import { fileResponse } from "./response.js";
 import { sitemap } from "./sitemap.js";
 import { staticFileServer } from "./static.js";
@@ -16,7 +17,8 @@ import { tsFileServer } from "./typescript.js";
 /** @type StaticMiddleware */
 const notFound = async () =>
   fileResponse(
-    path.join(path.dirname(FLAGS.argv0), "404.html"),
+    // path.join(path.dirname(FLAGS.argv0), "404.html"),
+    path.join(process.cwd(), "404.html"),
     undefined,
     404
   );
@@ -25,6 +27,7 @@ const notFound = async () =>
 const middlewares = [
   sitemap,
   tsFileServer,
+  jsFileServer,
   staticFileServer,
   findIndex,
   notFound,

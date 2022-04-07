@@ -1,3 +1,5 @@
+import { Stats } from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 import { fileResponse } from "./response.js";
 
@@ -8,15 +10,15 @@ import { fileResponse } from "./response.js";
  */
 export const findIndex = async (req) => {
   let filename = path.join(process.cwd(), req.url ?? "");
-  let basename = path.basename(filename);
-  if (basename.match(/\.[a-z]{2,3}$/)) {
+  if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
     return undefined;
   }
   while (filename.startsWith(process.cwd())) {
     const index = path.join(filename, "index.html");
     try {
-      return fileResponse(index);
-    } catch {
+      const stat = await fs.stat(index);
+      return fileResponse(index, stat);
+    } catch (e) {
       filename = path.dirname(filename);
     }
   }
