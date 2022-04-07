@@ -1,4 +1,4 @@
-import { Chip } from "./pages/chip.js";
+import { Chip } from "./pages/chip";
 import { CPU } from "./pages/cpu.js";
 import { Test } from "./pages/test.js";
 import { VM } from "./pages/vm.js";

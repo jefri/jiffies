@@ -13,11 +13,12 @@ import {
   nav,
   span,
   ul,
-} from "../../../jiffies/dom/html.ts";
+} from "../../../jiffies/dom/html";
 import { rounded } from "../../../jiffies/dom/css/border.js";
 import { width } from "../../../jiffies/dom/css/sizing.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
-import { FC } from "../../../jiffies/dom/fc.ts";
+import { FC } from "../../../jiffies/dom/fc";
+import { li } from "../../../jiffies/dom/html";
 
 const MemoryBlock = FC(
   "memory-block",
@@ -139,7 +140,7 @@ const Memory = FC(
       },
     });
 
-    return article(header(nav(ul(span(name)), buttonBar)), memoryBlock);
+    return article(header(nav(ul(li(name)), buttonBar)), memoryBlock);
   }
 );
 

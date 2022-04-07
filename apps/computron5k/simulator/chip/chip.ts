@@ -9,6 +9,7 @@ export interface Pin {
   readonly name: string;
   readonly width: number;
   pull(voltage: Voltage, bit?: number): void;
+  toggle(bit?: number): void;
   voltage(bit?: number): Voltage;
   connect(pin: Pin): void;
 }
@@ -38,6 +39,11 @@ export class Bus implements Pin {
     assert(bit >= 0 && bit < this.width);
     return this.state[bit];
   }
+
+  toggle(bit = 0) {
+    const nextVoltage = this.voltage(bit) == LOW ? HIGH : LOW;
+    this.pull(nextVoltage, bit);
+  }
 }
 
 export class SubBus implements Pin {
@@ -50,6 +56,11 @@ export class SubBus implements Pin {
   pull(voltage: Voltage, bit = 0) {
     assert(bit >= 0 && bit < this.width);
     this.bus.pull(voltage, this.start + bit);
+  }
+
+  toggle(bit = 0) {
+    const nextVoltage = this.voltage(bit) == LOW ? HIGH : LOW;
+    this.pull(nextVoltage, bit);
   }
 
   voltage(bit = 0): Voltage {

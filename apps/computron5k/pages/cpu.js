@@ -45,6 +45,8 @@ export const CPU = (
     screen?.update();
   };
 
+  setState();
+
   const runner = new (class CPURunner extends Timer {
     tick() {
       cpu.tick();

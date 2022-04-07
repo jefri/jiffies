@@ -1,5 +1,6 @@
 import { describe, it, expect } from "../../../../jiffies/scope/index.js";
-import { Bus, Chip, DFF, Nand, parseToPin, HIGH, LOW, printChip } from "./chip";
+import { Chip, DFF, Nand, parseToPin, HIGH, LOW, printChip } from "./chip";
+import * as make from "./builder";
 
 describe("Chip", () => {
   it("parses toPin", () => {
@@ -29,104 +30,9 @@ describe("Chip", () => {
       });
     });
 
-    const makeNot = () => {
-      const not = new Chip(["in"], ["out"], "Not");
-
-      not.wire(new Nand(), [
-        { from: "in", to: "a" },
-        { from: "in", to: "b" },
-        { from: "out", to: "out" },
-      ]);
-
-      return not;
-    };
-
-    const makeAnd = () => {
-      const andChip = new Chip(["a", "b"], ["out"], "And");
-      const n = new Bus("n");
-      andChip.pins.insert(n);
-      andChip.wire(new Nand(), [
-        { from: "a", to: "a" },
-        { from: "b", to: "b" },
-        { from: n, to: "out" },
-      ]);
-      andChip.wire(makeNot(), [
-        { from: n, to: "in" },
-        { from: "out", to: "out" },
-      ]);
-
-      return andChip;
-    };
-
-    const makeOr = () => {
-      const orChip = new Chip(["a", "b"], ["out"], "Or");
-
-      const notA = new Bus("notA");
-      const notB = new Bus("notB");
-
-      orChip.pins.insert(notA);
-      orChip.pins.insert(notB);
-
-      orChip.wire(makeNot(), [
-        { from: "a", to: "in" },
-        { from: notA, to: "out" },
-      ]);
-      orChip.wire(makeNot(), [
-        { from: "b", to: "in" },
-        { from: notB, to: "out" },
-      ]);
-      orChip.wire(new Nand(), [
-        { from: notA, to: "a" },
-        { from: notB, to: "b" },
-        { from: "out", to: "out" },
-      ]);
-
-      return orChip;
-    };
-
-    const makeXor = () => {
-      const xorChip = new Chip(["a", "b"], ["out"], "Xor");
-
-      const notA = new Bus("notA");
-      const notB = new Bus("notB");
-      const aAndNotB = new Bus("aAndNotB");
-      const notAAndB = new Bus("notAAndB");
-
-      xorChip.pins.insert(notA);
-      xorChip.pins.insert(notB);
-      xorChip.pins.insert(aAndNotB);
-      xorChip.pins.insert(notAAndB);
-
-      xorChip.wire(makeNot(), [
-        { from: "a", to: "in" },
-        { from: notA, to: "out" },
-      ]);
-      xorChip.wire(makeNot(), [
-        { from: "b", to: "in" },
-        { from: notB, to: "out" },
-      ]);
-      xorChip.wire(makeAnd(), [
-        { from: "a", to: "a" },
-        { from: notB, to: "b" },
-        { from: aAndNotB, to: "out" },
-      ]);
-      xorChip.wire(makeAnd(), [
-        { from: notA, to: "a" },
-        { from: "b", to: "b" },
-        { from: notAAndB, to: "out" },
-      ]);
-      xorChip.wire(makeOr(), [
-        { from: aAndNotB, to: "a" },
-        { from: notAAndB, to: "b" },
-        { from: "out", to: "out" },
-      ]);
-
-      return xorChip;
-    };
-
     describe("not", () => {
       it("evaluates a not gate", () => {
-        const notChip = makeNot();
+        const notChip = make.Not();
 
         notChip.eval();
         expect(notChip.out().voltage()).toBe(HIGH);
@@ -139,7 +45,7 @@ describe("Chip", () => {
 
     describe("and", () => {
       it("evaluates an and gate", () => {
-        const andChip = makeAnd();
+        const andChip = make.And();
 
         const a = andChip.in("a")!;
         const b = andChip.in("b")!;
@@ -163,7 +69,7 @@ describe("Chip", () => {
 
     describe("or", () => {
       it("evaluates an or gate", () => {
-        const orChip = makeOr();
+        const orChip = make.Or();
 
         const a = orChip.in("a")!;
         const b = orChip.in("b")!;
@@ -188,7 +94,7 @@ describe("Chip", () => {
 
     describe("xor", () => {
       it("evaluates an xor gate", () => {
-        const xorChip = makeXor();
+        const xorChip = make.Xor();
 
         const a = xorChip.in("a")!;
         const b = xorChip.in("b")!;
