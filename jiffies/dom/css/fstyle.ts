@@ -36,6 +36,7 @@ export function compileFStyle(fstyle: FStyle, prefix = ""): string {
     }
     rule += "}\n\n";
   }
+
   for (const { key, value } of rules) {
     if (key.startsWith("@media")) {
       rule += `${key} {\n`;

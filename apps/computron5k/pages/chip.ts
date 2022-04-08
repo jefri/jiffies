@@ -69,6 +69,12 @@ export const Chip = () => {
           columnGap: "var(--block-spacing-horizontal)",
           "> h2": {
             gridColumn: "1 / span 2",
+            marginBottom: "0",
+          },
+          article: {
+            margin: "calc(var(--block-spacing-vertical) / 2) 0",
+            boxShadow: "none",
+            border: "var(--border-width) solid var(--card-border-color)",
           },
         },
       },
