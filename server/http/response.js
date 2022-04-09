@@ -2,15 +2,15 @@ import { Stats } from "fs";
 import * as fs from "fs/promises";
 
 const MIME_TYPES = {
-  js: "text/javascript",
-  json: "text/javascript",
-  css: "text/css",
-  html: "text/html",
+	js: "text/javascript",
+	json: "text/javascript",
+	css: "text/css",
+	html: "text/html",
 };
 
-const mime = (/** @type string */ basename) => {
-  const extension = basename.substr(basename.lastIndexOf(".") + 1);
-  return MIME_TYPES[extension] ?? "application/octet-stream";
+const mime = ( /** @type string */ basename) => {
+	const extension = basename.substr(basename.lastIndexOf(".") + 1);
+	return MIME_TYPES[extension] ?? "application/octet-stream";
 };
 
 /**
@@ -19,22 +19,15 @@ const mime = (/** @type string */ basename) => {
  * @param {200|404|500} status
  * @returns StaticResponse
  */
-export const fileResponse =
-  (filename, stat, status = 200) =>
-  async () => {
-    if (!stat) {
-      stat = await fs.stat(filename);
-    }
-    const content = await fs.readFile(filename);
-    const contentType = mime(filename);
-    const contentLength = stat.size;
-    return {
-      status,
-      contentType,
-      contentLength,
-      content,
-    };
-  };
+export const fileResponse = (filename, stat, status = 200) => async () => {
+	if (!stat) {
+		stat = await fs.stat(filename);
+	}
+	const content = await fs.readFile(filename);
+	const contentType = mime(filename);
+	const contentLength = stat.size;
+	return { status, contentType, contentLength, content };
+};
 
 /**
  * @param {string} content
@@ -42,14 +35,12 @@ export const fileResponse =
  * @param {200|404|500} status
  * @returns import("./index.js").StaticMiddleware
  */
-export const contentResponse =
-  (content, contentType, status = 200) =>
-  async () => {
-    const contentBuffer = Buffer.from(content, "utf-8");
-    return {
-      content: contentBuffer,
-      contentType,
-      status,
-      contentLength: contentBuffer.length,
-    };
-  };
+export const contentResponse = (content, contentType, status = 200) => async () => {
+	const contentBuffer = Buffer.from(content, "utf-8");
+	return {
+		content: contentBuffer,
+		contentType,
+		status,
+		contentLength: contentBuffer.length,
+	};
+};

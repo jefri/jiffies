@@ -16,17 +16,19 @@ export { Or } from "./logic/or";
 export { Xor } from "./logic/xor";
 
 export const REGISTRY = new Map<string, () => Chip>(
-  [Not, And, Or, Xor, Mux, Demux].map((ChipCtor) => [
-    ChipCtor.name!,
-    () => {
-      const chip = new ChipCtor();
-      chip.name = ChipCtor.name!;
-      return chip;
-    },
-  ])
+	[Not, And, Or, Xor, Mux, Demux].map(
+		(ChipCtor) => [
+			ChipCtor.name!,
+			() => {
+				const chip = new ChipCtor();
+				chip.name = ChipCtor.name!;
+				return chip;
+			},
+		],
+	),
 );
 
 export function getBuiltinChip(name: string): Chip {
-  assert(REGISTRY.has(name), `Chip ${name} not in builtin registry`);
-  return REGISTRY.get(name)!();
+	assert(REGISTRY.has(name), `Chip ${name} not in builtin registry`);
+	return REGISTRY.get(name)!();
 }

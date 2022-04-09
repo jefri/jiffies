@@ -13,7 +13,7 @@ import { div } from "../dom/html.ts";
  * @returns {VirtualScrollDataAdapter<T>}
  */
 export function arrayAdapter(data) {
-  return (offset, limit) => data.slice(offset, offset + limit);
+	return (offset, limit) => data.slice(offset, offset + limit);
 }
 
 /**
@@ -40,16 +40,16 @@ export function arrayAdapter(data) {
  * @returns {VirtualScrollSettings}
  */
 export function fillVirtualScrollSettings(settings) {
-  const {
-    minIndex = 0,
-    maxIndex = 1,
-    startIndex = 0,
-    itemHeight = 20,
-    count = maxIndex - minIndex + 1,
-    tolerance = count,
-  } = settings;
+	const {
+		minIndex = 0,
+		maxIndex = 1,
+		startIndex = 0,
+		itemHeight = 20,
+		count = maxIndex - minIndex + 1,
+		tolerance = count,
+	} = settings;
 
-  return { minIndex, maxIndex, startIndex, itemHeight, count, tolerance };
+	return { minIndex, maxIndex, startIndex, itemHeight, count, tolerance };
 }
 
 /**
@@ -58,30 +58,29 @@ export function fillVirtualScrollSettings(settings) {
  * @returns {VirtualScrollState<T>}
  */
 export function initialState(settings) {
-  // From Denis Hilt, https://blog.logrocket.com/virtual-scrolling-core-principles-and-basic-implementation-in-react/
-  const { minIndex, maxIndex, startIndex, itemHeight, count, tolerance } =
-    settings;
-  const bufferedItems = count + 2 * tolerance;
-  const itemsAbove = Math.max(0, startIndex - tolerance - minIndex);
+	// From Denis Hilt, https://blog.logrocket.com/virtual-scrolling-core-principles-and-basic-implementation-in-react/
+	const { minIndex, maxIndex, startIndex, itemHeight, count, tolerance } = settings;
+	const bufferedItems = count + (2 * tolerance);
+	const itemsAbove = Math.max(0, startIndex - tolerance - minIndex);
 
-  const viewportHeight = count * itemHeight;
-  const totalHeight = (maxIndex - minIndex + 1) * itemHeight;
-  const toleranceHeight = tolerance * itemHeight;
-  const bufferHeight = viewportHeight + 2 * toleranceHeight;
-  const topPaddingHeight = itemsAbove * itemHeight;
-  const bottomPaddingHeight = totalHeight - (topPaddingHeight + bufferHeight);
+	const viewportHeight = count * itemHeight;
+	const totalHeight = (maxIndex - minIndex + 1) * itemHeight;
+	const toleranceHeight = tolerance * itemHeight;
+	const bufferHeight = viewportHeight + (2 * toleranceHeight);
+	const topPaddingHeight = itemsAbove * itemHeight;
+	const bottomPaddingHeight = totalHeight - (topPaddingHeight + bufferHeight);
 
-  return {
-    scrollTop: 0,
-    settings,
-    viewportHeight,
-    totalHeight,
-    toleranceHeight,
-    bufferedItems,
-    topPaddingHeight,
-    bottomPaddingHeight,
-    data: [],
-  };
+	return {
+		scrollTop: 0,
+		settings,
+		viewportHeight,
+		totalHeight,
+		toleranceHeight,
+		bufferedItems,
+		topPaddingHeight,
+		bottomPaddingHeight,
+		data: [],
+	};
 }
 
 /**
@@ -94,10 +93,10 @@ export function initialState(settings) {
  * @returns {T[]}
  */
 export function getData(minIndex, maxIndex, offset, limit, get) {
-  const start = Math.max(0, minIndex, offset);
-  const end = Math.min(maxIndex, offset + limit - 1);
-  const data = get(start, end - start);
-  return [...data];
+	const start = Math.max(0, minIndex, offset);
+	const end = Math.min(maxIndex, offset + limit - 1);
+	const data = get(start, end - start);
+	return [...data];
 }
 
 /**
@@ -113,27 +112,23 @@ export function getData(minIndex, maxIndex, offset, limit, get) {
    }}
    */
 export function doScroll(scrollTop, state, get) {
-  const {
-    totalHeight,
-    toleranceHeight,
-    bufferedItems,
-    settings: { itemHeight, minIndex, maxIndex },
-  } = state;
-  const index =
-    minIndex + Math.floor((scrollTop - toleranceHeight) / itemHeight);
-  const data = getData(minIndex, maxIndex, index, bufferedItems, get);
-  const topPaddingHeight = Math.max((index - minIndex) * itemHeight, 0);
-  const bottomPaddingHeight = Math.max(
-    totalHeight - (topPaddingHeight + data.length * itemHeight),
-    0
-  );
+	const {
+		totalHeight,
+		toleranceHeight,
+		bufferedItems,
+		settings: { itemHeight, minIndex, maxIndex },
+	} = state;
+	const index = minIndex + Math.floor(
+		(scrollTop - toleranceHeight) / itemHeight,
+	);
+	const data = getData(minIndex, maxIndex, index, bufferedItems, get);
+	const topPaddingHeight = Math.max((index - minIndex) * itemHeight, 0);
+	const bottomPaddingHeight = Math.max(
+		totalHeight - (topPaddingHeight + (data.length * itemHeight)),
+		0,
+	);
 
-  return {
-    scrollTop,
-    topPaddingHeight,
-    bottomPaddingHeight,
-    data,
-  };
+	return { scrollTop, topPaddingHeight, bottomPaddingHeight, data };
 }
 
 /**
@@ -161,70 +156,66 @@ export function doScroll(scrollTop, state, get) {
  */
 
 export const VirtualScroll = FC(
-  "virtual-scroll",
-  /**
+	"virtual-scroll",
+	/**
    * @template T
    * @template {Node} U
    * @param {VirtualScroll<T, U>} element
    * @param {VirtualScrollProps<T, U>} props
    */
-  (element, props) => {
-    const settings = fillVirtualScrollSettings(props.settings);
-    const state = (element.state ??= initialState(settings));
+	(element, props) => {
+		const settings = fillVirtualScrollSettings(props.settings);
+		const state = (element.state ??= initialState(settings));
 
-    /** @param {{target?: {scrollTop: number}}} event */
-    const scrollTo = ({ target } = { target: state }) => {
-      const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
-      const updatedSate = {
-        ...state,
-        ...doScroll(scrollTop, state, props.get),
-      };
-      setState(updatedSate);
-    };
+		/** @param {{target?: {scrollTop: number}}} event */
+		const scrollTo = ({ target } = { target: state }) => {
+			const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
+			const updatedSate = { ...state, ...doScroll(scrollTop, state, props.get) };
+			setState(updatedSate);
+		};
 
-    const viewportElement = div({
-      style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
-      events: {
-        scroll: debounce(scrollTo, 0),
-      },
-    });
-    setTimeout(() => {
-      viewportElement.scroll({ top: state.scrollTop });
-    });
+		const viewportElement = div({
+			style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
+			events: { scroll: debounce(scrollTo, 0) },
+		});
+		setTimeout(() => {
+			viewportElement.scroll({ top: state.scrollTop });
+		});
 
-    /** @param {VirtualScrollState<T>} newState */
-    const setState = (newState) => {
-      state.scrollTop = newState.scrollTop;
-      state.topPaddingHeight = newState.topPaddingHeight;
-      state.bottomPaddingHeight = newState.bottomPaddingHeight;
-      state.data = newState.data;
-      element.rows = state.data.map(props.row);
+		/** @param {VirtualScrollState<T>} newState */
+		const setState = (newState) => {
+			state.scrollTop = newState.scrollTop;
+			state.topPaddingHeight = newState.topPaddingHeight;
+			state.bottomPaddingHeight = newState.bottomPaddingHeight;
+			state.data = newState.data;
+			element.rows = state.data.map(props.row);
 
-      viewportElement.update(
-        div({
-          class: "VirtualScroll__topPadding",
-          style: { height: `${state.topPaddingHeight}px` },
-        }),
-        ...element.rows.map((row, i) =>
-          div(
-            {
-              class: `VirtualScroll__item_${i}`,
-              style: { height: `${settings.itemHeight}px` },
-            },
-            row
-          )
-        ),
-        div({
-          class: "VirtualScroll__bottomPadding",
-          style: { height: `${state.bottomPaddingHeight}px` },
-        })
-      );
-    };
+			viewportElement.update(
+				div({
+					class: "VirtualScroll__topPadding",
+					style: { height: `${state.topPaddingHeight}px` },
+				}),
+				...element.rows.map(
+					(row, i) =>
+						div(
+							{
+								class: `VirtualScroll__item_${i}`,
+								style: { height: `${settings.itemHeight}px` },
+							},
+							row,
+						),
+				),
+				div({
+					class: "VirtualScroll__bottomPadding",
+					style: { height: `${state.bottomPaddingHeight}px` },
+				}),
+			);
+		};
 
-    scrollTo();
+		scrollTo();
 
-    return viewportElement;
-  }
+		return viewportElement;
+	},
 );
 
 export default VirtualScroll;

@@ -10,11 +10,11 @@ import * as alu from "../simulator/cpu/alu.test.js";
 import * as cpu from "../simulator/cpu/cpu.test.js";
 
 export const Test = () => {
-  const root = article(header("Tests"));
-  (async function test() {
-    const results = await execute();
-    displayStatistics(results, root);
-    onConsole(results);
-  })();
-  return root;
+	const root = article(header("Tests"));
+	(async function test() {
+		const results = await execute();
+		displayStatistics(results, root);
+		onConsole(results);
+	})();
+	return root;
 };

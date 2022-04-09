@@ -7,12 +7,12 @@ import { fileResponse } from "./response.js";
  * @type import("./index.js").StaticMiddleware
  */
 export const staticFileServer = async (req) => {
-  const filename = path.join(process.cwd(), req.url ?? "");
-  try {
-    const stat = await fs.stat(filename);
-    return stat.isDirectory() ? undefined : fileResponse(filename, stat);
-  } catch (e) {
-    console.error(e);
-    return undefined;
-  }
+	const filename = path.join(process.cwd(), req.url ?? "");
+	try {
+		const stat = await fs.stat(filename);
+		return stat.isDirectory() ? undefined : fileResponse(filename, stat);
+	} catch (e) {
+		console.error(e);
+		return undefined;
+	}
 };

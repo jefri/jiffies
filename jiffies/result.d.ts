@@ -16,9 +16,10 @@ export function Some<T>(t: T): Option<T>;
 
 export type isOk = <T, E extends Error = Error>(t: Result<T, E>) => t is Ok<T>;
 export type isErr = <E extends Error>(e: Result<unknown, E>) => e is Err<E>;
-export type isResult = <T, E extends Error = Error>(
-  t: T | Result<T, E>
-) => t is Result<T, E>;
+export type isResult = <T, E extends Error = Error>(t: T | Result<T, E>) => t is Result<
+	T,
+	E
+>;
 
 // Beware: Order matters for correct inference.
 export function Ok<T>(ok: Ok<T>): T;

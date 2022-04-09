@@ -8,12 +8,21 @@ import * as context from "./context.test.js";
 import * as flags from "./flags.test.js";
 import * as generator from "./generator.test.js";
 
-describe("Test executor", () => {
-  it("matches equality", () => {
-    expect(1).toBe(1);
-  });
+describe(
+	"Test executor",
+	() => {
+		it(
+			"matches equality",
+			() => {
+				expect(1).toBe(1);
+			},
+		);
 
-  it("fails on inequality", () => {
-    expect(() => expect(1).toBe(2)).toThrow();
-  });
-});
+		it(
+			"fails on inequality",
+			() => {
+				expect(() => expect(1).toBe(2)).toThrow();
+			},
+		);
+	},
+);

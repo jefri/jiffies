@@ -20,22 +20,22 @@ export const Exit = Symbol("Context Exit");
  * @returns {import("./result.js").Result<T, E>}
  */
 export function using(
-  context,
-  operation,
-  normalizeError = (e) => Err(/** @type E */ (e))
+	context,
+	operation,
+	normalizeError = (e) => Err( /** @type E */ (e)),
 ) {
-  context = typeof context == "function" ? context() : context;
-  let /** @type import("./result.js").Result<T, Error> */ result;
-  try {
-    context[Enter]();
-    const op = operation(context);
-    result = isResult(op) ? op : Ok(op);
-  } catch (e) {
-    result = normalizeError(e);
-  } finally {
-    context[Exit]();
-  }
-  return result;
+	context = typeof context == "function" ? context() : context;
+	let result; /** @type import("./result.js").Result<T, Error> */
+	try {
+		context[Enter]();
+		const op = operation(context);
+		result = isResult(op) ? op : Ok(op);
+	} catch (e) {
+		result = normalizeError(e);
+	} finally {
+		context[Exit]();
+	}
+	return result;
 }
 
 /**
@@ -48,20 +48,20 @@ export function using(
  * @returns {Promise<import("./result.js").Result<T, Error>>}
  */
 export async function asyncUsing(
-  context,
-  operation,
-  normalizeError = (e) => Err(/** @type E */ (e))
+	context,
+	operation,
+	normalizeError = (e) => Err( /** @type E */ (e)),
 ) {
-  context = typeof context == "function" ? await context() : context;
-  let /** @type import("./result.js").Result<T, E> */ result;
-  try {
-    context[Enter]();
-    const op = await operation(context);
-    result = isResult(op) ? op : Ok(op);
-  } catch (e) {
-    result = normalizeError(e);
-  } finally {
-    context[Exit]();
-  }
-  return result;
+	context = typeof context == "function" ? await context() : context;
+	let result; /** @type import("./result.js").Result<T, E> */
+	try {
+		context[Enter]();
+		const op = await operation(context);
+		result = isResult(op) ? op : Ok(op);
+	} catch (e) {
+		result = normalizeError(e);
+	} finally {
+		context[Exit]();
+	}
+	return result;
 }

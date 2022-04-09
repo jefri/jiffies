@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
 import { parse } from "../../jiffies/flags.js";
@@ -16,21 +17,21 @@ import { tsFileServer } from "./typescript.js";
 
 /** @type StaticMiddleware */
 const notFound = async () =>
-  fileResponse(
-    // path.join(path.dirname(FLAGS.argv0), "404.html"),
-    path.join(process.cwd(), "404.html"),
-    undefined,
-    404
-  );
+	fileResponse(
+		// path.join(path.dirname(FLAGS.argv0), "404.html"),
+		path.join(process.cwd(), "404.html"),
+		undefined,
+		404,
+	);
 
 /** @type {StaticMiddleware[]}  */
 const middlewares = [
-  sitemap,
-  tsFileServer,
-  jsFileServer,
-  staticFileServer,
-  findIndex,
-  notFound,
+	sitemap,
+	tsFileServer,
+	jsFileServer,
+	staticFileServer,
+	findIndex,
+	notFound,
 ];
 
 /**
@@ -38,11 +39,11 @@ const middlewares = [
  * @param {string} message
  */
 const error = (res, message) => {
-  console.error(message);
-  res.statusCode = 500;
-  res.write(message);
-  res.end();
-  return true;
+	console.error(message);
+	res.statusCode = 500;
+	res.write(message);
+	res.end();
+	return true;
 };
 
 /**
@@ -51,46 +52,51 @@ const error = (res, message) => {
  */
 
 const sendContent = async (res, { content, contentType, contentLength }) => {
-  res.setHeader("content-length", "" + contentLength);
-  res.setHeader("content-type", contentType);
-  await res.write(content);
-  res.end();
-  return true;
+	res.setHeader("content-length", "" + contentLength);
+	res.setHeader("content-type", contentType);
+	await res.write(content);
+	res.end();
+	return true;
 };
 
-const log = (/** @type {IncomingMessage} */ req) => {
-  const when = new Date().toISOString();
-  const who = req.socket.remoteAddress;
-  const what = req.url;
-  const how = `${req.method} ${what}`;
-  console.log(`${when}\t${who}\t"${how}"`);
+const log = ( /** @type {IncomingMessage} */ req) => {
+	const when = new Date().toISOString();
+	const who = req.socket.remoteAddress;
+	const what = req.url;
+	const how = `${req.method} ${what}`;
+	console.log(`${when}\t${who}\t"${how}"`);
 };
 
-const server = createServer(async (req, res) => {
-  log(req);
-  /** @type {undefined|(() => Promise<StaticResponse>)} */ let handler;
-  try {
-    for (const middleware of middlewares) {
-      handler = await middleware(req);
-      if (handler !== undefined) {
-        break;
-      }
-    }
-    if (handler) {
-      sendContent(res, await handler());
-    } else {
-      res.end();
-    }
-  } catch (e) {
-    error(res, e.message + "\n" + e.stack);
-  }
-});
+const server = createServer(
+	async (req, res) => {
+		log(req);
+		/** @type {undefined|(() => Promise<StaticResponse>)} */ let handler;
+		try {
+			for (const middleware of middlewares) {
+				handler = await middleware(req);
+				if (handler !== undefined) {
+					break;
+				}
+			}
+			if (handler) {
+				sendContent(res, await handler());
+			} else {
+				res.end();
+			}
+		} catch (e) {
+			error(res, e.message + "\n" + e.stack);
+		}
+	},
+);
 
-server.on("listening", () => {
-  const { address, port } =
-    /** @type {import("net").AddressInfo} */ server.address();
-  console.log(`Listening at http://${address}:${port}`);
-});
+server.on(
+	"listening",
+	() => {
+		const { address, port } =
+		/** @type {import("net").AddressInfo} */ server.address();
+		console.log(`Listening at http://${address}:${port}`);
+	},
+);
 
 const FLAGS = parse(process.argv);
 console.log(`Starting in ${process.cwd()}`);

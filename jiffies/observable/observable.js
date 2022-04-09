@@ -42,34 +42,20 @@ import { DEFAULT_LOGGER, Logger } from "../log.js";
  * @param {T} value
  * @returns {Next<T>}
  */
-export const next = (value) => ({
-  value,
-  completed: false,
-  failed: false,
-});
+export const next = (value) => ({ value, completed: false, failed: false });
 
 /**
  * @template E
  * @param {E} e
  * @returns {Error<E>}
  */
-export const error = (e) => ({
-  error: e,
-  completed: false,
-  failed: true,
-});
+export const error = (e) => ({ error: e, completed: false, failed: true });
 
 /** @returns {Completed} */
-export const completed = () => ({
-  completed: true,
-  failed: false,
-});
+export const completed = () => ({ completed: true, failed: false });
 
 /** @returns {Failed} */
-export const failed = () => ({
-  completed: true,
-  failed: true,
-});
+export const failed = () => ({ completed: true, failed: true });
 
 /**
  * @template T
@@ -77,7 +63,7 @@ export const failed = () => ({
  * @returns {event is Next<T>}
  */
 export const isNext = (event) =>
-  !event.completed && !event.failed && event.value !== undefined;
+	!event.completed && !event.failed && event.value !== undefined;
 
 /**
  * @template E
@@ -104,9 +90,9 @@ export const isFailed = (event) => event.completed && event.failed;
  * @returns {t is Event<T, unknown>}
  */
 export const isEvent = (t) => {
-  /** @type Event<T, unknown> */
-  const b = /* @type unknown */ (t);
-  return isNext(b) || isError(b) || isCompleted(b);
+	/** @type Event<T, unknown> */
+	const b = /* @type unknown */ (t);
+	return isNext(b) || isError(b) || isCompleted(b);
 };
 
 /**
@@ -122,13 +108,13 @@ export const asEvents = (a) => a.map((e) => (isEvent(e) ? e : next(e)));
  * @returns {string}
  */
 const marble = (event) =>
-  isError(event)
-    ? "X"
-    : isFailed(event)
-    ? "!"
-    : isCompleted(event)
-    ? "|"
-    : `(${display(event.value)})`;
+	isError(event)
+		? "X"
+		: isFailed(event)
+			? "!"
+			: isCompleted(event)
+				? "|"
+				: `(${display(event.value)})`;
 
 /**
  * @template T
@@ -144,18 +130,18 @@ export const marbles = (events) => `:${events.map(marble).join("-")}`;
  * @returns {(Event<T, E>)[]}
  */
 export const collect = (input$) => {
-  /** @type {(Event<T, E>)[]} */
-  const collected = [];
+	/** @type {(Event<T, E>)[]} */
+	const collected = [];
 
-  const subscription = input$.subscribe({
-    next: (/* @type T */ x) => collected.push(next(x)),
-    error: (/* @type E */ e) => collected.push(error(e)),
-    complete: () => collected.push(completed()),
-  });
+	const subscription = input$.subscribe({
+		next: ( /* @type T */ x) => collected.push(next(x)),
+		error: ( /* @type E */ e) => collected.push(error(e)),
+		complete: () => collected.push(completed()),
+	});
 
-  subscription.unsubscribe();
+	subscription.unsubscribe();
 
-  return collected;
+	return collected;
 };
 
 /**
@@ -163,27 +149,26 @@ export const collect = (input$) => {
  * @param {Logger} logger
  * @returns {(o: Observable<T>) => Observable<T>}
  */
-export const watch =
-  (logger = DEFAULT_LOGGER) =>
-  /**
+export const watch = (logger = DEFAULT_LOGGER) =>
+/**
    * @template E
    * @param {Observable<T>} observable
    * @returns {Observable<T>}
    */
-  (observable) => {
-    observable.pipe(
-      tap({
-        next(/* @type T */ t) {
-          logger.info(t);
-        },
-        complete() {
-          logger.info("Observable completed");
-        },
-        error(/* @type E */ e) {
-          logger.warn(e);
-        },
-      })
-    );
+(observable) => {
+	observable.pipe(
+		tap({
+			next( /* @type T */ t) {
+				logger.info(t);
+			},
+			complete() {
+				logger.info("Observable completed");
+			},
+			error( /* @type E */ e) {
+				logger.warn(e);
+			},
+		}),
+	);
 
-    return observable;
-  };
+	return observable;
+};

@@ -12,7 +12,4 @@ import { Router } from "./router.js";
  * @param {Link} link
  */
 export const link = ({ href, link }) =>
-  a(
-    { href: Router.href(href), events: { click: Router.navigate(href) } },
-    link
-  );
+	a({ href: Router.href(href), events: { click: Router.navigate(href) } }, link);

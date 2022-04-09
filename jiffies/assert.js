@@ -3,11 +3,12 @@
  * @returns {void|never}
  */
 export function assert(
-  /** @type boolean */ condition,
-  /** @type string|(() => string) */ message = "Assertion failed"
+	/** @type boolean */ condition,
+	/** @type string|(() => string) */ message = "Assertion failed",
 ) {
-  if (!condition)
-    throw new Error(message instanceof Function ? message() : message);
+	if (!condition) {
+		throw new Error(message instanceof Function ? message() : message);
+	}
 }
 
 /**
@@ -18,11 +19,11 @@ export function assert(
  * @returns {NonNullable<T>}
  */
 export function assertExists(
-  /** @type T */ t,
-  message = "Assertion failed: value does not exist"
+	/** @type T */ t,
+	message = "Assertion failed: value does not exist",
 ) {
-  assert(t != null, message);
-  return t;
+	assert(t != null, message);
+	return t;
 }
 
 /**
@@ -30,11 +31,11 @@ export function assertExists(
  * @returns string
  */
 export function assertString(
-  /** {*} */ n,
-  message = `Assertion failed: ${n} is not a string`
+	/** {*} */ n,
+	message = `Assertion failed: ${n} is not a string`,
 ) {
-  assert(typeof n == "string");
-  return /** {string} */ n;
+	assert(typeof n == "string");
+	return n; /** {string} */
 }
 
 /**
@@ -43,8 +44,8 @@ export function assertString(
  * @returns {never}
  */
 export function checkExhaustive(
-  /** @type never */ value,
-  message = `Unexpected value ${value}`
+	/** @type never */ value,
+	message = `Unexpected value ${value}`,
 ) {
-  throw new Error(message);
+	throw new Error(message);
 }

@@ -17,7 +17,7 @@ export const isSome = (s) => s != null;
  * @returns {import("./result").None}
  */
 export function None(s) {
-  return null;
+	return null;
 }
 
 // Beware: Order matters for correct inference.
@@ -32,7 +32,7 @@ export function None(s) {
  * @returns {import("./result").Option<T>}
  */
 export const Some = (t) => {
-  return t ? t : None();
+	return t ? t : None();
 };
 
 /**
@@ -64,7 +64,7 @@ export const isResult = (t) => isOk(t) || isErr(t);
  * @returns {import("./result").Ok<T>}
  */
 export function Ok(t) {
-  return t.ok ?? { ok: t };
+	return t.ok ?? { ok: t };
 }
 
 /**
@@ -73,7 +73,7 @@ export function Ok(t) {
  * @returns {import("./result").Err<E>}
  */
 export function Err(e) {
-  return e.err ?? { err: typeof e === "string" ? new Error(e) : e };
+	return e.err ?? { err: typeof e === "string" ? new Error(e) : e };
 }
 
 /**
@@ -83,10 +83,16 @@ export function Err(e) {
  * @returns {T|never}
  */
 export function unwrap(t) {
-  if (isNone(t)) throw new Error(`Attempted to unwrap None`);
-  if (isErr(t)) throw Err(t);
-  if (isOk(t)) return Ok(t);
-  return t;
+	if (isNone(t)) {
+		throw new Error(`Attempted to unwrap None`);
+	}
+	if (isErr(t)) {
+		throw Err(t);
+	}
+	if (isOk(t)) {
+		return Ok(t);
+	}
+	return t;
 }
 
 /**
@@ -97,10 +103,16 @@ export function unwrap(t) {
  * @returns {T|never}
  */
 export function unwrapOr(t, def) {
-  if (isNone(t)) return def;
-  if (isErr(t)) return def;
-  if (isOk(t)) return Ok(t);
-  return t;
+	if (isNone(t)) {
+		return def;
+	}
+	if (isErr(t)) {
+		return def;
+	}
+	if (isOk(t)) {
+		return Ok(t);
+	}
+	return t;
 }
 
 /**
@@ -111,8 +123,14 @@ export function unwrapOr(t, def) {
  * @returns {T|never}
  */
 export function unwrapOrElse(t, def) {
-  if (isNone(t)) return def();
-  if (isErr(t)) return def();
-  if (isOk(t)) return Ok(t);
-  return t;
+	if (isNone(t)) {
+		return def();
+	}
+	if (isErr(t)) {
+		return def();
+	}
+	if (isOk(t)) {
+		return Ok(t);
+	}
+	return t;
 }

@@ -5,9 +5,9 @@
  * @returns {number[]}
  */
 export function range(start, end, stride = 1) {
-  const range = [];
-  for (let i = start; i < end; i += stride) {
-    range.push(i);
-  }
-  return range;
+	const range = [];
+	for (let i = start; i < end; i += stride) {
+		range.push(i);
+	}
+	return range;
 }

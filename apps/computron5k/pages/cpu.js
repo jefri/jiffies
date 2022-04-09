@@ -11,90 +11,96 @@ import { Screen } from "../components/screen.js";
 import { TickScreen } from "../testing/fill.js";
 
 /** @param {{cpu: CPUChip}} props */
-export const CPU = (
-  { cpu } = { cpu: new CPUChip({ ROM: new Memory(HACK) }) }
-) => {
-  const PC = span();
-  const A = span();
-  const D = span();
-  /** @type {ReturnType<MemoryGUI>} */
-  let RAM;
-  /** @type {ReturnType<MemoryGUI>} */
-  let ROM;
-  /** @type {ReturnType<Runbar>} */
-  let runbar;
-  /** @type {ReturnType<Screen>} */
-  let screen;
+export const CPU = ({ cpu } = { cpu: new CPUChip({ ROM: new Memory(HACK) }) }) => {
+	const PC = span();
+	const A = span();
+	const D = span();
+	/** @type {ReturnType<MemoryGUI>} */
+	let RAM;
+	/** @type {ReturnType<MemoryGUI>} */
+	let ROM;
+	/** @type {ReturnType<Runbar>} */
+	let runbar;
+	/** @type {ReturnType<Screen>} */
+	let screen;
 
-  const resetRAM = () => {
-    cpu.RAM.set(0, 3);
-    cpu.RAM.set(1, 2);
-    RAM?.update();
-    screen?.update();
-  };
-  resetRAM();
+	const resetRAM = () => {
+		cpu.RAM.set(0, 3);
+		cpu.RAM.set(1, 2);
+		RAM?.update();
+		screen?.update();
+	};
+	resetRAM();
 
-  const tickScreen = TickScreen(cpu);
+	const tickScreen = TickScreen(cpu);
 
-  const setState = () => {
-    PC.update(`PC: ${cpu.PC}`);
-    A.update(`A: ${cpu.A}`);
-    D.update(`D: ${cpu.D}`);
-    RAM?.update({ highlight: cpu.A });
-    ROM?.update({ highlight: cpu.PC });
-    screen?.update();
-  };
+	const setState = () => {
+		PC.update(`PC: ${cpu.PC}`);
+		A.update(`A: ${cpu.A}`);
+		D.update(`D: ${cpu.D}`);
+		RAM?.update({ highlight: cpu.A });
+		ROM?.update({ highlight: cpu.PC });
+		screen?.update();
+	};
 
-  setState();
+	setState();
 
-  const runner = new (class CPURunner extends Timer {
-    tick() {
-      cpu.tick();
-      // tickScreen();
-    }
+	const runner = new (
+		class CPURunner extends Timer {
+			tick() {
+				cpu.tick();
+				// tickScreen();
+			}
 
-    finishFrame() {
-      setState();
-    }
+			finishFrame() {
+				setState();
+			}
 
-    reset() {
-      cpu.reset();
-      setState();
-    }
+			reset() {
+				cpu.reset();
+				setState();
+			}
 
-    toggle() {
-      runbar.update();
-    }
-  })();
+			toggle() {
+				runbar.update();
+			}
+		}
+	)();
 
-  return div(
-    { class: "View__CPU" },
-    (runbar = Runbar(
-      { class: "container", style: { display: "block" }, runner },
-      ul(li(PC), li(A), li(D))
-    )),
-    div(
-      {
-        class: "grid",
-        style: {
-          gridTemplateColumns: "repeat(4, 256px)",
-          justifyContent: "center",
-        },
-      },
-      (ROM = MemoryGUI({
-        name: "ROM",
-        memory: cpu.ROM,
-        highlight: cpu.PC,
-        format: "asm",
-        editable: false,
-      })),
-      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
-      (screen = Screen({
-        style: { gridColumn: "3 / span 2" },
-        memory: cpu.RAM,
-      }))
-    )
-  );
+	return div(
+		{ class: "View__CPU" },
+		(
+			runbar =
+				Runbar(
+					{ class: "container", style: { display: "block" }, runner },
+					ul(li(PC), li(A), li(D)),
+				)
+		),
+		div(
+			{
+				class: "grid",
+				style: {
+					gridTemplateColumns: "repeat(4, 256px)",
+					justifyContent: "center",
+				},
+			},
+			(
+				ROM =
+					MemoryGUI({
+						name: "ROM",
+						memory: cpu.ROM,
+						highlight: cpu.PC,
+						format: "asm",
+						editable: false,
+					})
+			),
+			(RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
+			(
+				screen =
+					Screen({ style: { gridColumn: "3 / span 2" }, memory: cpu.RAM })
+			),
+		),
+	);
 };
 
 export default CPU;
