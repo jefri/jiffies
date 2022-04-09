@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Server",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/server/http/index.js",
+      "program": "${workspaceFolder}/server/main.ts",
       "args": ["--port=8080"]
     }
   ]

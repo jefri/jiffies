@@ -1,7 +1,7 @@
-import { FC } from "../../../jiffies/dom/fc";
-import { table, tbody, td, th, thead, tr } from "../../../jiffies/dom/html";
-import { Pin, Pins } from "../simulator/chip/chip";
-import { cursor } from "../../../jiffies/dom/css/cursor";
+import { FC } from "../../../jiffies/dom/fc.js";
+import { table, tbody, td, th, thead, tr } from "../../../jiffies/dom/html.js";
+import { Pin, Pins } from "../simulator/chip/chip.js";
+import { cursor } from "../../../jiffies/dom/css/cursor.js";
 
 export const Pinout = FC(
 	"pin-out",

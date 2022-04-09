@@ -11,9 +11,8 @@ const tsmap = new Map();
 
 export async function transpile(url, get) {
   if (!tsmap.has(url)) {
-    const { source: rawSource } = await get();
     const source = ts.transpile(
-      rawSource.toString(),
+      (await get()).toString(),
       compilerOptions,
       url,
       undefined,

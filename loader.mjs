@@ -26,8 +26,9 @@ export async function load(url, context, defaultLoad) {
   return url.endsWith("ts")
     ? {
         format: "module",
-        source: await transpile(url, () =>
-          defaultLoad(url, { format: "module" })
+        source: await transpile(
+          url,
+          async () => (await defaultLoad(url, { format: "module" })).source
         ),
       }
     : defaultLoad(url, context, defaultLoad);

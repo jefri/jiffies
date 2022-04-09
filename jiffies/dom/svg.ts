@@ -1,14 +1,16 @@
-import { DenormAttrs, DenormChildren, up } from "./dom";
+import { DenormAttrs, DenormChildren, up } from "./dom.js";
 
-const makeSVGElement = <K extends keyof SVGElementTagNameMap>(name: K) => (
-	attrs?: DenormAttrs<SVGElementTagNameMap[K]>,
-	...children: DenormChildren[]
-) =>
-	up(
-		document.createElementNS("http://www.w3.org/2000/svg", name),
-		attrs,
-		...children,
-	);
+const makeSVGElement =
+  <K extends keyof SVGElementTagNameMap>(name: K) =>
+  (
+    attrs?: DenormAttrs<SVGElementTagNameMap[K]>,
+    ...children: DenormChildren[]
+  ) =>
+    up(
+      document.createElementNS("http://www.w3.org/2000/svg", name),
+      attrs,
+      ...children
+    );
 
 export const a = makeSVGElement("a");
 export const animate = makeSVGElement("animate");

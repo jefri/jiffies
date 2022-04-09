@@ -6,16 +6,23 @@ import { bin, dec, hex } from "../util/twos.js";
 import ButtonBar from "../../../jiffies/components/button_bar.js";
 import InlineEdit from "../../../jiffies/components/inline_edit.js";
 import VirtualScroll from "../../../jiffies/components/virtual_scroll.js";
-import { article, code, header, nav, span, ul } from "../../../jiffies/dom/html";
+import {
+  article,
+  code,
+  header,
+  nav,
+  span,
+  ul,
+} from "../../../jiffies/dom/html.js";
 import { rounded } from "../../../jiffies/dom/css/border.js";
 import { width } from "../../../jiffies/dom/css/sizing.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
-import { FC } from "../../../jiffies/dom/fc";
-import { li } from "../../../jiffies/dom/html";
+import { FC } from "../../../jiffies/dom/fc.js";
+import { li } from "../../../jiffies/dom/html.js";
 
 const MemoryBlock = FC(
-	"memory-block",
-	/**
+  "memory-block",
+  /**
    * @param {HTMLElement & {virtualScroll: VirtualScroll<number, MemoryCell>}} element
    * @param { {
       memory: MemoryChip;
@@ -25,31 +32,30 @@ const MemoryBlock = FC(
       onChange: (i: number, value: string, previous: number) => void;
     } } props
   */
-	(element, { memory, highlight = -1, editable = false, format, onChange }) => {
-		if (element.virtualScroll) {
-			element.virtualScroll.update();
-		} else {
-			element.virtualScroll =
-				VirtualScroll({
-					settings: { count: 20, maxIndex: memory.size, itemHeight: 28 },
-					get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
-					row: ([i, v]) =>
-						MemoryCell({
-							index: i,
-							value: format(v),
-							editable: editable,
-							highlight: i === highlight,
-							onChange: (value) => onChange(i, value, v),
-						}),
-				});
-		}
-		return element.virtualScroll;
-	},
+  (element, { memory, highlight = -1, editable = false, format, onChange }) => {
+    if (element.virtualScroll) {
+      element.virtualScroll.update();
+    } else {
+      element.virtualScroll = VirtualScroll({
+        settings: { count: 20, maxIndex: memory.size, itemHeight: 28 },
+        get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
+        row: ([i, v]) =>
+          MemoryCell({
+            index: i,
+            value: format(v),
+            editable: editable,
+            highlight: i === highlight,
+            onChange: (value) => onChange(i, value, v),
+          }),
+      });
+    }
+    return element.virtualScroll;
+  }
 );
 
 const MemoryCell = FC(
-	"memory-cell",
-	/**
+  "memory-cell",
+  /**
    * @param {HTMLElement} el
    * @param {{
       index: number;
@@ -59,43 +65,43 @@ const MemoryCell = FC(
       onChange?: (v: string) => void;
     }} props
   */
-	(
-		el,
-		{ index, value, highlight = false, editable = false, onChange = () => {} },
-	) => [
-		code(
-			{
-				style: {
-					...width("1/4"),
-					...rounded("none"),
-					...(
-						highlight ? { background: "var(--code-kbd-background-color)" } : {}
-					),
-				},
-			},
-			hex(index),
-		),
-		code(
-			{
-				style: {
-					...width("3/4"),
-					...rounded("none"),
-					...text("right"),
-					...(
-						highlight ? { background: "var(--code-kbd-background-color)" } : {}
-					),
-				},
-			},
-			editable ? InlineEdit({ value, events: { change: onChange } }) : span(
-				value,
-			),
-		),
-	],
+  (
+    el,
+    { index, value, highlight = false, editable = false, onChange = () => {} }
+  ) => [
+    code(
+      {
+        style: {
+          ...width("1/4"),
+          ...rounded("none"),
+          ...(highlight
+            ? { background: "var(--code-kbd-background-color)" }
+            : {}),
+        },
+      },
+      hex(index)
+    ),
+    code(
+      {
+        style: {
+          ...width("3/4"),
+          ...rounded("none"),
+          ...text("right"),
+          ...(highlight
+            ? { background: "var(--code-kbd-background-color)" }
+            : {}),
+        },
+      },
+      editable
+        ? InlineEdit({ value, events: { change: onChange } })
+        : span(value)
+    ),
+  ]
 );
 
 const Memory = FC(
-	"memory-gui",
-	/** 
+  "memory-gui",
+  /** 
    * @param {import("../../../jiffies/dom/dom.js").Updateable<HTMLElement>} el
    * @param {{
        name?: string;
@@ -105,37 +111,37 @@ const Memory = FC(
         format: Format;
       }} props
    */
-	(
-		el,
-		{ name = "Memory", highlight = -1, editable = true, memory, format = "dec" },
-	) => {
-		el.style.width = "256px";
-		const state = (el.state ??= { format });
-		const setFormat = ( /** @type Format */ f) => {
-			state.format = f;
-			buttonBar.update({ value: state.format });
-			memoryBlock.update();
-		};
+  (
+    el,
+    { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
+  ) => {
+    el.style.width = "256px";
+    const state = (el.state ??= { format });
+    const setFormat = (/** @type Format */ f) => {
+      state.format = f;
+      buttonBar.update({ value: state.format });
+      memoryBlock.update();
+    };
 
-		const buttonBar = ButtonBar({
-			value: state.format,
-			values: FORMATS,
-			events: { onSelect: setFormat },
-		});
+    const buttonBar = ButtonBar({
+      value: state.format,
+      values: FORMATS,
+      events: { onSelect: setFormat },
+    });
 
-		const memoryBlock = MemoryBlock({
-			memory,
-			highlight,
-			editable,
-			format: (v) => doFormat(state.format, v),
-			onChange: (i, v) => {
-				memory.update(i, v, state.format);
-				memoryBlock.update();
-			},
-		});
+    const memoryBlock = MemoryBlock({
+      memory,
+      highlight,
+      editable,
+      format: (v) => doFormat(state.format, v),
+      onChange: (i, v) => {
+        memory.update(i, v, state.format);
+        memoryBlock.update();
+      },
+    });
 
-		return article(header(nav(ul(li(name)), buttonBar)), memoryBlock);
-	},
+    return article(header(nav(ul(li(name)), buttonBar)), memoryBlock);
+  }
 );
 
 export default Memory;
@@ -146,15 +152,15 @@ export default Memory;
  * @returns string
  */
 function doFormat(format, v) {
-	switch (format) {
-		case "bin":
-			return bin(v);
-		case "hex":
-			return hex(v);
-		case "asm":
-			return asm(v);
-		case "dec":
-		default:
-			return dec(v);
-	}
+  switch (format) {
+    case "bin":
+      return bin(v);
+    case "hex":
+      return hex(v);
+    case "asm":
+      return asm(v);
+    case "dec":
+    default:
+      return dec(v);
+  }
 }
