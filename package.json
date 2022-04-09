@@ -1,9 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "start": "node ./server/http/index.js",
-    "dev": "nodemon ./server/http/index.js",
-    "test": "node ./test.js",
+    "start": "node --experimental-loader ./loader.mjs ./server/main.js",
+    "test": "node --experimental-loader ./loader.mjs ./test.js",
     "ci": "node ./test.js --mode=junit"
   },
   "devDependencies": {
