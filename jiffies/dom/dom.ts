@@ -113,7 +113,11 @@ export function update<E extends DOMElement>(
           break;
         default:
           if (typeof v === "string") {
-            element.setAttributeNS(element.namespaceURI, k, v);
+            if (v === "") {
+              element.removeAttributeNS(element.namespaceURI, k);
+            } else {
+              element.setAttributeNS(element.namespaceURI, k, v);
+            }
           }
       }
     } else {
