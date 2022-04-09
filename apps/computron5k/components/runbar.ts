@@ -24,7 +24,7 @@ export const Runbar = FC(
               style: { ...runButton },
               events: { click: () => runner.frame() },
             },
-            "➡️"
+            "⏭" // U+23ED
           )
         ),
         li(
@@ -33,7 +33,7 @@ export const Runbar = FC(
               style: { ...runButton },
               events: { click: () => runner.reset() },
             },
-            "⏪"
+            "⏪" // U+23EA
           )
         ),
         li(
@@ -44,9 +44,11 @@ export const Runbar = FC(
                 click: () => (runner.running ? runner.stop() : runner.start()),
               },
             },
-            runner.running ? "⏸" : "▶️"
+            runner.running ? "⏸" : "⏵" // U+23F8 or U+23F5
           )
-        ),
+        )
+      ),
+      ul(
         li(
           Select({
             name: "speed",

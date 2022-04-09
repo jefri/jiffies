@@ -1,10 +1,12 @@
 import {
   article,
   div,
+  footer,
   h2,
-  h3,
+  header,
   section,
   style,
+  textarea,
 } from "../../../jiffies/dom/html";
 import { compileFStyle, FStyle } from "../../../jiffies/dom/css/fstyle";
 import { Pinout } from "../components/pinout";
@@ -24,7 +26,7 @@ export const Chip = () => {
   };
 
   const inPinout = Pinout({ pins: chip.ins, toggle: onToggle });
-  const outPinout = Pinout({ pins: chip.outs, toggle: onToggle });
+  const outPinout = Pinout({ pins: chip.outs });
   const pinsPinout = Pinout({ pins: chip.pins });
   const runner = new (class ChipRunner extends Timer {
     tick() {
@@ -63,7 +65,7 @@ export const Chip = () => {
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         columnGap: "var(--block-spacing-horizontal)",
-        "> div.pinout": {
+        "> .pinouts": {
           display: "grid",
           grid: "1fr 1fr / fit-content repeat(2, minmax(200, 1fr))",
           columnGap: "var(--block-spacing-horizontal)",
@@ -71,31 +73,35 @@ export const Chip = () => {
             gridColumn: "1 / span 2",
             marginBottom: "0",
           },
-          article: {
-            margin: "calc(var(--block-spacing-vertical) / 2) 0",
-            boxShadow: "none",
-            border: "var(--border-width) solid var(--card-border-color)",
+          "> article": {
+            display: "flex",
+            flexDirection: "column",
+            "> pin-out": {
+              flexGrow: "1",
+            },
           },
         },
       },
     },
-    "@media (max-width: 576px)": {
+    "@media (max-width: 1023px)": {
       ".View__Chip > section": {
         display: "flex",
         flexDirection: "column",
-        "> div.pinout": {
-          display: "flex",
-          flexDirection: "column",
-          "> h2": {
-            order: "0",
-          },
-          ...[1, 2, 4].reduce(
-            (p, n) => ((p[`> article:nth-of-type(${n})`] = { order: "1" }), p),
-            {} as FStyle
-          ),
-          "> article:nth-of-type(3)": {
-            order: "2",
-          },
+      },
+    },
+    "@media (max-width: 576px)": {
+      ".View__Chip > section > .pinouts": {
+        display: "flex",
+        flexDirection: "column",
+        "> h2": {
+          order: "0",
+        },
+        ...[1, 2, 4].reduce(
+          (p, n) => ((p[`> article:nth-of-type(${n})`] = { order: "1" }), p),
+          {} as FStyle
+        ),
+        "> article:nth-of-type(3)": {
+          order: "2",
         },
       },
     },
@@ -107,12 +113,32 @@ export const Chip = () => {
     runbar,
     section(
       div(
-        { class: "pinout" },
+        { class: "pinouts" },
         h2(`Chip: ${chip.name}`),
-        article(h3("Input pins"), inPinout),
-        article(h3("Output pins"), outPinout),
-        article(h3("HDL")),
-        article(h3("Internal Pins"), pinsPinout)
+        article(
+          { class: "no-shadow" },
+          header("Input pins"),
+          inPinout,
+          footer()
+        ),
+        article(
+          { class: "no-shadow" },
+          header("Output pins"),
+          outPinout,
+          footer()
+        ),
+        article(
+          { class: "no-shadow" },
+          header("HDL"),
+          textarea({ rows: 10 }),
+          footer()
+        ),
+        article(
+          { class: "no-shadow" },
+          header("Internal Pins"),
+          pinsPinout,
+          footer()
+        )
       )
     )
   );
