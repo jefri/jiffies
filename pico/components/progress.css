@@ -1,0 +1,60 @@
+/*!
+ * Pico.css v1.4.1 (https://picocss.com)
+ * Copyright 2019-2021 - Licensed under MIT
+ */
+
+/** Progress */
+progress {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+progress {
+  appearance: none;
+  display: inline-block;
+  width: 100%;
+  height: 0.5rem;
+  margin-bottom: calc(var(--spacing) * 0.5);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--border-radius);
+  background-color: var(--progress-background-color);
+  color: var(--progress-color);
+}
+progress::-webkit-progress-bar {
+  border-radius: var(--border-radius);
+  background: transparent;
+}
+progress[value]::-webkit-progress-value {
+  background-color: var(--progress-color);
+}
+progress::-moz-progress-bar {
+  background-color: var(--progress-color);
+}
+@media (prefers-reduced-motion: no-preference) {
+  progress:indeterminate {
+    background: var(--progress-background-color)
+      linear-gradient(
+        to right,
+        var(--progress-color) 30%,
+        var(--progress-background-color) 30%
+      )
+      top left/150% 150% no-repeat;
+    animation: progressIndeterminate 1s linear infinite;
+  }
+  progress:indeterminate[value]::-webkit-progress-value {
+    background-color: transparent;
+  }
+  progress:indeterminate::-moz-progress-bar {
+    background-color: transparent;
+  }
+}
+
+@keyframes progressIndeterminate {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

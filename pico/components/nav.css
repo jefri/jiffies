@@ -1,0 +1,70 @@
+/*!
+ * Pico.css v1.4.1 (https://picocss.com)
+ * Copyright 2019-2021 - Licensed under MIT
+ */
+
+/** Nav */
+nav,
+nav ul {
+  display: flex;
+}
+
+@media (max-width: 576px) {
+    nav {
+        flex-direction: column;
+    }
+}
+
+nav {
+  justify-content: space-between;
+}
+nav ol,
+nav ul {
+  align-items: center;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+nav ol:first-of-type,
+nav ul:first-of-type {
+  margin-left: calc(var(--spacing) * -0.5);
+}
+nav ol:last-of-type,
+nav ul:last-of-type {
+  margin-right: calc(var(--spacing) * -0.5);
+}
+nav li {
+  display: inline-block;
+  margin: 0;
+  padding: var(--spacing) calc(var(--spacing) * 0.5);
+}
+nav li > *,
+nav li > input:not([type="checkbox"]):not([type="radio"]) {
+  margin-bottom: 0;
+}
+nav a {
+  display: block;
+  margin: calc(var(--spacing) * -1) calc(var(--spacing) * -0.5);
+  padding: var(--spacing) calc(var(--spacing) * 0.5);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+}
+nav a:hover,
+nav a:active,
+nav a:focus {
+  text-decoration: none;
+}
+
+aside nav,
+aside ol,
+aside ul,
+aside li {
+  display: block;
+}
+aside li {
+  padding: calc(var(--spacing) * 0.5);
+}
+aside li a {
+  margin: calc(var(--spacing) * -0.5);
+  padding: calc(var(--spacing) * 0.5);
+}

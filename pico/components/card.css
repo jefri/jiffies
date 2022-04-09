@@ -1,0 +1,37 @@
+/*!
+ * Pico.css v1.4.1 (https://picocss.com)
+ * Copyright 2019-2021 - Licensed under MIT
+ */
+
+/** Card (<article>) */
+article {
+  margin: var(--block-spacing-vertical) 0;
+  padding: var(--block-spacing-vertical) var(--block-spacing-horizontal);
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background: var(--card-background-color);
+  box-shadow: var(--card-box-shadow);
+}
+article.no-shadow {
+    margin: calc(var(--block-spacing-vertical) / 2) 0;
+    box-shadow: none;
+    border: var(--border-width) solid var(--card-border-color);
+}
+article > header,
+article > footer {
+  margin-right: calc(var(--block-spacing-horizontal) * -1);
+  margin-left: calc(var(--block-spacing-horizontal) * -1);
+  padding: calc(var(--block-spacing-vertical) * 0.66)
+    var(--block-spacing-horizontal);
+  background-color: var(--card-sectionning-background-color);
+}
+article > header {
+  margin-top: calc(var(--block-spacing-vertical) * -1);
+  margin-bottom: calc(var(--block-spacing-vertical) * 0.5);
+  border-bottom: var(--border-width) solid var(--card-border-color);
+}
+article > footer {
+  /* margin-top: var(--block-spacing-vertical); */
+  margin-bottom: calc(var(--block-spacing-vertical) * -1);
+  border-top: var(--border-width) solid var(--card-border-color);
+}
