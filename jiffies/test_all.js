@@ -1,3 +1,5 @@
+// This file must be .js for imports to run. Unused imports in .ts files are
+// discarded during transpilation.
 import { describe, expect, it } from "./scope/index.js";
 
 import * as result from "./result.test.js";

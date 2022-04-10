@@ -2,8 +2,8 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-loader ./loader.mjs ./server/main.js",
-    "test": "node --experimental-loader ./loader.mjs ./test.js",
-    "ci": "node ./test.js --mode=junit"
+    "test": "node --experimental-loader ./loader.mjs ./test.mjs",
+    "ci": "node --experimental-loader ./loader.mjs ./test.mjs --mode=junit"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",

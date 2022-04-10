@@ -1,6 +1,6 @@
 /** @typedef {import("../log.js").Logger} Logger */
 
-import { div, span, ul, li, pre, code } from "../dom/html.ts";
+import { div, span, ul, li, pre, code } from "../dom/html.js";
 import { LEVEL } from "../log.js";
 
 /**

@@ -1,9 +1,9 @@
-import { FC } from "../dom/fc.ts";
-import { option, select } from "../dom/html.ts";
+import { FC } from "../dom/fc.js";
+import { option, select } from "../dom/html.js";
 
 export const Select = FC(
-	"jiffies-select",
-	/**
+  "jiffies-select",
+  /**
    * @param HTMLElement el;
    * @param {{
     name: string,
@@ -15,11 +15,11 @@ export const Select = FC(
     options: ([string, string])[],
    }} props
   */
-	(el, { name, events: { change }, disabled, value, options }) =>
-		select(
-			{ name, events: { change }, disabled },
-			...options.map(
-				([v, name]) => option({ value: v, selected: value === v }, `${name}`),
-			),
-		),
+  (el, { name, events: { change }, disabled, value, options }) =>
+    select(
+      { name, events: { change }, disabled },
+      ...options.map(([v, name]) =>
+        option({ value: v, selected: value === v }, `${name}`)
+      )
+    )
 );
