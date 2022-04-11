@@ -41,7 +41,7 @@ describe("html", () => {
 
     expect(clicked).toBe(1);
 
-    btn.update({ events: { click: null } });
+    btn.update({ events: { click: undefined } });
     btn.click();
     expect(clicked).toBe(1);
   });
