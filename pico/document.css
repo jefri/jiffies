@@ -86,6 +86,12 @@ body > footer {
   }
 }
 
+@media print {
+  .container {
+    width: 8.5in;
+  }
+}
+
 /**
    * Section
    * Responsive spacings for section

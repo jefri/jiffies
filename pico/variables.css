@@ -29,7 +29,6 @@
   --transition: 0.2s ease-in-out;
 }
 
-/**
 @media (min-width: 576px) {
   :root {
     --font-size: 17px;
@@ -50,7 +49,12 @@
     --font-size: 20px;
   }
 }
-*/
+
+@media print {
+  :root {
+    --font-size: 10px;
+  }
+}
 
 @media (min-width: 576px) {
   body > header,

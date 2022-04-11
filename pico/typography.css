@@ -221,6 +221,10 @@ p {
   margin-bottom: var(--typography-spacing-vertical);
 }
 
+p.justify {
+  text-align: justify;
+}
+
 small {
   font-size: var(--font-size);
 }

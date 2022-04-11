@@ -12,11 +12,13 @@ article {
   background: var(--card-background-color);
   box-shadow: var(--card-box-shadow);
 }
+
 article.no-shadow {
     margin: calc(var(--block-spacing-vertical) / 2) 0;
     box-shadow: none;
     border: var(--border-width) solid var(--card-border-color);
 }
+
 article > header,
 article > footer {
   margin-right: calc(var(--block-spacing-horizontal) * -1);
@@ -34,4 +36,10 @@ article > footer {
   /* margin-top: var(--block-spacing-vertical); */
   margin-bottom: calc(var(--block-spacing-vertical) * -1);
   border-top: var(--border-width) solid var(--card-border-color);
+}
+
+@media print {
+  article {
+    box-shadow: none;
+  }
 }
