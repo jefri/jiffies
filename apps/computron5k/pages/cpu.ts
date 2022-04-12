@@ -17,14 +17,10 @@ export const CPU = (
   const PC = span();
   const A = span();
   const D = span();
-  /** @type {ReturnType<MemoryGUI>} */
-  let RAM;
-  /** @type {ReturnType<MemoryGUI>} */
-  let ROM;
-  /** @type {ReturnType<Runbar>} */
-  let runbar;
-  /** @type {ReturnType<Screen>} */
-  let screen;
+  let RAM: ReturnType<typeof MemoryGUI>;
+  let ROM: ReturnType<typeof MemoryGUI>;
+  let runbar: ReturnType<typeof Runbar>;
+  let screen: ReturnType<typeof Screen>;
 
   const resetRAM = () => {
     cpu.RAM.set(0, 3);

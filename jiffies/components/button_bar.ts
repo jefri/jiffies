@@ -1,20 +1,17 @@
+import { Display, display } from "../display.js";
 import { FC } from "../dom/fc.js";
 import { a, li, ul } from "../dom/html.js";
 
 const ButtonBar = FC(
   "button-bar",
-  /**
-   * @template {string} T
-   * @param {HTMLElement} el
-   * @param {{
-      value: T;
-      values: T[];
-      events: {
-        onSelect: (current: T) => void;
-      }
-    }}  props
-  */
-  (el, { value, values, events }) =>
+  <T extends Display>(
+    el: HTMLElement,
+    {
+      value,
+      values,
+      events,
+    }: { value: T; values: T[]; events: { onSelect: (current: T) => void } }
+  ) =>
     ul(
       { class: "ButtonBar__wrapper" },
       ...values.map((option) =>
@@ -34,7 +31,7 @@ const ButtonBar = FC(
                 },
               },
             },
-            option
+            display(option)
           )
         )
       )

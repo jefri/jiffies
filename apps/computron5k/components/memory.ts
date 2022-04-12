@@ -1,4 +1,8 @@
-import { FORMATS, Memory as MemoryChip } from "../simulator/cpu/memory.js";
+import {
+  Format,
+  FORMATS,
+  Memory as MemoryChip,
+} from "../simulator/cpu/memory.js";
 import { asm } from "../util/asm.js";
 import { bin, dec, hex } from "../util/twos.js";
 /** @typedef {import("../simulator/cpu/memory.js").Format} Format */
@@ -19,20 +23,28 @@ import { width } from "../../../jiffies/dom/css/sizing.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 import { li } from "../../../jiffies/dom/html.js";
+import { Updatable } from "../../../jiffies/dom/dom.js";
 
 const MemoryBlock = FC(
   "memory-block",
-  /**
-   * @param {HTMLElement & {virtualScroll: VirtualScroll<number, MemoryCell>}} element
-   * @param { {
+  (
+    element: Updatable<HTMLElement> & {
+      virtualScroll: VirtualScroll<number, typeof MemoryCell>;
+    },
+    {
+      memory,
+      highlight = -1,
+      editable = false,
+      format,
+      onChange,
+    }: {
       memory: MemoryChip;
       highlight?: number;
       editable?: boolean;
       format: (v: number) => string;
       onChange: (i: number, value: string, previous: number) => void;
-    } } props
-  */
-  (element, { memory, highlight = -1, editable = false, format, onChange }) => {
+    }
+  ) => {
     if (element.virtualScroll) {
       element.virtualScroll.update();
     } else {
@@ -55,19 +67,21 @@ const MemoryBlock = FC(
 
 const MemoryCell = FC(
   "memory-cell",
-  /**
-   * @param {HTMLElement} el
-   * @param {{
-      index: number;
-      value: string;
-      highlight: boolean;
-      editable?: boolean;
-      onChange?: (v: string) => void;
-    }} props
-  */
   (
-    el,
-    { index, value, highlight = false, editable = false, onChange = () => {} }
+    el: Updatable<HTMLElement>,
+    {
+      index,
+      value,
+      highlight = false,
+      editable = false,
+      onChange = () => {},
+    }: {
+      index: number;
+      value: number;
+      highlight?: boolean;
+      editable?: boolean;
+      onChange: (i: number, value: string, previous: number) => void;
+    }
   ) => [
     code(
       {
@@ -93,7 +107,7 @@ const MemoryCell = FC(
         },
       },
       editable
-        ? InlineEdit({ value, events: { change: onChange } })
+        ? InlineEdit({ value: `${value}`, events: { change: onChange } })
         : span(value)
     ),
   ]
@@ -101,23 +115,25 @@ const MemoryCell = FC(
 
 const Memory = FC(
   "memory-gui",
-  /** 
-   * @param {import("../../../jiffies/dom/dom.js").Updateable<HTMLElement>} el
-   * @param {{
-       name?: string;
-        highlight?: number;
-        editable?: boolean;
-        memory: MemoryChip;
-        format: Format;
-      }} props
-   */
   (
-    el,
-    { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
+    el: Updatable<HTMLElement> & { state?: { format: Format } },
+    {
+      name = "Memory",
+      highlight = -1,
+      editable = true,
+      memory,
+      format = "dec",
+    }: {
+      name?: string;
+      editable?: boolean;
+      highlight?: number;
+      memory: MemoryChip;
+      format: Format;
+    }
   ) => {
     el.style.width = "256px";
     const state = (el.state ??= { format });
-    const setFormat = (/** @type Format */ f) => {
+    const setFormat = (f: Format) => {
       state.format = f;
       buttonBar.update({ value: state.format });
       memoryBlock.update();
@@ -146,12 +162,7 @@ const Memory = FC(
 
 export default Memory;
 
-/**
- * @param {Format} format
- * @param {number} v
- * @returns string
- */
-function doFormat(format, v) {
+function doFormat(format: Format, v: number): string {
   switch (format) {
     case "bin":
       return bin(v);
