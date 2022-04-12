@@ -55,6 +55,10 @@ nav a:focus {
   text-decoration: none;
 }
 
+nav.panel li {
+  padding: 0 calc(var(--spacing) / 4);
+}
+
 aside nav,
 aside ol,
 aside ul,

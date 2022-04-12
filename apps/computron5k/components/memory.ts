@@ -156,7 +156,11 @@ const Memory = FC(
       },
     });
 
-    return article(header(nav(ul(li(name)), buttonBar)), memoryBlock);
+    return article(
+      { class: "panel no-shadow" },
+      header(nav({ class: "panel" }, ul(li(name)), buttonBar)),
+      memoryBlock
+    );
   }
 );
 

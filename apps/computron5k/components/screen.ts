@@ -4,24 +4,15 @@ import { Memory, SCREEN } from "../simulator/cpu/memory.js";
 
 const WHITE = "white";
 const BLACK = "black";
+type COLOR = typeof WHITE | typeof BLACK;
 
-/** @returns WHITE|BLACK */
-function get(
-  /** @type Memory */ mem,
-  /** @type number */ x,
-  /** @type number */ y
-) {
+function get(mem: Memory, x: number, y: number): COLOR {
   const byte = mem.get(SCREEN + 32 * y + ((x / 16) | 0));
   const bit = byte & (1 << x % 16);
   return bit === 0 ? WHITE : BLACK;
 }
 
-function set(
-  /** @type Uint8ClampedArray */ data,
-  /** @type number */ x,
-  /** @type number */ y,
-  /** @type WHITE|BLACK */ value
-) {
+function set(data: Uint8ClampedArray, x: number, y: number, value: COLOR) {
   const pixel = (y * 512 + x) * 4;
   const color = value === WHITE ? 255 : 0;
   data[pixel] = color;
@@ -32,14 +23,16 @@ function set(
 
 export const Screen = FC(
   "hack-screen",
-  /**
-   * @param {HTMLElement&{screen?:HTMLCanvasElement, ctx?: CanvasRenderingContext2D}} el
-   * @param {{memory: Memory}} param1
-   */
-  (el, { memory }) => {
+  (
+    el: HTMLElement & {
+      screen?: HTMLCanvasElement;
+      ctx?: CanvasRenderingContext2D;
+    },
+    { memory }: { memory: Memory }
+  ) => {
     const screen = (el.screen ??= canvas({ width: 512, height: 256 }));
     el.ctx ??= screen.getContext("2d") ?? undefined;
-    el.style.width = "calc(512px + 2 * var(--block-spacing-horizontal))";
+    el.style.width = "518px";
 
     if (el.ctx) {
       const image = el.ctx.getImageData(0, 0, 512, 256);
@@ -53,6 +46,7 @@ export const Screen = FC(
     }
 
     return article(
+      { class: "no-shadow panel" },
       header("Display"),
       figure(
         {
@@ -61,6 +55,7 @@ export const Screen = FC(
             borderLeft: "2px solid gray",
             borderBottom: "2px solid lightgray",
             borderRight: "2px solid lightgray",
+            marginBottom: "0",
           },
         },
         screen

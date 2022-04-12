@@ -38,6 +38,18 @@ article > footer {
   border-top: var(--border-width) solid var(--card-border-color);
 }
 
+article.panel {
+  margin: 0;
+  padding: 0;
+}
+
+article.panel > header,
+article.panel > footer {
+  margin: 0;
+  padding: calc(var(--block-spacing-vertical) / 2) calc((var(--block-spacing-horizontal) / 2));
+}
+
+
 @media print {
   article {
     box-shadow: none;

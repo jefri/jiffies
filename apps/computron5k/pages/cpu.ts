@@ -1,4 +1,4 @@
-import { div, li, span, ul } from "../../../jiffies/dom/html.js";
+import { div, li, span, style, ul } from "../../../jiffies/dom/html.js";
 import { CPU as CPUChip } from "../simulator/cpu/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/cpu/memory.js";
@@ -9,6 +9,7 @@ import { Screen } from "../components/screen.js";
 /** @typedef {import("../components/screen.js").Screen} Screen */
 
 import { TickScreen } from "../testing/fill.js";
+import { compileFStyle } from "../../../jiffies/dom/css/fstyle.js";
 
 /** @param {{cpu: CPUChip}} props */
 export const CPU = (
@@ -65,18 +66,32 @@ export const CPU = (
 
   return div(
     { class: "View__CPU" },
-    (runbar = Runbar(
-      { class: "container", style: { display: "block" }, runner },
-      ul(li(PC), li(A), li(D))
-    )),
-    div(
-      {
-        class: "grid",
-        style: {
-          gridTemplateColumns: "repeat(4, 256px)",
-          justifyContent: "center",
+    (runbar = Runbar({ runner }, ul(li(PC), li(A), li(D)))),
+    style(
+      compileFStyle({
+        ".View__CPU": {
+          "div.grid": {
+            gridTemplateColumns: "repeat(4, 256px)",
+            justifyContent: "center",
+          },
+          "hack-screen": {
+            gridColumn: "3 / span 2",
+          },
         },
-      },
+        "@media (max-width: 1125px)": {
+          ".View__CPU": {
+            "div.grid": {
+              gridTemplateColumns: "repeat(2, 256px)",
+            },
+            "hack-screen": {
+              gridColumn: "1 / span 2",
+            },
+          },
+        },
+      })
+    ),
+    div(
+      { class: "grid" },
       (ROM = MemoryGUI({
         name: "ROM",
         memory: cpu.ROM,
@@ -86,7 +101,6 @@ export const CPU = (
       })),
       (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
       (screen = Screen({
-        style: { gridColumn: "3 / span 2" },
         memory: cpu.RAM,
       }))
     )

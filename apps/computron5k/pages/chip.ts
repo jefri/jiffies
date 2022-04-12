@@ -64,11 +64,11 @@ export const Chip = () => {
       "> section": {
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
-        columnGap: "var(--block-spacing-horizontal)",
+        gap: "var(--block-spacing-vertical) var(--block-spacing-horizontal)",
         "> .pinouts": {
           display: "grid",
           grid: "1fr 1fr / fit-content repeat(2, minmax(200, 1fr))",
-          columnGap: "var(--block-spacing-horizontal)",
+          gap: "var(--block-spacing-vertical) var(--block-spacing-horizontal)",
           "> h2": { gridColumn: "1 / span 2", marginBottom: "0" },
           "> article": {
             display: "flex",
@@ -103,26 +103,15 @@ export const Chip = () => {
       div(
         { class: "pinouts" },
         h2(`Chip: ${chip.name}`),
+        article({ class: "no-shadow panel" }, header("Input pins"), inPinout),
+        article({ class: "no-shadow panel" }, header("Output pins"), outPinout),
         article(
-          { class: "no-shadow" },
-          header("Input pins"),
-          inPinout,
-          footer()
-        ),
-        article(
-          { class: "no-shadow" },
-          header("Output pins"),
-          outPinout,
-          footer()
-        ),
-        article(
-          { class: "no-shadow" },
+          { class: "no-shadow panel" },
           header("HDL"),
-          textarea({ rows: 10 }),
-          footer()
+          textarea({ rows: 10, style: { height: "100%" } })
         ),
         article(
-          { class: "no-shadow" },
+          { class: "no-shadow panel" },
           header("Internal Pins"),
           pinsPinout,
           footer()
