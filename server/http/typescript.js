@@ -11,7 +11,6 @@ export const tsFileServer = async (req) => {
   if (req.url?.endsWith(".js")) {
     let filename = path.join(process.cwd(), req.url);
     try {
-      console.log(`Looking for ${filename}`);
       const stat = await fs.stat(filename);
       if (stat.isFile()) {
         const js = (await fs.readFile(filename)).toString("utf-8");
@@ -21,10 +20,8 @@ export const tsFileServer = async (req) => {
 
     filename = filename.replace(/\.js$/, ".ts");
     try {
-      console.log(`Looking for ${filename}`);
       const stat = await fs.stat(filename);
       if (stat.isFile()) {
-        console.log(`Found ${filename}`);
         const js = await transpile(filename, () => fs.readFile(filename));
         return contentResponse(js, "application/javascript");
       }

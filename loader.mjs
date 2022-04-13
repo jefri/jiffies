@@ -14,7 +14,6 @@ export async function resolve(specifier, context, defaultResolve) {
   try {
     const stats = await stat(fileURLToPath(tsURL));
     if (stats.isFile()) {
-      console.log(`Found ${tsSpecifier}`);
       return { url: tsSpecifier };
     }
   } catch (e) {

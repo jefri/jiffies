@@ -7,10 +7,7 @@ import { fileResponse } from "./response.js";
  * @type import("./index.js").StaticMiddleware
  */
 export const staticFileServer = async (req) => {
-  console.log(req.url);
-  console.log(req.host);
   const url = new URL(req.url ?? "", req.host ?? `${req.proto}://localhost`);
-  console.log(url);
   const filename = path.join(process.cwd(), url.pathname);
   try {
     const stat = await fs.stat(filename);
