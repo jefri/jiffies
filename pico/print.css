@@ -1,5 +1,15 @@
 @media print {
-    :root {
-        --font-size: 10px;
+    .no-print {
+        display: none;
+    }
+
+    .print-only {
+        display: inherit;
+    }
+}
+
+@media not print {
+    .print-only {
+        display: none;
     }
 }

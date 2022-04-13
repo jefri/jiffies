@@ -7,6 +7,7 @@ import {
   style,
   cite,
   a,
+  span,
 } from "../../jiffies/dom/html.js";
 import { Resume, AboutMe } from "./resume.js";
 
@@ -23,8 +24,11 @@ export const App = () => {
     "© David Souther 2022",
     cite(
       a(
-        { href: "https://github.com/jefri/jiffies/apps/resume" },
-        "Page Source: github.com/jefri/jiffies/apps/resume"
+        {
+          href: "https://github.com/jefri/jiffies/apps/resume",
+        },
+        "Page Source",
+        span({ class: "print-only" }, ": github.com/jefri/jiffies/apps/resume")
       )
     )
   );

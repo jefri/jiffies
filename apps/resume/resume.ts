@@ -26,6 +26,9 @@ import * as ResumeTypes from "./type.js";
 export const Resume = (resume: ResumeTypes.ResumeData) => [
   style(
     compileFStyle({
+      body: {
+        marginTop: "var(--block-spacing-vertical)",
+      },
       "article > header > h3": {
         marginBottom: "0",
       },
@@ -92,6 +95,9 @@ export const AboutMe = (
         figure: {
           gridArea: "avatar",
           margin: "0",
+          img: {
+            borderRadius: "10%",
+          },
         },
         "div.location": {
           gridArea: "location",
@@ -146,7 +152,19 @@ const Location = (location: ResumeTypes.Location) =>
   );
 
 const Links = (relevantLinks: ResumeTypes.Link[]) =>
-  nav(ul(...relevantLinks.map((link) => li(a({ href: link.URL }, link.type)))));
+  nav(
+    ul(
+      ...relevantLinks.map((link) =>
+        li(
+          a(
+            { href: link.URL },
+            span({ class: "no-print" }, link.type),
+            span({ class: "print-only" }, link.URL)
+          )
+        )
+      )
+    )
+  );
 
 const jobDetails = (jobs: ResumeTypes.JobExperience[]) =>
   article(header(h3("Work Experience")), ...jobs.map(jobDetail));
@@ -249,4 +267,8 @@ const publication = ({
   details: { name, URL },
   publishingDate,
 }: ResumeTypes.PublicArtifact) =>
-  p(a({ href: URL }, name), small(em(publishingDate)));
+  p(
+    a({ href: URL }, name),
+    span({ class: "print-only" }, URL ?? ""),
+    small(em(publishingDate))
+  );

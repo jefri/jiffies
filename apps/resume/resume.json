@@ -10,7 +10,7 @@
       "surnames": "Souther",
       "title": "Sr Software Engineer at SpaceX Starlink",
       "avatar": {
-        "link": "https://www.gravatar.com/avatar/17ca500eef7a047caa3471cba49afe58?s=136&r=PG&d=https://i.stack.imgur.com/T119o.png"
+        "link": "headshot.jpg"
       },
       "location": {
         "country": "US",
@@ -20,11 +20,11 @@
     },
     "relevantLinks": [
       {
-        "type": "github.com/davidsouther",
+        "type": "github",
         "URL": "https://github.com/davidsouther"
       },
       {
-        "type": "davidsouther@gmail.com",
+        "type": "email",
         "URL": "mailto:davidsouther+resume@gmail.com"
       }
     ]
@@ -597,21 +597,6 @@
             "name": "Developer",
             "startDate": "2015-01-01",
             "finishDate": "2015-01-31"
-          }
-        ]
-      },
-      {
-        "details": {
-          "name": "DavidSouther/mean-cookbook",
-          "description": "MEAN development in collection of short articles, 4 or 5 paragraphs of 1 or 2 gists.",
-          "URL": "https://github.com/DavidSouther/mean-cookbook"
-        },
-        "type": "openSource",
-        "roles": [
-          {
-            "name": "Developer",
-            "startDate": "2014-05-01",
-            "finishDate": "2014-08-31"
           }
         ]
       },
