@@ -1,17 +1,10 @@
 import { Select } from "../../../jiffies/components/select.js";
 import { DenormChildren } from "../../../jiffies/dom/dom.js";
 import { FC } from "../../../jiffies/dom/fc.js";
-import { button, li, nav, ul } from "../../../jiffies/dom/html.js";
+import { button, i, li, nav, ul } from "../../../jiffies/dom/html.js";
 import { Timer } from "../simulator/timer.js";
 
-const runButton = {
-  fontSize: "2rem",
-  margin: "0",
-  padding: "0",
-  lineHeight: "2rem",
-  background: "none",
-  border: "none",
-};
+const icon = (icon: string) => i({ class: `icon-${icon}` });
 
 export const Runbar = FC(
   "run-bar",
@@ -21,30 +14,27 @@ export const Runbar = FC(
         li(
           button(
             {
-              style: { ...runButton },
               events: { click: () => runner.frame() },
             },
-            "⏭" // U+23ED
+            icon("fast-fw")
           )
         ),
         li(
           button(
             {
-              style: { ...runButton },
               events: { click: () => runner.reset() },
             },
-            "⏪" // U+23EA
+            icon(`to-start`)
           )
         ),
         li(
           button(
             {
-              style: { ...runButton },
               events: {
                 click: () => (runner.running ? runner.stop() : runner.start()),
               },
             },
-            runner.running ? "⏸" : "⏵" // U+23F8 or U+23F5
+            runner.running ? icon(`pause`) : icon(`play`)
           )
         )
       ),
@@ -53,10 +43,11 @@ export const Runbar = FC(
           Select({
             name: "speed",
             events: {
-              change: (e: InputEvent) =>
-                (runner.speed = Number(
+              change: (e: Event) => {
+                runner.speed = Number(
                   (e.target as HTMLSelectElement)?.value ?? runner.speed
-                )),
+                );
+              },
             },
             disabled: runner.running,
             value: `${runner.speed}`,
@@ -72,10 +63,11 @@ export const Runbar = FC(
           Select({
             name: "steps",
             events: {
-              change: (e: InputEvent) =>
-                (runner.steps = Number(
+              change: (e: Event) => {
+                runner.steps = Number(
                   (e.target as HTMLSelectElement)?.value ?? runner.steps
-                )),
+                );
+              },
             },
             disabled: runner.running,
             value: `${runner.steps}`,

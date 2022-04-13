@@ -9,6 +9,11 @@ const MIME_TYPES = {
   png: "image/png",
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
+  svg: "image/svg+xml",
+  eot: "application/vnd.ms-fontobject",
+  ttf: "application/font-ttf",
+  woff: "application/font-woff",
+  woff2: "application/font-woff2",
 };
 
 const mime = (/** @type string */ basename) => {
