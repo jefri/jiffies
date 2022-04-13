@@ -3,7 +3,9 @@
   "scripts": {
     "start": "node --experimental-loader ./loader.mjs ./server/main.js",
     "test": "node --experimental-loader ./loader.mjs ./test.mjs",
-    "ci": "node --experimental-loader ./loader.mjs ./test.mjs --mode=junit"
+    "ci": "node --experimental-loader ./loader.mjs ./test.mjs --mode=junit",
+    "lint": "npx prettier . --check",
+    "format": "npx prettier . --write"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",

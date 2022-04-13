@@ -1,174 +1,150 @@
 import { describe, it } from "../../../jiffies/scope/describe.js";
 import { expect } from "../../../jiffies/scope/expect.js";
 import {
-	BISHOP,
-	BLACK,
-	ChessGame,
-	E,
-	I,
-	index,
-	KING,
-	KNIGHT,
-	PAWN,
-	QUEEN,
-	ROOK,
-	square,
-	WHITE,
+  BISHOP,
+  BLACK,
+  ChessGame,
+  E,
+  I,
+  index,
+  KING,
+  KNIGHT,
+  PAWN,
+  QUEEN,
+  ROOK,
+  square,
+  WHITE,
 } from "./chess.js";
 
 function movesFor(
-	/** @type ChessGame */ game,
-	/** @type import("./chess.js").File */ file,
-	/** @type import("./chess.js").Rank */ rank,
+  /** @type ChessGame */ game,
+  /** @type import("./chess.js").File */ file,
+  /** @type import("./chess.js").Rank */ rank
 ) {
-	return game.moves(file, rank).map((m) => m.toString()).sort();
+  return game
+    .moves(file, rank)
+    .map((m) => m.toString())
+    .sort();
 }
 
-describe(
-	"Chess Board",
-	() => {
-		it(
-			"Sets up for black and white",
-			() => {
-				const board = new ChessGame();
+describe("Chess Board", () => {
+  it("Sets up for black and white", () => {
+    const board = new ChessGame();
 
-				expect(board.at("d", 1)).toBe(WHITE * QUEEN);
-				expect(board.at("e", 1)).toBe(WHITE * KING);
-				expect(board.at("e", 8)).toBe(BLACK * KING);
-				expect(board.at("d", 8)).toBe(BLACK * QUEEN);
-			},
-		);
+    expect(board.at("d", 1)).toBe(WHITE * QUEEN);
+    expect(board.at("e", 1)).toBe(WHITE * KING);
+    expect(board.at("e", 8)).toBe(BLACK * KING);
+    expect(board.at("d", 8)).toBe(BLACK * QUEEN);
+  });
 
-		describe(
-			"moves",
-			() => {
-				it(
-					"generates valid pawn moves",
-					() => {
-						const board = new ChessGame();
-						const moves = movesFor(board, "e", 2);
-						expect(moves.length).toBe(2);
-						expect(moves).toEqual(["e3", "e4"]);
-					},
-				);
+  describe("moves", () => {
+    it("generates valid pawn moves", () => {
+      const board = new ChessGame();
+      const moves = movesFor(board, "e", 2);
+      expect(moves.length).toBe(2);
+      expect(moves).toEqual(["e3", "e4"]);
+    });
 
-				it(
-					"generates valid rook moves",
-					() => {
-						const board = new TestBoard();
-						board.clear();
-						board.set("d", 4, BLACK * ROOK);
+    it("generates valid rook moves", () => {
+      const board = new TestBoard();
+      board.clear();
+      board.set("d", 4, BLACK * ROOK);
 
-						const moves = movesFor(board, "d", 4);
-						expect(moves.length).toBe(14);
-					},
-				);
+      const moves = movesFor(board, "d", 4);
+      expect(moves.length).toBe(14);
+    });
 
-				it(
-					"generates valid knight moves",
-					() => {
-						const board = new TestBoard();
-						board.clear();
-						board.set("d", 2, BLACK * KNIGHT);
+    it("generates valid knight moves", () => {
+      const board = new TestBoard();
+      board.clear();
+      board.set("d", 2, BLACK * KNIGHT);
 
-						const moves = movesFor(board, "d", 2);
-						expect(moves.length).toBe(6);
-						expect(moves).toEqual(["Nb1", "Nb3", "Nc4", "Ne4", "Nf1", "Nf3"]);
-					},
-				);
+      const moves = movesFor(board, "d", 2);
+      expect(moves.length).toBe(6);
+      expect(moves).toEqual(["Nb1", "Nb3", "Nc4", "Ne4", "Nf1", "Nf3"]);
+    });
 
-				it(
-					"stops movement at capture",
-					() => {
-						const board = new TestBoard();
-						board.clear();
-						board.set("a", 1, WHITE * BISHOP);
-						board.set("d", 4, BLACK * BISHOP);
+    it("stops movement at capture", () => {
+      const board = new TestBoard();
+      board.clear();
+      board.set("a", 1, WHITE * BISHOP);
+      board.set("d", 4, BLACK * BISHOP);
 
-						const moves = movesFor(board, "a", 1);
-						expect(moves).toEqual(["Bb2", "Bc3", "Bxd4"]);
-					},
-				);
+      const moves = movesFor(board, "a", 1);
+      expect(moves).toEqual(["Bb2", "Bc3", "Bxd4"]);
+    });
 
-				it(
-					"stops movement at friendly",
-					() => {
-						const board = new TestBoard();
-						board.clear();
-						board.set("a", 1, WHITE * BISHOP);
-						board.set("d", 4, WHITE * BISHOP);
+    it("stops movement at friendly", () => {
+      const board = new TestBoard();
+      board.clear();
+      board.set("a", 1, WHITE * BISHOP);
+      board.set("d", 4, WHITE * BISHOP);
 
-						const moves = movesFor(board, "a", 1);
-						expect(moves).toEqual(["Bb2", "Bc3"]);
-					},
-				);
+      const moves = movesFor(board, "a", 1);
+      expect(moves).toEqual(["Bb2", "Bc3"]);
+    });
 
-				it(
-					"finds check",
-					() => {
-						const board = new TestBoard();
-						board.clear();
+    it("finds check", () => {
+      const board = new TestBoard();
+      board.clear();
 
-						board.set("a", 1, WHITE * KING);
-						board.set("c", 2, BLACK * ROOK);
+      board.set("a", 1, WHITE * KING);
+      board.set("c", 2, BLACK * ROOK);
 
-						board.set("c", 3, BLACK * PAWN);
-						board.set("d", 2, BLACK * PAWN);
+      board.set("c", 3, BLACK * PAWN);
+      board.set("d", 2, BLACK * PAWN);
 
-						const rookMoves = movesFor(board, "c", 2);
-						expect(rookMoves).toEqual(["Ra2", "Rb2", "Rc1x"]);
-					},
-				);
+      const rookMoves = movesFor(board, "c", 2);
+      expect(rookMoves).toEqual(["Ra2", "Rb2", "Rc1x"]);
+    });
 
-				it("finds mate", () => {});
+    it("finds mate", () => {});
 
-				it("accepts kingside castle O-O", () => {});
+    it("accepts kingside castle O-O", () => {});
 
-				it("accepts queenside castle O-O-O", () => {});
+    it("accepts queenside castle O-O-O", () => {});
 
-				it("finds castles", () => {});
+    it("finds castles", () => {});
 
-				it("accepts en passant", () => {});
+    it("accepts en passant", () => {});
 
-				it("finds enpassant", () => {});
+    it("finds enpassant", () => {});
 
-				it("stops moves that are pinned to king", () => {});
+    it("stops moves that are pinned to king", () => {});
 
-				it("parses PGN movesets", () => {});
-			},
-		);
-	},
-);
+    it("parses PGN movesets", () => {});
+  });
+});
 
 const CLEAR_GAME = [
-	[I, I, I, I, I, I, I, I, I, I],
-	[I, I, I, I, I, I, I, I, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	[E, E, E, E, E, E, E, E, I, I],
-	/** a1  is this corner */
-	[I, I, I, I, I, I, I, I, I, I],
-	[I, I, I, I, I, I, I, I, I, I],
+  [I, I, I, I, I, I, I, I, I, I],
+  [I, I, I, I, I, I, I, I, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  [E, E, E, E, E, E, E, E, I, I],
+  /** a1  is this corner */
+  [I, I, I, I, I, I, I, I, I, I],
+  [I, I, I, I, I, I, I, I, I, I],
 ].flat();
 
 class TestBoard extends ChessGame {
-	clear() {
-		this.board = CLEAR_GAME;
-	}
+  clear() {
+    this.board = CLEAR_GAME;
+  }
 
-	set(
-		/** @type import("./chess.js").File */ file,
-		/** @type import("./chess.js").Rank */ rank,
-		/** @type number */ piece,
-	) {
-		const idx = index(file, rank);
-		this.board[idx] = piece;
-	}
+  set(
+    /** @type import("./chess.js").File */ file,
+    /** @type import("./chess.js").Rank */ rank,
+    /** @type number */ piece
+  ) {
+    const idx = index(file, rank);
+    this.board[idx] = piece;
+  }
 }
 
 // From https://en.wikipedia.org/wiki/Portable_Game_Notation

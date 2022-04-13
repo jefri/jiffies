@@ -63,7 +63,9 @@ export const InlineEdit = FC(
             left: "0",
             marginTop: "-0.375rem",
           },
-          events: { blur: ({ target }) => events.change(target?.value ?? "") },
+          events: {
+            blur: ({ target }) => events.change(target?.value ?? ""),
+          },
           type: "text",
           value: state.value,
         }),

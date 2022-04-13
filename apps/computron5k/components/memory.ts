@@ -108,7 +108,10 @@ const MemoryCell = FC(
           },
         },
         editable
-          ? InlineEdit({ value: `${value}`, events: { change: onChange } })
+          ? InlineEdit({
+              value: `${value}`,
+              events: { change: onChange },
+            })
           : span(value)
       ),
     ];

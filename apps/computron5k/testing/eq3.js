@@ -16,23 +16,25 @@ const hdl = `
 `;
 
 const chip = new Chip(["a", "b", "c"], ["out"]);
-chip.wire(
-	new Nand(),
-	[{ from: "a", to: "a" }, { from: "b", to: "b" }, { from: "neq1", to: "out" }],
-);
-chip.wire(
-	new Nand(),
-	[{ from: "b", to: "a" }, { from: "c", to: "b" }, { from: "neq2", to: "out" }],
-);
-chip.wire(
-	new Or(),
-	[
-		{ from: "neq1", to: "a" },
-		{ from: "neq2", to: "b" },
-		{ from: "outOr", to: "out" },
-	],
-);
-chip.wire(new Not(), [{ from: "outOr", to: "in" }, { from: "out", to: "out" }]);
+chip.wire(new Nand(), [
+  { from: "a", to: "a" },
+  { from: "b", to: "b" },
+  { from: "neq1", to: "out" },
+]);
+chip.wire(new Nand(), [
+  { from: "b", to: "a" },
+  { from: "c", to: "b" },
+  { from: "neq2", to: "out" },
+]);
+chip.wire(new Or(), [
+  { from: "neq1", to: "a" },
+  { from: "neq2", to: "b" },
+  { from: "outOr", to: "out" },
+]);
+chip.wire(new Not(), [
+  { from: "outOr", to: "in" },
+  { from: "out", to: "out" },
+]);
 
 export const eq3 = { hdl, chip };
 export default eq3;

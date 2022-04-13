@@ -1,24 +1,24 @@
 import { SCREEN } from "../simulator/cpu/memory.js";
 
 export const TickScreen = (
-	/** @type {import("../simulator/cpu/cpu.js").CPU} */ cpu,
+  /** @type {import("../simulator/cpu/cpu.js").CPU} */ cpu
 ) => {
-	let row = 0;
-	let col = 0;
-	let color = 0xffff;
-	return () => {
-		const index = SCREEN + col + (row * 32);
-		cpu.RAM.set(index, color);
-		col += 1;
-		if (col >= 32) {
-			col = 0;
-			row += 1;
-			if (row >= 256) {
-				row = 0;
-				color = color === 0x0000 ? 0xffff : 0x0000;
-			}
-		}
-	};
+  let row = 0;
+  let col = 0;
+  let color = 0xffff;
+  return () => {
+    const index = SCREEN + col + row * 32;
+    cpu.RAM.set(index, color);
+    col += 1;
+    if (col >= 32) {
+      col = 0;
+      row += 1;
+      if (row >= 256) {
+        row = 0;
+        color = color === 0x0000 ? 0xffff : 0x0000;
+      }
+    }
+  };
 };
 
 export const JACK = `

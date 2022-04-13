@@ -99,7 +99,13 @@ export function flattenResults(results, prefix = "") {
     const test = `${prefix}${arrow}${title}`;
     errorList = errorList.concat(
       result.error
-        ? [{ test, stack: getError(result), stats: { executed: 1, failed: 1 } }]
+        ? [
+            {
+              test,
+              stack: getError(result),
+              stats: { executed: 1, failed: 1 },
+            },
+          ]
         : result.passed === true
         ? [{ test: test, stats: { executed: 1, failed: 0 } }]
         : flattenResults(result, test)

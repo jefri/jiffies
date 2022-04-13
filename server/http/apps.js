@@ -9,18 +9,18 @@ import { fileResponse } from "./response.js";
  * @type import("./index.js").StaticMiddleware
  */
 export const findIndex = async (req) => {
-	let filename = path.join(process.cwd(), req.url ?? "");
-	if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
-		return undefined;
-	}
-	while (filename.startsWith(process.cwd())) {
-		const index = path.join(filename, "index.html");
-		try {
-			const stat = await fs.stat(index);
-			return fileResponse(index, stat);
-		} catch (e) {
-			filename = path.dirname(filename);
-		}
-	}
-	return undefined;
+  let filename = path.join(process.cwd(), req.url ?? "");
+  if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
+    return undefined;
+  }
+  while (filename.startsWith(process.cwd())) {
+    const index = path.join(filename, "index.html");
+    try {
+      const stat = await fs.stat(index);
+      return fileResponse(index, stat);
+    } catch (e) {
+      filename = path.dirname(filename);
+    }
+  }
+  return undefined;
 };

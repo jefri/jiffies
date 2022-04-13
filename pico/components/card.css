@@ -14,9 +14,9 @@ article {
 }
 
 article.no-shadow {
-    margin: calc(var(--block-spacing-vertical) / 2) 0;
-    box-shadow: none;
-    border: var(--border-width) solid var(--card-border-color);
+  margin: calc(var(--block-spacing-vertical) / 2) 0;
+  box-shadow: none;
+  border: var(--border-width) solid var(--card-border-color);
 }
 
 article > header,
@@ -46,9 +46,9 @@ article.panel {
 article.panel > header,
 article.panel > footer {
   margin: 0;
-  padding: calc(var(--block-spacing-vertical) / 2) calc((var(--block-spacing-horizontal) / 2));
+  padding: calc(var(--block-spacing-vertical) / 2)
+    calc((var(--block-spacing-horizontal) / 2));
 }
-
 
 @media print {
   article {

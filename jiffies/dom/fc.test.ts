@@ -28,7 +28,11 @@ describe("FC", () => {
           placeholder: "First Name",
           required: true,
         }),
-        Input({ name: "lastName", placeholder: "Last Name", required: true })
+        Input({
+          name: "lastName",
+          placeholder: "Last Name",
+          required: true,
+        })
       ),
       Input(
         { name: "email", type: "email", placeholder: "E-Mail" },

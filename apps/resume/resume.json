@@ -182,7 +182,10 @@
                 "name": "TypeScript",
                 "type": "technology"
               },
-              { "name": "Google Cloud Platform", "type": "technology" },
+              {
+                "name": "Google Cloud Platform",
+                "type": "technology"
+              },
               { "name": "Graph Algorithms", "type": "domain" }
             ]
           }

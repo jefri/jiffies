@@ -79,7 +79,10 @@ export const Chip = () => {
       },
     },
     "@media (max-width: 1023px)": {
-      ".View__Chip > section": { display: "flex", flexDirection: "column" },
+      ".View__Chip > section": {
+        display: "flex",
+        flexDirection: "column",
+      },
     },
     "@media (max-width: 576px)": {
       ".View__Chip > section > .pinouts": {

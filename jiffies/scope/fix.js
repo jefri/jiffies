@@ -6,23 +6,23 @@
  * @returns {T}
  */
 export function fix(n) {
-	if (typeof n === "number") {
-		return (+n.toFixed(1)); /** @type T */
-	}
-	if (n !== Object(n)) {
-		// A primitive
-		return n;
-	}
-	if (n instanceof Array) {
-		return (n.map(fix)); /** @type T */
-	}
-	return (
-		/** @type T*/
-		/** @type unknown */ mapreduce(
-			fix,
-			/** @type Record<string, unknown> */ (n),
-		)
-	);
+  if (typeof n === "number") {
+    return +n.toFixed(1); /** @type T */
+  }
+  if (n !== Object(n)) {
+    // A primitive
+    return n;
+  }
+  if (n instanceof Array) {
+    return n.map(fix); /** @type T */
+  }
+  return (
+    /** @type T*/
+    /** @type unknown */ mapreduce(
+      fix,
+      /** @type Record<string, unknown> */ (n)
+    )
+  );
 }
 
 /**
@@ -32,10 +32,8 @@ export function fix(n) {
  * @returns Record<string, unknown>
  */
 function mapreduce(fn, iter) {
-	return Object
-		.entries(iter)
-		.reduce(
-			(acc, [k, v]) => ((acc[k] = fn(v)), acc),
-			/** @type Record<string, unknown>*/ ({}),
-		);
+  return Object.entries(iter).reduce(
+    (acc, [k, v]) => ((acc[k] = fn(v)), acc),
+    /** @type Record<string, unknown>*/ ({})
+  );
 }
