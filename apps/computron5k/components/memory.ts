@@ -82,35 +82,37 @@ const MemoryCell = FC(
       editable?: boolean;
       onChange: (i: number, value: string, previous: number) => void;
     }
-  ) => [
-    code(
-      {
-        style: {
-          ...width("1/4"),
-          ...rounded("none"),
-          ...(highlight
-            ? { background: "var(--code-kbd-background-color)" }
-            : {}),
+  ) => {
+    el.style.display = "flex";
+    return [
+      code(
+        {
+          style: {
+            ...rounded("none"),
+            ...(highlight
+              ? { background: "var(--code-kbd-background-color)" }
+              : {}),
+          },
         },
-      },
-      hex(index)
-    ),
-    code(
-      {
-        style: {
-          ...width("3/4"),
-          ...rounded("none"),
-          ...text("right"),
-          ...(highlight
-            ? { background: "var(--code-kbd-background-color)" }
-            : {}),
+        hex(index)
+      ),
+      code(
+        {
+          style: {
+            flexGrow: "1",
+            ...rounded("none"),
+            ...text("right"),
+            ...(highlight
+              ? { background: "var(--code-kbd-background-color)" }
+              : {}),
+          },
         },
-      },
-      editable
-        ? InlineEdit({ value: `${value}`, events: { change: onChange } })
-        : span(value)
-    ),
-  ]
+        editable
+          ? InlineEdit({ value: `${value}`, events: { change: onChange } })
+          : span(value)
+      ),
+    ];
+  }
 );
 
 const Memory = FC(
@@ -131,7 +133,7 @@ const Memory = FC(
       format: Format;
     }
   ) => {
-    el.style.width = "256px";
+    el.style.width = "283px";
     const state = (el.state ??= { format });
     const setFormat = (f: Format) => {
       state.format = f;

@@ -71,17 +71,17 @@ export const CPU = (
       compileFStyle({
         ".View__CPU": {
           "div.grid": {
-            gridTemplateColumns: "repeat(4, 256px)",
+            gridTemplateColumns: "repeat(4, 283px)",
             justifyContent: "center",
           },
           "hack-screen": {
             gridColumn: "3 / span 2",
           },
         },
-        "@media (max-width: 1125px)": {
+        "@media (max-width: 1195px)": {
           ".View__CPU": {
             "div.grid": {
-              gridTemplateColumns: "repeat(2, 256px)",
+              gridTemplateColumns: "repeat(2, 283px)",
             },
             "hack-screen": {
               gridColumn: "1 / span 2",
