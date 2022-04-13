@@ -235,7 +235,7 @@ const publications = (artifacts: ResumeTypes.PublicArtifact[]) =>
           marginBottom: "0",
           p: {
             display: "grid",
-            grid: "fit-content(0) / 4fr 1fr;",
+            grid: "fit-content(0) / 3fr minmax(fit-content, 1fr);",
             gap: "0 calc(var(--block-spacing-vertical) / 2)",
             marginBottom: "0",
           },
