@@ -2,13 +2,13 @@
   "compilerOptions": {
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "target": "esNext",
-    "module": "esnext",
+    "module": "ES2020",
     "noEmit": true,
     "noEmitOnError": true,
     "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
-    "moduleResolution": "node"
+    "moduleResolution": "nodenext"
   },
   "include": ["jiffies/**/*", "apps/**/*", "server/**/*", "*.mjs"]
 }
