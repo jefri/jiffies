@@ -1,10 +1,10 @@
-import { Updatable } from "../dom/dom";
+import { DOMElement, Updatable } from "../dom/dom";
 import { Link } from "./link";
 
 export interface Router {
   current?: string;
   navigate: (url: string) => (event: Event) => void;
-  (target: Updatable<Element>): Updatable<Element>;
+  (target: Updatable<DOMElement>): Updatable<DOMElement>;
 }
 
 let baseURI = `${document.baseURI}`;

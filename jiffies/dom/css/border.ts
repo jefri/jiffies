@@ -1,10 +1,7 @@
+import { Side, Size } from "./constants.js";
 import { isSide, getSize, getSide } from "./core.js";
 
-/**
- * @param {import('./constants.js').Side|import('./constants.js').Size=} size
- * @param {import('./constants.js').Side=} side
- */
-export function rounded(size = "", side = "") {
+export function rounded(size: Size = "", side: Side = "") {
   if (isSide(size)) {
     side = size;
     size = "";
@@ -17,7 +14,7 @@ export function rounded(size = "", side = "") {
       prev[`border${curr}Radius`] = sized;
     }
     return prev;
-  }, /** @type {CSSStyleDeclaration} */ ({}));
+  }, {} as CSSStyleDeclaration);
 }
 
 /**
@@ -41,7 +38,7 @@ export function border({
 }
 
 export function inset(
-  /** @type {0|1|2|4|8} */ width,
+  /** @type 0|1|2|4|8 */ width,
   /** @type string */ color1 = "gray",
   /** @type string */ color2 = "lightgray"
 ) {

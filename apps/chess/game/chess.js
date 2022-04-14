@@ -163,7 +163,7 @@ export class ChessGame {
     this.previous = previous;
     if (updateThreat) {
       this.calcThreat();
-      lastMove?.verifyCheck(this);
+      lastMove?.verifyCheck();
     }
   }
 
@@ -320,7 +320,7 @@ export function square(/** @type number */ idx) {
   return `${file}${rank}`;
 }
 
-/** @returns File */
+/** @returns {File} */
 function verifyFile(/** @type number */ file) {
   if (file < 0 || file > 7) {
     throw new Error(`Invalid File number: ${file}`);
@@ -328,12 +328,12 @@ function verifyFile(/** @type number */ file) {
   return String.fromCharCode(file + 97); /* @type File */
 }
 
-/** @returns Rank */
+/** @returns {Rank} */
 function verifyRank(/** @type number */ rank) {
   if (rank < 1 || rank > 8) {
     throw new Error(`Invalid rank number: ${rank}`);
   }
-  return rank; /* @type Rank */
+  return rank;
 }
 
 /** @returns {[File, Rank]} */
@@ -400,7 +400,8 @@ export class Move {
 
   verifyCheck() {
     const board = this.previous.do(this, true);
-    const color = /** @type Color */ -1 * this.color;
+    /** @type {Color} */
+    const color = -1 * this.color;
     this.check = checkCheck(board, color);
     this.mate = board.allMoves(color).length === 0;
   }

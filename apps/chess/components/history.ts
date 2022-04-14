@@ -58,7 +58,9 @@ export const history = FC(
     const notification = span();
 
     setTimeout(() => {
-      (game.toPlay === WHITE ? whiteInput : blackInput).focus();
+      (game.toPlay === WHITE ? whiteInput : blackInput).dispatchEvent(
+        new Event("focus")
+      );
     });
 
     return table(

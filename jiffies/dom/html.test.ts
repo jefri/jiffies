@@ -24,7 +24,7 @@ describe("html", () => {
         },
       },
     });
-    btn.click();
+    btn.dispatchEvent(new Event("click"));
     expect(clicked).toBe(true);
   });
 
@@ -37,12 +37,12 @@ describe("html", () => {
         },
       },
     });
-    btn.click();
+    btn.dispatchEvent(new Event("click"));
 
     expect(clicked).toBe(1);
 
     btn.update({ events: { click: undefined } });
-    btn.click();
+    btn.dispatchEvent(new Event("click"));
     expect(clicked).toBe(1);
   });
 
@@ -65,7 +65,7 @@ describe("html", () => {
       style: { flexDirection: "column" },
       events: { click: () => (clicked = true) },
     });
-    btn.click();
+    btn.dispatchEvent(new Event("click"));
 
     expect(btn.classList.contains("test-class")).toBe(true);
     expect(btn.style.flexDirection).toBe("column");

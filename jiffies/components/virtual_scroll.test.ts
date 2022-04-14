@@ -14,7 +14,7 @@ describe("VirtualScroll", () => {
       get: arrayAdapter(data),
       row: (i) => div(`${i}`),
     };
-    const scroll = VirtualScroll(props);
+    const scroll: VirtualScroll<number, div> = VirtualScroll(props);
 
     expect(scroll.state.bufferedItems).toBe(9);
     expect(scroll.state.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);

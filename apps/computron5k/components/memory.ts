@@ -19,7 +19,6 @@ import {
   ul,
 } from "../../../jiffies/dom/html.js";
 import { rounded } from "../../../jiffies/dom/css/border.js";
-import { width } from "../../../jiffies/dom/css/sizing.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
 import { FC } from "../../../jiffies/dom/fc.js";
 import { li } from "../../../jiffies/dom/html.js";
@@ -112,7 +111,7 @@ const MemoryCell = FC(
               value: `${value}`,
               events: { change: onChange },
             })
-          : span(value)
+          : span(`${value}`)
       ),
     ];
   }

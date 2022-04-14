@@ -17,10 +17,10 @@ export { Xor } from "./logic/xor.js";
 
 export const REGISTRY = new Map<string, () => Chip>(
   [Not, And, Or, Xor, Mux, Demux].map((ChipCtor) => [
-    ChipCtor.name!,
+    ChipCtor.name,
     () => {
       const chip = new ChipCtor();
-      chip.name = ChipCtor.name!;
+      chip.name = ChipCtor.name;
       return chip;
     },
   ])

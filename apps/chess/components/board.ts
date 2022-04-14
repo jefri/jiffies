@@ -25,7 +25,7 @@ export const ChessBoard = FC(
           ...FILES.map((file) =>
             td(
               {
-                square: `${file}${rank}`,
+                class: `${file}${rank}`,
                 style: {
                   position: "relative",
                   width: "2em",

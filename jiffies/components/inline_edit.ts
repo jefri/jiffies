@@ -72,7 +72,7 @@ export const InlineEdit = FC(
         "\u00a0" // Hack to get the span to take up space
       );
       setTimeout(() => {
-        edit.focus();
+        edit.dispatchEvent(new Event("focus"));
       });
       return edit;
     };

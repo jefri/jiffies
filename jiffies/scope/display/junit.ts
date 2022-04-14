@@ -36,7 +36,7 @@ function testsuite(
     "testsuite",
     { id, name, tests, failures },
     cases.map(({ test, stack }) =>
-      testcase({ name: `${name} ${test}` }, stack ? [stack] : [])
+      testcase({ name: `${name} ${test}` }, stack ? [stack as string] : [])
     )
   );
 }

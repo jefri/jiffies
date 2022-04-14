@@ -151,7 +151,7 @@ export class Chip {
   pins = new Pins();
   parts = new Set<Chip>();
 
-  constructor(ins: string[], outs: string[], name?: string) {
+  constructor(ins: string[], outs: string[], public name?: string) {
     for (const inn of ins) {
       const { pin, start = 1 } = parseToPin(inn);
       this.ins.insert(new Bus(pin, start));

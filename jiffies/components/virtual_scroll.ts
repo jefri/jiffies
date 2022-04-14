@@ -190,7 +190,7 @@ function VirtualScrollFn<T, U extends HTMLElement>(
 
   scrollTo();
 
-  return viewportElement;
+  return viewportElement as VirtualScroll<T, U>;
 }
 
 export const VirtualScroll = FC("virtual-scroll", VirtualScrollFn);
