@@ -1,3 +1,4 @@
+// @ts-ignore
 import ts from "typescript";
 
 const compilerOptions = {

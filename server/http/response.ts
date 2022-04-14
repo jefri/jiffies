@@ -1,7 +1,8 @@
 import { Stats } from "fs";
 import * as fs from "fs/promises";
+import { StaticMiddleware, StaticResponse } from ".";
 
-const MIME_TYPES = {
+const MIME_TYPES: Record<string, string> = {
   js: "text/javascript",
   json: "text/javascript",
   css: "text/css",
@@ -16,20 +17,14 @@ const MIME_TYPES = {
   woff2: "application/font-woff2",
 };
 
-const mime = (/** @type string */ basename) => {
+const mime = (basename: string) => {
   const extension = basename.substr(basename.lastIndexOf(".") + 1);
   return MIME_TYPES[extension] ?? "application/octet-stream";
 };
 
-/**
- * @param {string} filename
- * @param {Stats=} stat
- * @param {200|404|500} status
- * @returns StaticResponse
- */
 export const fileResponse =
-  (filename, stat, status = 200) =>
-  async () => {
+  (filename: string, stat?: Stats, status: 200 | 404 | 500 = 200) =>
+  async (): Promise<StaticResponse> => {
     if (!stat) {
       stat = await fs.stat(filename);
     }
@@ -39,15 +34,9 @@ export const fileResponse =
     return { status, contentType, contentLength, content };
   };
 
-/**
- * @param {string} content
- * @param {string} contentType
- * @param {200|404|500} status
- * @returns import("./index.js").StaticMiddleware
- */
 export const contentResponse =
-  (content, contentType, status = 200) =>
-  async () => {
+  (content: string, contentType: string, status: 200 | 404 | 500 = 200) =>
+  async (): Promise<StaticResponse> => {
     const contentBuffer = Buffer.from(content, "utf-8");
     return {
       content: contentBuffer,

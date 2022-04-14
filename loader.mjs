@@ -5,7 +5,12 @@ import { transpile } from "./transpile.mjs";
 
 const baseURL = pathToFileURL(`${cwd()}/`).href;
 
-export async function resolve(specifier, context, defaultResolve) {
+/** @returns {Promise<{url: string}>} */
+export async function resolve(
+  /** @type string */ specifier,
+  /** @type {{parentUrl?: string}} */ context,
+  /** @type {(string, {parentUrl?: string}, Function) => Promise<{url: string}}> */ defaultResolve
+) {
   const tsURL = new URL(
     specifier.replace(/js$/, "ts"),
     context.parentURL ?? baseURL
@@ -22,7 +27,12 @@ export async function resolve(specifier, context, defaultResolve) {
   return defaultResolve(specifier, context, defaultResolve);
 }
 
-export async function load(url, context, defaultLoad) {
+/** @returns {Promise<{source: string}>} */
+export async function load(
+  /** @type string */ url,
+  /** @type {{format?: string}} */ context,
+  /** @type {(string, {format?: string}, Function) => Promise<{source: string}> */ defaultLoad
+) {
   return url.endsWith("ts")
     ? {
         format: "module",

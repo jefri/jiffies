@@ -1,14 +1,15 @@
 import * as fs from "fs/promises";
-import path from "path";
+import * as path from "path";
 import { info } from "../../jiffies/log.js";
+import { StaticMiddleware } from "./index.js";
 import { contentResponse } from "./response.js";
 
-const findSiteMap = async (root) => {
+const findSiteMap = async (root: string) => {
   if (root.startsWith("node_modules")) {
     return [];
   }
-  return (await fs.readdir(root, { withFileTypes: true })).map(
-    async (entry) => {
+  const children = (await fs.readdir(root, { withFileTypes: true })).map(
+    async (entry): Promise<string[]> => {
       const next = path
         .join(root, entry.name)
         // Normalize separators for web
@@ -22,18 +23,19 @@ const findSiteMap = async (root) => {
         if (entry.name.startsWith(".")) {
           return [];
         }
-        return (await Promise.all(await findSiteMap(next))).flat();
+        const flattened = (await Promise.all(await findSiteMap(next))).flat();
+        return flattened;
       }
       return [];
     }
   );
+  return children;
 };
 
-export const sitemap = await (async () => {
+export const sitemap: StaticMiddleware = await (async () => {
   const apps = await (await Promise.all(await findSiteMap(".")))
     .flat()
     .filter((a) => a !== undefined);
-  /** @type import("./index.js").StaticMiddleware */
   return (req) => {
     if ((req.url ?? "").endsWith("sitemap.json")) {
       return contentResponse(JSON.stringify(apps), "application/json");

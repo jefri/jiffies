@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { createServer, IncomingMessage, ServerResponse } from "http";
+import { createServer, IncomingMessage, Server, ServerResponse } from "http";
+import { AddressInfo } from "net";
 import * as path from "path";
 import { info } from "../../jiffies/log.js";
 import { findIndex } from "./apps.js";
@@ -9,13 +10,18 @@ import { sitemap } from "./sitemap.js";
 import { staticFileServer } from "./static.js";
 import { tsFileServer } from "./typescript.js";
 
-/**
- * @typedef {{status: 200|404|500, content: Buffer, contentType: string, contentLength?: number}} StaticResponse
- * @typedef {(req: IncomingMessage) => (() => Promise<StaticResponse>)|undefined} StaticMiddleware
- */
+export interface StaticResponse {
+  status: 200 | 404 | 500;
+  content: Buffer;
+  contentType: string;
+  contentLength?: number;
+}
 
-/** @type StaticMiddleware */
-const notFound = async () =>
+export interface StaticMiddleware {
+  (req: IncomingMessage): Promise<undefined | (() => Promise<StaticResponse>)>;
+}
+
+const notFound: StaticMiddleware = async () =>
   fileResponse(
     // path.join(path.dirname(FLAGS.argv0), "404.html"),
     path.join(process.cwd(), "404.html"),
@@ -23,8 +29,7 @@ const notFound = async () =>
     404
   );
 
-/** @type {StaticMiddleware[]}  */
-const middlewares = [
+const middlewares: StaticMiddleware[] = [
   sitemap,
   tsFileServer,
   staticFileServer,
@@ -32,11 +37,7 @@ const middlewares = [
   notFound,
 ];
 
-/**
- * @param {ServerResponse} res
- * @param {string} message
- */
-const error = (res, message) => {
+const error = (res: ServerResponse, message: string) => {
   console.error(message);
   res.statusCode = 500;
   res.write(message);
@@ -44,12 +45,10 @@ const error = (res, message) => {
   return true;
 };
 
-/**
- * @param {ServerResponse} res
- * @param {StaticResponse} response
- */
-
-const sendContent = async (res, { content, contentType, contentLength }) => {
+const sendContent = async (
+  res: ServerResponse,
+  { content, contentType, contentLength }: StaticResponse
+) => {
   res.setHeader("content-length", "" + contentLength);
   res.setHeader("content-type", contentType);
   await res.write(content);
@@ -57,7 +56,7 @@ const sendContent = async (res, { content, contentType, contentLength }) => {
   return true;
 };
 
-const log = (/** @type {IncomingMessage} */ req) => {
+const log = (req: IncomingMessage) => {
   const when = new Date().toISOString();
   const who = req.socket.remoteAddress;
   const what = req.url;
@@ -68,7 +67,7 @@ const log = (/** @type {IncomingMessage} */ req) => {
 export const makeServer = () => {
   const server = createServer(async (req, res) => {
     log(req);
-    /** @type {undefined|(() => Promise<StaticResponse>)} */ let handler;
+    let handler: undefined | (() => Promise<StaticResponse>);
     try {
       for (const middleware of middlewares) {
         handler = await middleware(req);
@@ -82,13 +81,12 @@ export const makeServer = () => {
         res.end();
       }
     } catch (e) {
-      error(res, e.message + "\n" + e.stack);
+      error(res, (e as Error).message + "\n" + (e as Error).stack);
     }
   });
 
   server.on("listening", () => {
-    const { address, port } =
-      /** @type {import("net").AddressInfo} */ server.address();
+    const { address, port } = server.address() as AddressInfo;
     info("Server listening", { address: `http://${address}:${port}` });
   });
 
