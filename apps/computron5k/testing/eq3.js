@@ -1,4 +1,4 @@
-import { Not, Or } from "../simulator/chip/builtins.js";
+import { Not, Or } from "../simulator/chip/builtins";
 import { Chip, Nand } from "../simulator/chip/chip.js";
 
 /** Figure A2.1 */

@@ -5,7 +5,7 @@ import {
   beforeeach,
   rootCases,
 } from "./describe.js";
-import { TestResult, TestSummary } from "./scope.js";
+import { TestFailed, TestPassed, TestResult, TestSummary } from "./scope.js";
 
 export async function execute(
   prefix = "",
@@ -71,7 +71,7 @@ export function getError({ error }: TestResult) {
 
 export interface FlatResult {
   test: string;
-  stack?: string;
+  stack?: string | number | TestResult | TestSummary;
   stats: { executed: number; failed: number };
 }
 
@@ -79,18 +79,18 @@ function makeResult(
   test: string,
   result: TestResult | TestSummary
 ): FlatResult[] {
-  if (result.error)
+  if ((result as TestFailed).error)
     return [
       {
         test,
-        stack: getError(result),
+        stack: getError(result as TestResult),
         stats: { executed: 1, failed: 1 },
       },
     ];
-  if (result.passed) {
+  if ((result as TestPassed).passed) {
     return [{ test, stats: { executed: 1, failed: 0 } }];
   }
-  return flattenResults(result, test);
+  return flattenResults(result as TestResult, test);
 }
 
 export function flattenResults(results: TestResult, prefix = ""): FlatResult[] {

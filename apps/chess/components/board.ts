@@ -2,19 +2,15 @@ import { FC } from "../../../jiffies/dom/fc.js";
 import { span, table, td, tr } from "../../../jiffies/dom/html.js";
 import { asNum, ChessGame, index, L, Piece, W } from "../game/chess.js";
 
-/** @type [8, 7, 6, 5, 4, 3, 2, 1] */
-const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
-/** @type ['a','b','c','d','e','f','g','h'] */
-const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;
+const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
 
-const parity = (
-  /** @type {'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'} */ file,
-  /** @type number */ rank
-) => (file.charCodeAt(0) - 97 + rank) % 2 == 0;
+const parity = (file: typeof FILES[number], rank: number) =>
+  (file.charCodeAt(0) - 97 + rank) % 2 == 0;
 
 export const ChessBoard = FC(
   "chess-board",
-  (el, /** @type {{game: ChessGame}} */ { game }) =>
+  (el, { game }: { game: ChessGame }) =>
     table(
       {
         style: {
@@ -58,8 +54,8 @@ export const ChessBoard = FC(
 
 const CORNER_PADDING = "2px";
 
-const corner = (/** @type {'tl'|'tr'|'bl'|'br'} */ c) => {
-  const block = {
+const corner = (c: "tl" | "tr" | "bl" | "br") => {
+  const block: Record<string, string> = {
     display: "block",
     position: "absolute",
     fontSize: "0.5em",

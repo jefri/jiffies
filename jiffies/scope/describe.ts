@@ -1,4 +1,4 @@
-import { TestCase } from "./execute.js";
+import { TestCase } from "./scope";
 
 export const beforeall = Symbol("beforeAll");
 export const beforeeach = Symbol("beforeEach");

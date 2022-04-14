@@ -32,14 +32,13 @@ const findSiteMap = async (root: string) => {
   return children;
 };
 
-export const sitemap: StaticMiddleware = await (async () => {
-  const apps = await (await Promise.all(await findSiteMap(".")))
-    .flat()
-    .filter((a) => a !== undefined);
-  return (req) => {
-    if ((req.url ?? "").endsWith("sitemap.json")) {
-      return contentResponse(JSON.stringify(apps), "application/json");
-    }
-    return undefined;
-  };
-})();
+const apps = await (await Promise.all(await findSiteMap(".")))
+  .flat()
+  .filter((a) => a !== undefined);
+
+export const sitemap: StaticMiddleware = async (req) => {
+  if ((req.url ?? "").endsWith("sitemap.json")) {
+    return contentResponse(JSON.stringify(apps), "application/json");
+  }
+  return undefined;
+};

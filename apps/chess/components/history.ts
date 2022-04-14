@@ -13,32 +13,30 @@ import {
   thead,
   tr,
 } from "../../../jiffies/dom/html.js";
-import { BLACK, ChessGame, Move, WHITE } from "../game/chess.js";
+import { BLACK, ChessGame, Color, Move, WHITE } from "../game/chess.js";
 
 export const history = FC(
   "chess-history",
   (
     el,
-    /** @type {{game: ChessGame, events?: {move?: (m: Move) => void, undo?: () => {}}}} */ {
+    {
       game,
       events,
+    }: {
+      game: ChessGame;
+      events?: { move?: (m: Move) => void; undo?: () => void };
     }
   ) => {
-    const tryInput =
-      (/** @type import("../game/chess.js").Color */ color) =>
-      (
-        /** @type Event */
-        e
-      ) => {
-        notification.update("");
-        const { value = "" } = /** @type HTMLInputElement */ (e?.target);
-        const move = Move.parse(value, color, game);
-        if (isOk(move)) {
-          (events?.move ?? (() => {}))(Ok(move));
-        } else {
-          notification.update(`${Err(move).message}`);
-        }
-      };
+    const tryInput = (color: Color) => (e: Event) => {
+      notification.update("");
+      const { value = "" } = e?.target as HTMLInputElement;
+      const move = Move.parse(value, color, game);
+      if (isOk(move)) {
+        (events?.move ?? (() => {}))(Ok(move));
+      } else {
+        notification.update(`${Err(move).message}`);
+      }
+    };
     const whiteInput = input({
       name: "WhiteMove",
       disabled: game.toPlay === BLACK,

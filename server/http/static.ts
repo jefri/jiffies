@@ -1,12 +1,10 @@
 import * as path from "path";
 import * as fs from "fs/promises";
 import { fileResponse } from "./response.js";
-import type { StaticMiddleware, StaticResponse } from "./index.js";
+import type { StaticMiddleware } from "./index.js";
 
-export const staticFileServer: StaticMiddleware = async (
-  req
-): Promise<StaticResponse | undefined> => {
-  const url = new URL(req.url ?? "", req.host ?? `${req.proto}://localhost`);
+export const staticFileServer: StaticMiddleware = async (req) => {
+  const url = new URL(req.url ?? "", `http://localhost`);
   const filename = path.join(process.cwd(), url.pathname);
   try {
     const stat = await fs.stat(filename);

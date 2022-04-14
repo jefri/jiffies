@@ -8,8 +8,8 @@ const baseURL = pathToFileURL(`${cwd()}/`).href;
 /** @returns {Promise<{url: string}>} */
 export async function resolve(
   /** @type string */ specifier,
-  /** @type {{parentUrl?: string}} */ context,
-  /** @type {(string, {parentUrl?: string}, Function) => Promise<{url: string}}> */ defaultResolve
+  /** @type {{parentURL?: string}} */ context,
+  /** @type {(specifier: string, context: {parentURL?: string}, defaultResolve: Function) => Promise<{url: string}>} */ defaultResolve
 ) {
   const tsURL = new URL(
     specifier.replace(/js$/, "ts"),
@@ -31,11 +31,10 @@ export async function resolve(
 export async function load(
   /** @type string */ url,
   /** @type {{format?: string}} */ context,
-  /** @type {(string, {format?: string}, Function) => Promise<{source: string}> */ defaultLoad
+  /** @type {(url: string, context: {format?: string}, defaultLoad?: Function) => Promise<{source: string}>} */ defaultLoad
 ) {
   return url.endsWith("ts")
     ? {
-        format: "module",
         source: await transpile(
           url,
           async () => (await defaultLoad(url, { format: "module" })).source

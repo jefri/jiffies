@@ -8,7 +8,7 @@ import { Test } from "./test.js";
 export const Chess = FC("chess-game", () => {
   let game = new ChessGame();
   const board = ChessBoard({ game });
-  const move = (/** @type Move */ m) => {
+  const move = (m: Move) => {
     game = game.do(m);
     update();
   };
