@@ -19,8 +19,7 @@ export interface AsyncOperation<T, E extends Error, C extends Context> {
 export function using<T, E extends Error, C extends Context>(
   context: C | (() => C) | Operation<T, E, C>,
   operation?: Operation<T, E, C>,
-  normalizeError: (e: Error | unknown | any) => Err<E> = (e) =>
-    Err(/** @type E */ e)
+  normalizeError: (e: Error | unknown | any) => Err<E> = (e) => Err(e)
 ): Result<T, E> {
   if (typeof context == "function") {
     if (context.length == 1) {
@@ -30,11 +29,11 @@ export function using<T, E extends Error, C extends Context>(
       context = (context as () => C)() as C;
     }
   }
-  let result;
+  let result: Result<T, E>;
   try {
     context[Enter]();
     const op = operation!(context);
-    result = isResult(op) ? op : Ok(op);
+    result = isResult(op as Result<T, E>) ? (op as Result<T, E>) : Ok(op as T);
   } catch (e) {
     result = normalizeError(e);
   } finally {
@@ -49,12 +48,11 @@ export async function asyncUsing<T, E extends Error, C extends Context>(
   normalizeError: (e: Error | unknown | any) => Err<E> = (e: E) => Err(e)
 ): Promise<Result<T, E>> {
   context = typeof context == "function" ? await context() : context;
-  let result;
-  /** @type import("./result.js").Result<T, E> */
+  let result: Result<T, E>;
   try {
     context[Enter]();
     const op = await operation(context);
-    result = isResult(op) ? op : Ok(op);
+    result = isResult(op as Result<T, E>) ? (op as Result<T, E>) : Ok(op as T);
   } catch (e) {
     result = normalizeError(e);
   } finally {

@@ -15,7 +15,7 @@ describe("Result", () => {
     const a = None<string>();
     expect(a).toBeNull();
 
-    const b = None<string>("b");
+    const b = None<string>();
     expect(b).toBeNull();
 
     const c = Some<string>(a);
@@ -53,7 +53,7 @@ describe("Result", () => {
     const e: string = "else";
 
     expect(unwrap(a)).toBe("some");
-    expect(unwrap(c)).toBe("ok");
+    expect(unwrap<string, Error>(c)).toBe("ok");
     expect(() => unwrap(b)).toThrow("Attempted to unwrap None");
     expect(() => unwrap(d)).toThrow("err");
     expect(unwrap(e)).toBe("else");

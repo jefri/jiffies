@@ -1,6 +1,6 @@
-import { Observable, ReplaySubject } from "rxjs";
-import { tap } from "rxjs/operators";
-import { display } from "src/display.js";
+// import { Observable, ReplaySubject } from "rxjs";
+// import { tap } from "rxjs/operators";
+import { display } from "../display.js";
 import { DEFAULT_LOGGER, Logger } from "../log.js";
 
 /**
@@ -90,8 +90,8 @@ export const isFailed = (event) => event.completed && event.failed;
  * @returns {t is Event<T, unknown>}
  */
 export const isEvent = (t) => {
-  /** @type Event<T, unknown> */
-  const b = /* @type unknown */ t;
+  /* @type unknown */
+  const b = t;
   return isNext(b) || isError(b) || isCompleted(b);
 };
 

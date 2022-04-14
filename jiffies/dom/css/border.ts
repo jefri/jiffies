@@ -11,28 +11,25 @@ export function rounded(size: Size = "", side: Side = "") {
     if (curr === "") {
       prev.borderRadius = sized;
     } else {
+      // @ts-ignore
       prev[`border${curr}Radius`] = sized;
     }
     return prev;
   }, {} as CSSStyleDeclaration);
 }
 
-/**
- * @param {{
-  side?: import("./constants.js").Side,
-  style?: 'solid'|'dotted'|'dashed'|'double'|'none',
-  radius?: import("./constants.js").Size,
-  width?: 0|1|2|4|8,
-  color?: string
- }} param0 
- * @returns 
- */
 export function border({
   side = "",
   style = "solid",
   radius = "",
   width = 1,
   color = "black",
+}: {
+  side?: import("./constants.js").Side;
+  style?: "solid" | "dotted" | "dashed" | "double" | "none";
+  radius?: import("./constants.js").Size;
+  width?: 0 | 1 | 2 | 4 | 8;
+  color?: string;
 }) {
   return {};
 }

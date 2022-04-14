@@ -1,5 +1,5 @@
-import { Enter, Exit, using } from "./context.js";
-import { Err, isErr, isOk, Ok } from "./result.js";
+import { Context, Enter, Exit, using } from "./context.js";
+import { Err, isErr, isOk, Ok, unwrap } from "./result.js";
 import { describe, it } from "./scope/describe.js";
 import { expect } from "./scope/expect.js";
 
@@ -7,7 +7,7 @@ describe("Context", () => {
   it("performs an operation using a context", () => {
     const context = TestContext();
     const result = using(context, () => Ok(5));
-    expect(Ok(result)).toBe(5);
+    expect(unwrap(result)).toBe(5);
     expect(context.initialized).toBe(true);
     expect(context.completed).toBe(true);
   });
@@ -20,7 +20,7 @@ describe("Context", () => {
     });
 
     expect(isErr(result)).toBe(true);
-    expect(Err(/** @type Err<Error> */ result)).toMatchObject({
+    expect(Err(result as Err<Error>)).toMatchObject({
       message: "Failed",
     });
   });
@@ -32,22 +32,19 @@ describe("Context", () => {
     }));
 
     expect(isOk(op)).toBe(true);
-    const { completed, initialized } = Ok(/** @type OK<TestContext> */ op);
+    const { completed, initialized } = unwrap(op);
     expect(initialized).toBe(true);
     expect(completed).toBe(false);
   });
 });
 
-/**
- * @typedef TextContext
- * @property {boolean} initialized
- * @property {boolean} completed}
- */
+interface TestContext {
+  initialized: boolean;
+  completed: boolean;
+}
 
-/** @returns {import("./context.js").Context | TestContext} */
-function TestContext() {
+function TestContext(): Context & TestContext {
   const context = {
-    /** @type import("./context.js").Context | TestContext */
     [Enter]: () => {
       context.initialized = true;
     },
