@@ -1,22 +1,21 @@
 import { assert } from "../assert.js";
 import { equals } from "../equal.js";
 
-/** @template T */
-export class Matcher {
-  constructor(/** @type T */ actual) {
+export class Matcher<T> {
+  actual: T;
+  constructor(actual: T) {
     this.actual = actual;
   }
 
-  /** @returns {Matcher<T>} */
-  get not() {
+  get not(): Matcher<T> {
     return new NotMatcher(this.actual);
   }
 
-  toBe(/** @type T */ expected) {
+  toBe(expected: T) {
     assert(this.actual === expected, () => `${this.actual} !== ${expected}`);
   }
 
-  toEqual(/** @type T */ expected) {
+  toEqual(expected: T) {
     assert(
       equals(this.actual, expected),
       () =>
@@ -26,13 +25,13 @@ export class Matcher {
     );
   }
 
-  toMatch(/** @type {RegExp|string} */ expected) {
+  toMatch(expected: RegExp | string) {
     assert(
       typeof this.actual === "string",
       () => "Must have string for regexp match"
     );
     // @ts-expect-error
-    const actual = /** @type string */ (this.actual);
+    const actual: string = this.actual;
     if (typeof expected === "string") {
       assert(
         actual.includes(expected),
@@ -46,10 +45,10 @@ export class Matcher {
     }
   }
 
-  toMatchObject(/** @type Partial<T> */ expected) {
+  toMatchObject(expected: Partial<T>) {
     for (const [k, v] of Object.entries(expected)) {
       // @ts-expect-error
-      const actual = this.actual[k];
+      const actual: Partial<T> = this.actual[k];
       assert(
         equals(actual, v),
         () =>
@@ -67,11 +66,10 @@ export class Matcher {
     );
   }
 
-  toThrow(/** @type string= */ message = "") {
+  toThrow(message = "") {
     let didThrow = false;
 
-    /** @type unknown */
-    let result = undefined;
+    let result: unknown = undefined;
     try {
       // @ts-expect-error
       result = this.actual();
@@ -88,22 +86,21 @@ export class Matcher {
   }
 }
 
-/** @template T */
-export class NotMatcher {
-  constructor(/** @type T */ actual) {
+export class NotMatcher<T> {
+  actual: T;
+  constructor(actual: T) {
     this.actual = actual;
   }
 
-  /** @returns {Matcher<T>} */
-  get not() {
+  get not(): Matcher<T> {
     return new Matcher(this.actual);
   }
 
-  toBe(/** @type T */ expected) {
+  toBe(expected: T) {
     assert(this.actual !== expected, () => `${this.actual} === ${expected}`);
   }
 
-  toEqual(/** @type T */ expected) {
+  toEqual(expected: T) {
     assert(
       !equals(this.actual, expected),
       () =>
@@ -113,13 +110,13 @@ export class NotMatcher {
     );
   }
 
-  toMatch(/** @type {RegExp|string} */ expected) {
+  toMatch(expected: RegExp | string) {
     assert(
       typeof this.actual === "string",
       () => "Must have string for regexp match"
     );
     // @ts-expect-error
-    const actual = /** @type string */ (this.actual);
+    const actual: string = this.actual;
     if (typeof expected === "string") {
       assert(
         !actual.includes(expected),
@@ -130,7 +127,7 @@ export class NotMatcher {
     }
   }
 
-  toMatchObject(/** @type Partial<T> */ expected) {
+  toMatchObject(expected: Partial<T>) {
     for (const [k, v] of Object.entries(expected)) {
       // @ts-expect-error
       const actual = this.actual[k];
@@ -148,11 +145,10 @@ export class NotMatcher {
     assert(this.actual !== null, () => `Expected not null`);
   }
 
-  toThrow(/** @type string= */ message = "") {
+  toThrow(message = "") {
     let didThrow = false;
 
-    /** @type unknown */
-    let result = undefined;
+    let result: unknown = undefined;
     try {
       // @ts-expect-error
       result = this.actual();
@@ -169,10 +165,6 @@ export class NotMatcher {
   }
 }
 
-/**
- * @template T
- * @returns {Matcher<T>}
- */
-export function expect(/** @type T */ t) {
+export function expect<T>(t: T): Matcher<T> {
   return new Matcher(t);
 }

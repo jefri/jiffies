@@ -2,6 +2,7 @@
 
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
+import { info } from "../../jiffies/log.js";
 import { findIndex } from "./apps.js";
 import { fileResponse } from "./response.js";
 import { sitemap } from "./sitemap.js";
@@ -61,7 +62,7 @@ const log = (/** @type {IncomingMessage} */ req) => {
   const who = req.socket.remoteAddress;
   const what = req.url;
   const how = `${req.method} ${what}`;
-  console.log(`${when}\t${who}\t"${how}"`);
+  info("Request", { when, who, how });
 };
 
 export const makeServer = () => {
@@ -88,7 +89,7 @@ export const makeServer = () => {
   server.on("listening", () => {
     const { address, port } =
       /** @type {import("net").AddressInfo} */ server.address();
-    console.log(`Listening at http://${address}:${port}`);
+    info("Server listening", { address: `http://${address}:${port}` });
   });
 
   return server;

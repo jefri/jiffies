@@ -1,7 +1,7 @@
 import { display, Display } from "./display.js";
 
 export interface Log {
-  (message: Display): void;
+  (message: Display, data?: {}): void;
 }
 
 export interface Logger {
@@ -27,11 +27,11 @@ export function getLogger(name: string): Logger {
   const logAt =
     (
       level: number,
-      fn: (message: Display) => void
+      fn: (message: Display, data?: {}) => void
     ): ((message: Display) => void) =>
-    (message: Display) =>
+    (message: Display, data?: {}) =>
       level >= (logger.level ?? LEVEL.SILENT)
-        ? fn(display(message))
+        ? fn(display(message), data)
         : undefined;
 
   logger.debug = logAt(LEVEL.VERBOSE, console.debug.bind(console));
@@ -44,18 +44,18 @@ export function getLogger(name: string): Logger {
 
 export const DEFAULT_LOGGER = getLogger("default");
 
-export function debug(message: Display) {
-  DEFAULT_LOGGER.debug(message);
+export function debug(message: Display, data?: {}) {
+  DEFAULT_LOGGER.debug(message, data);
 }
 
-export function info(message: Display) {
-  DEFAULT_LOGGER.info(message);
+export function info(message: Display, data?: {}) {
+  DEFAULT_LOGGER.info(message, data);
 }
 
-export function warn(message: Display) {
-  DEFAULT_LOGGER.warn(message);
+export function warn(message: Display, data?: {}) {
+  DEFAULT_LOGGER.warn(message, data);
 }
 
-export function error(message: Display) {
-  DEFAULT_LOGGER.error(message);
+export function error(message: Display, data?: {}) {
+  DEFAULT_LOGGER.error(message, data);
 }

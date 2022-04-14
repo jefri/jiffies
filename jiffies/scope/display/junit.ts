@@ -1,14 +1,13 @@
 import { xml } from "../../dom/xml.js";
-import { flattenResults } from "../execute.js";
+import { FlatResult, flattenResults } from "../execute.js";
+import { TestResult } from "../scope.js";
 
-/** @param {import("../execute.js").TestResult} results */
-const cases = (results) =>
+const cases = (results: TestResult) =>
   Object.entries(results).filter(
     ([key]) => !["executed", "passed", "failed"].includes(key)
   );
 
-/** @param {import("../execute.js").TestResult} results */
-export function asXML(results) {
+export function asXML(results: TestResult) {
   return (
     `<?xml version="1.0" encoding="UTF-8" ?>` +
     xml(
@@ -17,20 +16,21 @@ export function asXML(results) {
       cases(results).map(([title, children]) =>
         testsuite(
           title,
-          children.executed,
-          children.failed,
-          flattenResults(children)
+          (children as TestResult).executed,
+          (children as TestResult).failed,
+          flattenResults(children as TestResult)
         )
       )
     )
   );
 }
 
-/**
- * @param {string} name
- * @param {import("../execute.js").FlatResult[]} cases
- */
-function testsuite(name, tests, failures, cases) {
+function testsuite(
+  name: string,
+  tests: number,
+  failures: number,
+  cases: FlatResult[]
+) {
   const id = name.replace("s+", "_");
   return xml(
     "testsuite",
@@ -42,8 +42,12 @@ function testsuite(name, tests, failures, cases) {
 }
 
 function testcase(
-  { name, id = name.replace(/\s+/g, "_"), time = "0.00" },
-  failures
+  {
+    name,
+    id = name.replace(/\s+/g, "_"),
+    time = "0.00",
+  }: { name: string; id?: string; time?: string },
+  failures: string[]
 ) {
   return xml(
     "testcase",
@@ -52,6 +56,12 @@ function testcase(
   );
 }
 
-function failure({ text, message = text.split("\n")[0] }) {
+function failure({
+  text,
+  message = text.split("\n")[0],
+}: {
+  text: string;
+  message?: string;
+}) {
   return xml("failure", { message }, [`<![CDATA[${text}]]>`]);
 }

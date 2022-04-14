@@ -115,7 +115,6 @@ describe("Chip", () => {
         expect(xorChip.out().voltage()).toBe(LOW);
 
         a.pull(LOW);
-        console.log(printChip(xorChip));
         xorChip.eval();
         expect(xorChip.out().voltage()).toBe(HIGH);
       });

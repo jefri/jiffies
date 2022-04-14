@@ -1,3 +1,4 @@
+import { L } from "../../apps/chess/game/chess.js";
 import { display, Display } from "../display.js";
 import { DOMElement, Updatable, Updater } from "../dom/dom.js";
 import { div, span, ul, li, pre, code } from "../dom/html.js";
@@ -5,6 +6,10 @@ import { LEVEL, Logger } from "../log.js";
 
 export interface HTMLLogger extends Logger {
   root: Updatable<DOMElement>;
+}
+
+export function isHTMLLogger(logger: Logger): logger is HTMLLogger {
+  return (logger as HTMLLogger).root != undefined;
 }
 
 export function makeHTMLLogger(name: string): HTMLLogger {

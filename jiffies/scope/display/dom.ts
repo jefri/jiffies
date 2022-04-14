@@ -1,7 +1,8 @@
-import { makeHTMLLogger } from "../../components/logger.js";
+import { isHTMLLogger, makeHTMLLogger } from "../../components/logger.js";
 import { DEFAULT_LOGGER, LEVEL } from "../../log.js";
 import { getTotalCases } from "../describe.js";
-import { flattenResults, TestResult } from "../execute.js";
+import { flattenResults } from "../execute.js";
+import { TestResult } from "../scope.js";
 
 export function displayStatistics(results: TestResult, root = document.body) {
   const { executed, failed } = results;
@@ -25,7 +26,7 @@ export function displayStatistics(results: TestResult, root = document.body) {
     }
   }
 
-  if (logger.root) {
+  if (isHTMLLogger(logger)) {
     root.appendChild(logger.root);
   }
 }

@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import path from "path";
+import { info } from "../../jiffies/log.js";
 import { contentResponse } from "./response.js";
 
 const findSiteMap = async (root) => {
@@ -14,6 +15,7 @@ const findSiteMap = async (root) => {
         .replaceAll(path.sep, "/");
       if (entry.isFile()) {
         if (entry.name === "index.html") {
+          info(`Adding to sitemap`, { index: next });
           return [next];
         }
       } else if (entry.isDirectory()) {

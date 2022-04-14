@@ -5,30 +5,23 @@ import {
   beforeeach,
   rootCases,
 } from "./describe.js";
+import { TestResult, TestSummary } from "./scope.js";
 
-/**
- * @typedef {import("./scope.js").TestCase} TestCase
- * @typedef {import("./scope.js").TestResult} TestResult
- */
-
-/**
- * @param {string} prefix
- * @param {TestCase} cases
- * @returns {Promise<TestResult>}
- */
-export async function execute(prefix = "", cases = rootCases()) {
+export async function execute(
+  prefix = "",
+  cases = rootCases()
+): Promise<TestResult> {
   const beforeallfn = cases[beforeall] ?? (() => {});
   const beforeeachfn = cases[beforeeach] ?? (() => {});
   const afterallfn = cases[afterall] ?? (() => {});
   const aftereachfn = cases[aftereach] ?? (() => {});
 
-  /** @type {TestResult} */
-  const result = { executed: 0, passed: 0, failed: 0 };
+  const result: TestResult = { executed: 0, passed: 0, failed: 0, total: 0 };
 
   try {
     await beforeallfn();
   } catch (e) {
-    result["_beforeAll"] = { error: /** @type {Error} */ (e) };
+    result["_beforeAll"] = { error: e };
     return result;
   }
 
@@ -60,56 +53,56 @@ export async function execute(prefix = "", cases = rootCases()) {
   try {
     await afterallfn();
   } catch (e) {
-    result["_afterAll"] = { error: /** @type Error */ e };
+    result["_afterAll"] = { error: e };
   }
 
   return result;
 }
 
-/** @param {TestResult} error */
-export function getError({ error }) {
+export function getError({ error }: TestResult) {
   if (typeof error == "string") {
     return error;
-  } else if (/** @type Error */ (error).message) {
-    return error.stack; /** @type Error */
+  } else if ((error as TestResult).message) {
+    return (error as TestResult).stack;
   } else {
     return "unknown error";
   }
 }
 
-/**
- * @typedef {{test: string, stack?: string, stats: {executed: number, failed: number} }} FlatResult
- * @param {import("./scope.js").TestResult} results
- * @returns {FlatResult[]}
- */
-export function flattenResults(results, prefix = "") {
+export interface FlatResult {
+  test: string;
+  stack?: string;
+  stats: { executed: number; failed: number };
+}
+
+function makeResult(
+  test: string,
+  result: TestResult | TestSummary
+): FlatResult[] {
+  if (result.error)
+    return [
+      {
+        test,
+        stack: getError(result),
+        stats: { executed: 1, failed: 1 },
+      },
+    ];
+  if (result.passed) {
+    return [{ test, stats: { executed: 1, failed: 0 } }];
+  }
+  return flattenResults(result, test);
+}
+
+export function flattenResults(results: TestResult, prefix = ""): FlatResult[] {
   const arrow = prefix == "" ? "" : " -> ";
-  /** @type {FlatResult[]} */
-  let errorList = [
-    /*
-    {
-      test: prefix,
-      stats: { executed: results.executed, failed: results.failed },
-    },
-    */
-  ];
+  let errorList: FlatResult[] = [];
   for (const [title, result] of Object.entries(results).filter(
     ([key]) => !["executed", "passed", "failed"].includes(key)
   )) {
     const test = `${prefix}${arrow}${title}`;
-    errorList = errorList.concat(
-      result.error
-        ? [
-            {
-              test,
-              stack: getError(result),
-              stats: { executed: 1, failed: 1 },
-            },
-          ]
-        : result.passed === true
-        ? [{ test: test, stats: { executed: 1, failed: 0 } }]
-        : flattenResults(result, test)
-    );
+    if (typeof result == "number") continue;
+    const flatResult = makeResult(test, result);
+    errorList = errorList.concat(flatResult);
   }
   return errorList;
 }
