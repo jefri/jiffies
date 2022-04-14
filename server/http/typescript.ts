@@ -2,12 +2,12 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { contentResponse } from "./response.js";
 import { transpile } from "../../transpile.mjs";
+import { StaticMiddleware } from "./index.js";
 
 /**
- * Finds .ts files and transpiles them to JS.
- * @type import("./index.js").StaticMiddleware
+ * Serves .js files statically. Finds .ts files and transpiles them to JS.
  */
-export const tsFileServer = async (req) => {
+export const tsFileServer: StaticMiddleware = async (req) => {
   if (req.url?.endsWith(".js")) {
     let filename = path.join(process.cwd(), req.url);
     try {

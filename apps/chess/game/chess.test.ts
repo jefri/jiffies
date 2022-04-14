@@ -5,22 +5,19 @@ import {
   BLACK,
   ChessGame,
   E,
+  File,
   I,
   index,
   KING,
   KNIGHT,
   PAWN,
   QUEEN,
+  Rank,
   ROOK,
-  square,
   WHITE,
 } from "./chess.js";
 
-function movesFor(
-  /** @type ChessGame */ game,
-  /** @type import("./chess.js").File */ file,
-  /** @type import("./chess.js").Rank */ rank
-) {
+function movesFor(game: ChessGame, file: File, rank: Rank) {
   return game
     .moves(file, rank)
     .map((m) => m.toString())
@@ -137,11 +134,7 @@ class TestBoard extends ChessGame {
     this.board = CLEAR_GAME;
   }
 
-  set(
-    /** @type import("./chess.js").File */ file,
-    /** @type import("./chess.js").Rank */ rank,
-    /** @type number */ piece
-  ) {
+  set(file: File, rank: Rank, piece: number) {
     const idx = index(file, rank);
     this.board[idx] = piece;
   }

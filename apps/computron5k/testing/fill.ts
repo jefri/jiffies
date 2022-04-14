@@ -1,8 +1,7 @@
+import { CPU } from "../simulator/cpu/cpu.js";
 import { SCREEN } from "../simulator/cpu/memory.js";
 
-export const TickScreen = (
-  /** @type {import("../simulator/cpu/cpu.js").CPU} */ cpu
-) => {
+export const TickScreen = (cpu: CPU) => {
   let row = 0;
   let col = 0;
   let color = 0xffff;
