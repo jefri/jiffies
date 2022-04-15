@@ -46,14 +46,10 @@ describe("html", () => {
     expect(clicked).toBe(1);
   });
 
-  it("sets style strings", () => {
-    const btn = button({ style: "flex-direction: column" });
-
-    expect(btn.style.flexDirection).toBe("column");
-  });
-
   it("sets style properties", () => {
-    const btn = button({ style: { flexDirection: "column" } });
+    const btn = button({
+      style: { flexDirection: "column" },
+    }) as unknown as HTMLButtonElement;
 
     expect(btn.style.flexDirection).toBe("column");
   });
@@ -68,7 +64,9 @@ describe("html", () => {
     btn.dispatchEvent(new Event("click"));
 
     expect(btn.classList.contains("test-class")).toBe(true);
-    expect(btn.style.flexDirection).toBe("column");
+    expect((btn as unknown as HTMLButtonElement).style.flexDirection).toBe(
+      "column"
+    );
     expect(clicked).toBe(true);
   });
 });

@@ -1,6 +1,5 @@
 import {
   CLEAR,
-  DenormAttrs,
   DenormChildren,
   DomAttrs,
   normalizeArguments,
@@ -8,78 +7,77 @@ import {
   update,
 } from "./dom.js";
 
-export type Scope<S> = Partial<S & DomAttrs>;
+export type Scope<S> = S & Partial<DomAttrs>;
 export type AttrSet = object;
 
-export interface RenderFn<S extends object, E extends Element> {
-  (el: E, attrs: Scope<S>, children: DenormChildren[]):
-    | Updatable<E>
-    | Updatable<E>[];
+export const State = Symbol();
+export interface FCComponent<Props extends Object, State extends Object>
+  extends HTMLElement {
+  [State]: Partial<State>;
+  update(
+    attrs?: Partial<Scope<Props>> | DenormChildren,
+    ...children: DenormChildren[]
+  ): void;
+}
+export interface RenderFn<P extends object, S extends object> {
+  (el: FCComponent<P, S>, attrs: Scope<P>, children: DenormChildren[]):
+    | Updatable<Element>
+    | Updatable<Element>[];
 }
 
-export function FC<S extends object, E extends Element>(
-  name: string,
-  attrSet: AttrSet | RenderFn<S, E>,
-  component?: RenderFn<S, E>
-) {
-  let render: RenderFn<S, E> = component ?? (() => []);
-  if (component === undefined && typeof attrSet === "function") {
-    render = attrSet as RenderFn<S, E>;
-    attrSet = {};
-  }
+export interface FCComponentCtor<Props extends Object, State extends Object> {
+  (
+    attrs?: Scope<Props> | DenormChildren,
+    ...children: DenormChildren[]
+  ): FCComponent<Props, State>;
+}
 
+export function FC<Props extends object, State extends Object = {}>(
+  name: string,
+  component: RenderFn<Props, State>
+): FCComponentCtor<Props, State> {
   class FCImpl extends HTMLElement {
     constructor() {
       super();
     }
 
-    #lastAttrs: Scope<S> = {};
-    #lastChildren: DenormChildren[] = [];
+    [State]: Partial<State> = {};
+    #attrs: Scope<Props> = {} as Scope<Props>;
+    #children: DenormChildren[] = [];
 
-    update(attrs?: Scope<S> | DenormChildren, ...children: DenormChildren[]) {
+    update(
+      attrs?: Scope<Props> | DenormChildren,
+      ...children: DenormChildren[]
+    ) {
       [attrs, children] = normalizeArguments(attrs, children) as [
-        Scope<S>,
+        Scope<Props>,
         DenormChildren[]
       ];
       if (children[0] === CLEAR) {
-        this.#lastChildren = [];
+        this.#children = [];
       } else if (children.length > 0) {
-        this.#lastChildren = children;
+        this.#children = children;
       }
-      this.#lastAttrs = { ...this.#lastAttrs, ...(attrs as Scope<S>) };
+      this.#attrs = { ...this.#attrs, ...(attrs as Scope<Props>) };
+      // Apply updates from the attrs to the dom node itself
       // @ts-ignore
-      update(this, this.#lastAttrs, []);
-      // @ts-ignore
-      const replace = [render(this, this.#lastAttrs, this.#lastChildren)];
+      update(this, this.#attrs, []);
+      // Re-run the component function using new element, attrs, and children.
+      const replace = [component(this, this.#attrs, this.#children)];
       this.replaceChildren(...replace.flat());
     }
   }
 
   customElements.define(name, FCImpl);
 
-  return (attrs?: Scope<S>, ...children: DenormChildren[]) => {
-    const element = document.createElement(name) as FCImpl;
+  const ctor: FCComponentCtor<Props, State> = (
+    attrs?: Scope<Props> | DenormChildren,
+    ...children: DenormChildren[]
+  ): FCComponent<Props, State> => {
+    const element = document.createElement(name) as FCComponent<Props, State>;
     element.update(attrs, ...children);
     return element;
   };
-}
 
-type Component<S extends object, E extends HTMLElement> = Scope<S> &
-  Updatable<E>;
-
-interface ComponentClass<S extends object, E extends HTMLElement> {
-  name: string;
-  new (): Component<S, E>;
-}
-
-export function C<S extends object, E extends HTMLElement>(
-  clazz: ComponentClass<S, E>
-) {
-  customElements.define(clazz.name, clazz);
-
-  return (attrs?: DenormAttrs<E, S>, ...children: DenormChildren[]) => {
-    const element = document.createElement(clazz.name) as Component<S, E>;
-    element.update(attrs, ...children);
-    return element;
-  };
+  return ctor;
 }

@@ -1,3 +1,4 @@
+import { State } from "../dom/fc.js";
 import { div } from "../dom/html.js";
 import { describe, it, expect } from "../scope/index.js";
 import VirtualScroll, {
@@ -9,17 +10,17 @@ describe("VirtualScroll", () => {
   it("tracks scroll position", () => {
     const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    const props: VirtualScrollProps<number, div> = {
+    const props: VirtualScrollProps<number, HTMLDivElement> = {
       settings: { count: 3, startIndex: 2 },
       get: arrayAdapter(data),
       row: (i) => div(`${i}`),
     };
-    const scroll: VirtualScroll<number, div> = VirtualScroll(props);
+    const scroll = VirtualScroll(props);
 
-    expect(scroll.state.bufferedItems).toBe(9);
-    expect(scroll.state.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(scroll[State].state?.bufferedItems).toBe(9);
+    expect(scroll[State].state?.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     //expect(scroll.state.topPaddingHeight).toBe(0);
-    expect(scroll.state.viewportHeight).toBe(60);
+    expect(scroll[State].state?.viewportHeight).toBe(60);
     //expect(scroll.state.totalHeight).toBe(200);
   });
 });

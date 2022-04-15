@@ -1,3 +1,5 @@
+import * as CSS from "./types/css";
+
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");
 
@@ -8,23 +10,19 @@ export type DOMElement = Element &
   DocumentAndElementEventHandlers &
   ElementCSSInlineStyle;
 
-export type Updater<E extends DOMElement> = E & {
+export type Updater<E extends DOMElement> = Omit<E, "style"> & {
   [Events]?: Map<string, EventHandler>;
   update?: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
 };
 
-export type Updatable<E extends Element> = E & {
+export type Updatable<E extends Element> = Omit<E, "style"> & {
   [Events]: Map<string, EventHandler>;
   update: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
 };
 
 export type DomAttrs = {
   class: string;
-  style:
-    | string
-    | Partial<{
-        [K in keyof CSSStyleDeclaration]: string;
-      }>;
+  style: Partial<CSS.Properties>;
   events: Partial<{
     [K in keyof HTMLElementEventMap]: EventHandler;
   }>;

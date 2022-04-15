@@ -5,6 +5,7 @@
     "test": "node --experimental-loader ./loader.mjs ./test.mjs",
     "ci": "node --experimental-loader ./loader.mjs ./test.mjs --mode=junit",
     "lint": "npx prettier . --check",
+    "check": "npx tsc",
     "format": "npx prettier . --write"
   },
   "devDependencies": {

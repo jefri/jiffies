@@ -5,7 +5,6 @@ import {
 } from "../simulator/cpu/memory.js";
 import { asm } from "../util/asm.js";
 import { bin, dec, hex } from "../util/twos.js";
-/** @typedef {import("../simulator/cpu/memory.js").Format} Format */
 
 import ButtonBar from "../../../jiffies/components/button_bar.js";
 import InlineEdit from "../../../jiffies/components/inline_edit.js";
@@ -20,34 +19,27 @@ import {
 } from "../../../jiffies/dom/html.js";
 import { rounded } from "../../../jiffies/dom/css/border.js";
 import { text } from "../../../jiffies/dom/css/typography.js";
-import { FC } from "../../../jiffies/dom/fc.js";
+import { FC, State } from "../../../jiffies/dom/fc.js";
 import { li } from "../../../jiffies/dom/html.js";
-import { Updatable } from "../../../jiffies/dom/dom.js";
 
-const MemoryBlock = FC(
+const MemoryBlock = FC<
+  {
+    memory: MemoryChip;
+    highlight?: number;
+    editable?: boolean;
+    format: (v: number) => string;
+    onChange: (i: number, value: string, previous: number) => void;
+  },
+  {
+    virtualScroll: VirtualScroll<number, typeof MemoryCell>;
+  }
+>(
   "memory-block",
-  (
-    element: Updatable<HTMLElement> & {
-      virtualScroll: VirtualScroll<number, typeof MemoryCell>;
-    },
-    {
-      memory,
-      highlight = -1,
-      editable = false,
-      format,
-      onChange,
-    }: {
-      memory: MemoryChip;
-      highlight?: number;
-      editable?: boolean;
-      format: (v: number) => string;
-      onChange: (i: number, value: string, previous: number) => void;
-    }
-  ) => {
-    if (element.virtualScroll) {
-      element.virtualScroll.update();
+  (el, { memory, highlight = -1, editable = false, format, onChange }) => {
+    if (el[State].virtualScroll) {
+      el[State].virtualScroll?.update();
     } else {
-      element.virtualScroll = VirtualScroll({
+      el[State].virtualScroll = VirtualScroll({
         settings: { count: 20, maxIndex: memory.size, itemHeight: 28 },
         get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
         row: ([i, v]) =>
@@ -60,27 +52,21 @@ const MemoryBlock = FC(
           }),
       });
     }
-    return element.virtualScroll;
+    return el[State].virtualScroll!;
   }
 );
 
-const MemoryCell = FC(
+const MemoryCell = FC<{
+  index: number;
+  value: number;
+  highlight?: boolean;
+  editable?: boolean;
+  onChange: (i: number, value: string, previous: number) => void;
+}>(
   "memory-cell",
   (
-    el: Updatable<HTMLElement>,
-    {
-      index,
-      value,
-      highlight = false,
-      editable = false,
-      onChange = () => {},
-    }: {
-      index: number;
-      value: number;
-      highlight?: boolean;
-      editable?: boolean;
-      onChange: (i: number, value: string, previous: number) => void;
-    }
+    el,
+    { index, value, highlight = false, editable = false, onChange = () => {} }
   ) => {
     el.style.display = "flex";
     return [
@@ -117,26 +103,24 @@ const MemoryCell = FC(
   }
 );
 
-const Memory = FC(
+const Memory = FC<
+  {
+    name?: string;
+    editable?: boolean;
+    highlight?: number;
+    memory: MemoryChip;
+    format: Format;
+  },
+  { format: Format }
+>(
   "memory-gui",
   (
-    el: Updatable<HTMLElement> & { state?: { format: Format } },
-    {
-      name = "Memory",
-      highlight = -1,
-      editable = true,
-      memory,
-      format = "dec",
-    }: {
-      name?: string;
-      editable?: boolean;
-      highlight?: number;
-      memory: MemoryChip;
-      format: Format;
-    }
+    el,
+    { name = "Memory", highlight = -1, editable = true, memory, format = "dec" }
   ) => {
     el.style.width = "283px";
-    const state = (el.state ??= { format });
+    const state = el[State];
+    state.format ??= format;
     const setFormat = (f: Format) => {
       state.format = f;
       buttonBar.update({ value: state.format });

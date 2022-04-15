@@ -1,3 +1,4 @@
+import { Properties } from "../types/css.js";
 import { Side, Size } from "./constants.js";
 import { isSide, getSize, getSide } from "./core.js";
 
@@ -15,7 +16,7 @@ export function rounded(size: Size = "", side: Side = "") {
       prev[`border${curr}Radius`] = sized;
     }
     return prev;
-  }, {} as CSSStyleDeclaration);
+  }, {} as Properties);
 }
 
 export function border({
@@ -25,9 +26,9 @@ export function border({
   width = 1,
   color = "black",
 }: {
-  side?: import("./constants.js").Side;
+  side?: Side;
   style?: "solid" | "dotted" | "dashed" | "double" | "none";
-  radius?: import("./constants.js").Size;
+  radius?: Size;
   width?: 0 | 1 | 2 | 4 | 8;
   color?: string;
 }) {
@@ -35,9 +36,9 @@ export function border({
 }
 
 export function inset(
-  /** @type 0|1|2|4|8 */ width,
-  /** @type string */ color1 = "gray",
-  /** @type string */ color2 = "lightgray"
+  width: 0 | 1 | 2 | 4 | 8,
+  color1: string = "gray",
+  color2: string = "lightgray"
 ) {
   return {
     ...border({ side: "tl", width, color: color1, radius: "none" }),

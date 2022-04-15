@@ -1,6 +1,6 @@
 import { debounce } from "../debounce.js";
 import { Updatable } from "../dom/dom.js";
-import { FC } from "../dom/fc.js";
+import { FC, State } from "../dom/fc.js";
 import { div } from "../dom/html.js";
 
 export interface VirtualScrollSettings {
@@ -128,71 +128,68 @@ interface VirtualScrollState<T> {
   data: T[];
 }
 
-export interface VirtualScroll<T, U extends HTMLElement>
-  extends Updatable<HTMLElement> {
+export interface VirtualScroll<T, U extends HTMLElement> {
   state: VirtualScrollState<T>;
   rows: U[];
 }
 
-function VirtualScrollFn<T, U extends HTMLElement>(
-  element: VirtualScroll<T, U>,
-  props: VirtualScrollProps<T, U>
-): VirtualScroll<T, U> {
-  const settings = fillVirtualScrollSettings(props.settings);
-  const state = (element.state ??= initialState(settings));
+export const VirtualScroll = FC<VirtualScrollProps, VirtualScroll>(
+  "virtual-scroll",
+  (element, props) => {
+    const settings = fillVirtualScrollSettings(props.settings);
+    const state = (element[State].state ??= initialState(settings));
 
-  const scrollTo = (
-    { target }: { target?: { scrollTop: number } } = { target: state }
-  ) => {
-    const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
-    const updatedSate = {
-      ...state,
-      ...doScroll(scrollTop, state, props.get),
+    const scrollTo = (
+      { target }: { target?: { scrollTop: number } } = { target: state }
+    ) => {
+      const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
+      const updatedSate = {
+        ...state,
+        ...doScroll(scrollTop, state, props.get),
+      };
+      setState(updatedSate);
     };
-    setState(updatedSate);
-  };
 
-  const viewportElement = div({
-    style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
-    events: { scroll: debounce(scrollTo, 0) },
-  });
-  setTimeout(() => {
-    viewportElement.scroll({ top: state.scrollTop });
-  });
+    const viewportElement = div({
+      style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
+      events: { scroll: debounce(scrollTo, 0) },
+    });
+    setTimeout(() => {
+      viewportElement.scroll({ top: state.scrollTop });
+    });
 
-  const setState = (newState: VirtualScrollState<T>) => {
-    state.scrollTop = newState.scrollTop;
-    state.topPaddingHeight = newState.topPaddingHeight;
-    state.bottomPaddingHeight = newState.bottomPaddingHeight;
-    state.data = newState.data;
-    element.rows = state.data.map(props.row);
+    const setState = (newState: VirtualScrollState<T>) => {
+      state.scrollTop = newState.scrollTop;
+      state.topPaddingHeight = newState.topPaddingHeight;
+      state.bottomPaddingHeight = newState.bottomPaddingHeight;
+      state.data = newState.data;
+      element[State].rows = state.data.map(props.row);
 
-    viewportElement.update(
-      div({
-        class: "VirtualScroll__topPadding",
-        style: { height: `${state.topPaddingHeight}px` },
-      }),
-      ...element.rows.map((row, i) =>
-        div(
-          {
-            class: `VirtualScroll__item_${i}`,
-            style: { height: `${settings.itemHeight}px` },
-          },
-          row
-        )
-      ),
-      div({
-        class: "VirtualScroll__bottomPadding",
-        style: { height: `${state.bottomPaddingHeight}px` },
-      })
-    );
-  };
+      viewportElement.update(
+        div({
+          class: "VirtualScroll__topPadding",
+          style: { height: `${state.topPaddingHeight}px` },
+        }),
+        ...element[State].rows.map((row, i) =>
+          div(
+            {
+              class: `VirtualScroll__item_${i}`,
+              style: { height: `${settings.itemHeight}px` },
+            },
+            row
+          )
+        ),
+        div({
+          class: "VirtualScroll__bottomPadding",
+          style: { height: `${state.bottomPaddingHeight}px` },
+        })
+      );
+    };
 
-  scrollTo();
+    scrollTo();
 
-  return viewportElement as VirtualScroll<T, U>;
-}
-
-export const VirtualScroll = FC("virtual-scroll", VirtualScrollFn);
+    return viewportElement;
+  }
+);
 
 export default VirtualScroll;

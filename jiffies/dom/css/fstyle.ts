@@ -1,19 +1,11 @@
 import { dashCase } from "../../case.js";
-// type CSSProperties = Omit<
-//   CSSStyleDeclaration,
-//   | "getPropertyPriority"
-//   | "getPropertyValue"
-//   | "item"
-//   | "removeProperty"
-//   | "setProperty"
-//   | number
-// >;
+import { Properties } from "../types/css.js";
 
-// export interface FStyle
-//   extends CSSProperties,
-//     Record<Exclude<string, keyof CSSProperties>, FStyle> {}
-
-export interface FStyle extends Record<string, string | FStyle> {}
+export type FStyle =
+  | Properties
+  | {
+      [K in string]: FStyle;
+    };
 
 export function compileFStyle(fstyle: FStyle, prefix = ""): string {
   const properties: { key: string; value: string }[] = [];

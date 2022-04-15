@@ -12,7 +12,7 @@ export const Form({
         onSubmit = (event) => {},
     },
     ...children
-) => 
+) =>
     form({
             action,
             events: {submit: (event) => {
@@ -81,20 +81,22 @@ components.
 
 ```js
 const MyPage = () => [
-    style(compileFstyle({
+  style(
+    compileFstyle({
+      main: {
+        display: "flex",
+        flexDirection: "row",
+      },
+      "@media max-width(768px)": {
         main: {
-            display: 'flex',
-            flexDirection: 'row',
+          flexDirection: "column",
         },
-        "@media max-width(768px)": {
-            main: {
-                flexDirection: 'column',
-            }
-        }
-    })),
-    section('...'),
-    section('...'),
-    section('...'),
+      },
+    })
+  ),
+  section("..."),
+  section("..."),
+  section("..."),
 ];
 ```
 

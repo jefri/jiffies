@@ -99,7 +99,7 @@ export const CPU = (
         format: "asm",
         editable: false,
       })),
-      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM })),
+      (RAM = MemoryGUI({ name: "RAM", memory: cpu.RAM, format: "hex" })),
       (screen = Screen({
         memory: cpu.RAM,
       }))

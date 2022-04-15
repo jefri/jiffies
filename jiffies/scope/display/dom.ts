@@ -1,5 +1,5 @@
 import { isHTMLLogger, makeHTMLLogger } from "../../components/logger.js";
-import { DOMElement } from "../../dom/dom.js";
+import { DOMElement, Updatable } from "../../dom/dom.js";
 import { DEFAULT_LOGGER, LEVEL } from "../../log.js";
 import { getTotalCases } from "../describe.js";
 import { flattenResults } from "../execute.js";
@@ -7,7 +7,7 @@ import { TestResult } from "../scope.js";
 
 export function displayStatistics(
   results: TestResult,
-  root: DOMElement = document.body
+  root: Updatable<DOMElement> = document.body as unknown as Updatable<DOMElement>
 ) {
   const { executed, failed } = results;
   const logger = (() => {
