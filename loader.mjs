@@ -27,14 +27,15 @@ export async function resolve(
   return defaultResolve(specifier, context, defaultResolve);
 }
 
-/** @returns {Promise<{source: string}>} */
+/** @returns {Promise<{format: string, source: string}>} */
 export async function load(
   /** @type string */ url,
   /** @type {{format?: string}} */ context,
-  /** @type {(url: string, context: {format?: string}, defaultLoad?: Function) => Promise<{source: string}>} */ defaultLoad
+  /** @type {(url: string, context: {format?: string}, defaultLoad?: Function) => Promise<{format: string, source: string}>} */ defaultLoad
 ) {
   return url.endsWith("ts")
     ? {
+        format: "module",
         source: await transpile(
           url,
           async () => (await defaultLoad(url, { format: "module" })).source
