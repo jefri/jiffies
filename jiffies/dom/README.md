@@ -15,9 +15,11 @@ export const Form({
 ) =>
     form({
             action,
-            events: {submit: (event) => {
+            events: {
+              submit: (event) => {
                 event.preventDefault();
                 onSubmit(event);
+              }
             }
         },
         h3(title),
@@ -62,13 +64,13 @@ WebComponent elements in the DOM, and exposes an interface that matches native
 HTML elements.
 
 ```js
-export const GameSquare = FC('game-square', (el, {pieceType}) => {
-    el.textContent = pieceType;
+export const GameSquare = FC<{piece: Piece}>('game-square', (el, {piece}) => {
+    el.textContent = piece;
     // `el` is retained between updates
     return el;
 });
 
-export const GameBoard = FC('game-board', (el, {pieces} => {
+export const GameBoard = FC<{pieces: Piece[]}>('game-board', (el, {pieces} => {
     return el;
 }));
 ```
