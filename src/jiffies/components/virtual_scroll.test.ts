@@ -15,6 +15,7 @@ describe("VirtualScroll", () => {
       get: arrayAdapter(data),
       row: (i) => div(`${i}`),
     };
+    // @ts-ignore TODO(TFC)
     const scroll = VirtualScroll(props);
 
     expect(scroll[State].bufferedItems).toBe(9);

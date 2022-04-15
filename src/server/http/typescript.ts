@@ -9,7 +9,7 @@ import { StaticMiddleware } from "./index.js";
  */
 export const tsFileServer: StaticMiddleware = async (req) => {
   if (req.url?.endsWith(".js")) {
-    let filename = path.join(process.cwd(), req.url);
+    let filename = path.join(process.cwd(), "src", req.url);
     try {
       const stat = await fs.stat(filename);
       if (stat.isFile()) {

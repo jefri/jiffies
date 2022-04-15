@@ -24,7 +24,7 @@ export interface StaticMiddleware {
 const notFound: StaticMiddleware = async () =>
   fileResponse(
     // path.join(path.dirname(FLAGS.argv0), "404.html"),
-    path.join(process.cwd(), "404.html"),
+    path.join(process.cwd(), "src", "404.html"),
     undefined,
     404
   );

@@ -32,7 +32,9 @@ const findSiteMap = async (root: string) => {
   return children;
 };
 
-const apps = await (await Promise.all(await findSiteMap(".")))
+const apps = await (
+  await Promise.all(await findSiteMap(path.join(process.cwd(), "src")))
+)
   .flat()
   .filter((a) => a !== undefined);
 

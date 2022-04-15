@@ -4,8 +4,11 @@ import { a, li, ul } from "../dom/html.js";
 
 const ButtonBar = FC<{
   // T extends Display
+  // @ts-ignore TODO(TFC)
   value: T;
+  // @ts-ignore TODO(TFC)
   values: T[];
+  // @ts-ignore TODO(TFC)
   events: { onSelect: (current: T) => void };
 }>("button-bar", (el, { value, values, events }) =>
   ul(

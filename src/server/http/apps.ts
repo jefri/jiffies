@@ -7,7 +7,7 @@ import { fileResponse } from "./response.js";
  * Searches up the request path until the first index is found.
  */
 export const findIndex: StaticMiddleware = async (req) => {
-  let filename = path.join(process.cwd(), req.url ?? "");
+  let filename = path.join(process.cwd(), "src", req.url ?? "");
   if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
     return undefined;
   }

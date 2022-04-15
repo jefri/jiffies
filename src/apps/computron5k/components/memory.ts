@@ -31,6 +31,7 @@ const MemoryBlock = FC<
     onChange: (i: number, value: string, previous: number) => void;
   },
   {
+    // @ts-ignore TODO(TFC)
     virtualScroll: VirtualScroll<number, typeof MemoryCell>;
   }
 >(
@@ -43,12 +44,13 @@ const MemoryBlock = FC<
         settings: { count: 20, maxIndex: memory.size, itemHeight: 28 },
         get: (o, l) => memory.map((i, v) => [i, v], o, o + l),
         row: ([i, v]) =>
+          // @ts-ignore TODO(TFC)
           MemoryCell({
             index: i,
             value: v,
             editable: editable,
             highlight: i === highlight,
-            onChange: (value) => onChange(i, value, v),
+            onChange: (value) => onChange(i, `${value}`, v),
           }),
       });
     }
@@ -96,7 +98,8 @@ const MemoryCell = FC<{
           ? InlineEdit({
               value: `${value}`,
               events: {
-                change: (newValue) => onChange(index, newValue, value),
+                // @ts-ignore TODO(FC Events)
+                change: (newValue: string) => onChange(index, newValue, value),
               },
             })
           : span(`${value}`)

@@ -3,12 +3,12 @@
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "target": "esNext",
     "module": "ES2020",
-    "noEmit": true,
     "noEmitOnError": true,
     "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "outDir": "build"
   },
-  "include": ["jiffies/**/*", "apps/**/*", "server/**/*", "*.mjs"]
+  "include": ["src/**/*"]
 }
