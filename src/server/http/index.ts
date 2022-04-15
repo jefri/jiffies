@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { createServer, IncomingMessage, Server, ServerResponse } from "http";
+import { createServer, IncomingMessage, ServerResponse } from "http";
 import { AddressInfo } from "net";
 import * as path from "path";
-import { info } from "../../jiffies/log.js";
+import { info } from "../../log.js";
 import { findIndex } from "./apps.js";
 import { fileResponse } from "./response.js";
 import { sitemap } from "./sitemap.js";
@@ -17,19 +17,29 @@ export interface StaticResponse {
   contentLength?: number;
 }
 
+export interface ServerConfig {
+  root: string;
+}
+
+export interface MiddlewareFactory {
+  (config: ServerConfig): Promise<StaticMiddleware>;
+}
+
 export interface StaticMiddleware {
   (req: IncomingMessage): Promise<undefined | (() => Promise<StaticResponse>)>;
 }
 
-const notFound: StaticMiddleware = async () =>
-  fileResponse(
-    // path.join(path.dirname(FLAGS.argv0), "404.html"),
-    path.join(process.cwd(), "src", "404.html"),
-    undefined,
-    404
-  );
+const notFound: MiddlewareFactory =
+  async ({ root }) =>
+  async () =>
+    fileResponse(
+      // path.join(path.dirname(FLAGS.argv0), "404.html"),
+      path.join(root, "404.html"),
+      undefined,
+      404
+    );
 
-const middlewares: StaticMiddleware[] = [
+const middlewares: MiddlewareFactory[] = [
   sitemap,
   tsFileServer,
   staticFileServer,
@@ -64,12 +74,13 @@ const log = (req: IncomingMessage) => {
   info("Request", { when, who, how });
 };
 
-export const makeServer = () => {
+export const makeServer = async (config: ServerConfig) => {
+  const handlers = await Promise.all(middlewares.map(async (m) => m(config)));
   const server = createServer(async (req, res) => {
     log(req);
     let handler: undefined | (() => Promise<StaticResponse>);
     try {
-      for (const middleware of middlewares) {
+      for (const middleware of handlers) {
         handler = await middleware(req);
         if (handler !== undefined) {
           break;

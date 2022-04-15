@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "lib": ["esnext", "DOM", "DOM.Iterable"],
-    "target": "esNext",
-    "module": "ES2020",
+    "target": "es2022",
+    "module": "es2022",
     "noEmitOnError": true,
     "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "outDir": "build"
+    "outDir": "build",
+    "declaration": true
   },
   "include": ["src/**/*"]
 }

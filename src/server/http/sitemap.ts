@@ -1,10 +1,10 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { info } from "../../jiffies/log.js";
-import { StaticMiddleware } from "./index.js";
+import { info } from "../../log.js";
+import { MiddlewareFactory, StaticMiddleware } from "./index.js";
 import { contentResponse } from "./response.js";
 
-const findSiteMap = async (root: string) => {
+const findSiteMap = async (root: string, prefix = root) => {
   if (root.startsWith("node_modules")) {
     return [];
   }
@@ -16,14 +16,17 @@ const findSiteMap = async (root: string) => {
         .replaceAll(path.sep, "/");
       if (entry.isFile()) {
         if (entry.name === "index.html") {
-          info(`Adding to sitemap`, { index: next });
-          return [next];
+          let index = next.replace(prefix, "");
+          info(`Adding to sitemap`, { index });
+          return [index];
         }
       } else if (entry.isDirectory()) {
         if (entry.name.startsWith(".")) {
           return [];
         }
-        const flattened = (await Promise.all(await findSiteMap(next))).flat();
+        const flattened = (
+          await Promise.all(await findSiteMap(next, prefix))
+        ).flat();
         return flattened;
       }
       return [];
@@ -32,15 +35,14 @@ const findSiteMap = async (root: string) => {
   return children;
 };
 
-const apps = await (
-  await Promise.all(await findSiteMap(path.join(process.cwd(), "src")))
-)
-  .flat()
-  .filter((a) => a !== undefined);
-
-export const sitemap: StaticMiddleware = async (req) => {
-  if ((req.url ?? "").endsWith("sitemap.json")) {
-    return contentResponse(JSON.stringify(apps), "application/json");
-  }
-  return undefined;
+export const sitemap: MiddlewareFactory = async ({ root }) => {
+  const apps = await (await Promise.all(await findSiteMap(root)))
+    .flat()
+    .filter((a) => a !== undefined);
+  return async (req) => {
+    if ((req.url ?? "").endsWith("sitemap.json")) {
+      return contentResponse(JSON.stringify(apps), "application/json");
+    }
+    return undefined;
+  };
 };

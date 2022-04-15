@@ -1,5 +1,5 @@
-import { FC } from "../../../jiffies/dom/fc.js";
-import { span, table, td, tr } from "../../../jiffies/dom/html.js";
+import { FC } from "../../../dom/fc.js";
+import { span, table, td, tr } from "../../../dom/html.js";
 import { asNum, ChessGame, index, L, Piece, W } from "../game/chess.js";
 
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;

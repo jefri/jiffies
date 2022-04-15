@@ -1,4 +1,4 @@
-import { assert } from "../../../../../jiffies/assert.js";
+import { assert } from "../../../../../assert.js";
 import { Chip } from "../chip.js";
 
 import { And } from "./logic/and.js";

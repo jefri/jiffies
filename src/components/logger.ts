@@ -1,4 +1,3 @@
-import { L } from "../../apps/chess/game/chess.js";
 import { display, Display } from "../display.js";
 import { DOMElement, Updatable, Updater } from "../dom/dom.js";
 import { div, span, ul, li, pre, code } from "../dom/html.js";

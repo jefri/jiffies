@@ -1,4 +1,4 @@
-import { compileFStyle } from "../../jiffies/dom/css/fstyle.js";
+import { compileFStyle } from "../../dom/css/fstyle.js";
 import {
   footer,
   h1,
@@ -8,7 +8,7 @@ import {
   cite,
   a,
   span,
-} from "../../jiffies/dom/html.js";
+} from "../../dom/html.js";
 import { Resume, AboutMe } from "./resume.js";
 
 export const App = () => {

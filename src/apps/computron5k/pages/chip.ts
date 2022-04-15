@@ -7,8 +7,8 @@ import {
   section,
   style,
   textarea,
-} from "../../../jiffies/dom/html.js";
-import { compileFStyle, FStyle } from "../../../jiffies/dom/css/fstyle.js";
+} from "../../../dom/html.js";
+import { compileFStyle, FStyle } from "../../../dom/css/fstyle.js";
 import { Pinout } from "../components/pinout.js";
 import { Runbar } from "../components/runbar.js";
 import { LOW, Pin } from "../simulator/chip/chip.js";

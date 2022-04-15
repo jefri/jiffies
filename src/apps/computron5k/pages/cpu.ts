@@ -1,4 +1,4 @@
-import { div, li, span, style, ul } from "../../../jiffies/dom/html.js";
+import { div, li, span, style, ul } from "../../../dom/html.js";
 import { CPU as CPUChip } from "../simulator/cpu/cpu.js";
 import MemoryGUI from "../components/memory.js";
 import { Memory } from "../simulator/cpu/memory.js";
@@ -9,7 +9,7 @@ import { Screen } from "../components/screen.js";
 /** @typedef {import("../components/screen.js").Screen} Screen */
 
 import { TickScreen } from "../testing/fill.js";
-import { compileFStyle } from "../../../jiffies/dom/css/fstyle.js";
+import { compileFStyle } from "../../../dom/css/fstyle.js";
 
 /** @param {{cpu: CPUChip}} props */
 export const CPU = (

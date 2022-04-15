@@ -15,15 +15,15 @@
     <div style="display: none" id="status"></div>
     <div style="display: none" id="json"></div>
     <div style="display: none" id="xml"></div>
-    <script type="module" src="./jiffies/test_all.js"></script>
-    <script type="module" src="./jiffies/dom/test.js"></script>
-    <script type="module" src="./jiffies/components/test.js"></script>
+    <script type="module" src="./test_all.js"></script>
+    <script type="module" src="./dom/test.js"></script>
+    <script type="module" src="./components/test.js"></script>
 
     <script type="module">
-      import { execute } from "./jiffies/scope/execute.js";
-      import { displayStatistics } from "./jiffies/scope/display/dom.js";
-      import { onConsole } from "./jiffies/scope/display/console.js";
-      import { asXML } from "./jiffies/scope/display/junit.js";
+      import { execute } from "./scope/execute.js";
+      import { displayStatistics } from "./scope/display/dom.js";
+      import { onConsole } from "./scope/display/console.js";
+      import { asXML } from "./scope/display/junit.js";
 
       function write(id, value) {
         const start = `--- START_${id.toUpperCase()} ---`;
@@ -43,8 +43,8 @@
       })();
     </script>
     <script type="module">
-      import { nav, ul, li, strong } from "./jiffies/dom/html.js";
-      import { link } from "./jiffies/router/link.js";
+      import { nav, ul, li, strong } from "./dom/html.js";
+      import { link } from "./router/link.js";
 
       const getUrls = async () => {
         const sitemap = await fetch("/sitemap.json");

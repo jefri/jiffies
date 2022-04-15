@@ -1,24 +1,26 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { StaticMiddleware } from "./index.js";
+import { MiddlewareFactory, StaticMiddleware } from "./index.js";
 import { fileResponse } from "./response.js";
 
 /**
  * Searches up the request path until the first index is found.
  */
-export const findIndex: StaticMiddleware = async (req) => {
-  let filename = path.join(process.cwd(), "src", req.url ?? "");
-  if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
-    return undefined;
-  }
-  while (filename.startsWith(process.cwd())) {
-    const index = path.join(filename, "index.html");
-    try {
-      const stat = await fs.stat(index);
-      return fileResponse(index, stat);
-    } catch (e) {
-      filename = path.dirname(filename);
+export const findIndex: MiddlewareFactory =
+  async ({ root }) =>
+  async (req) => {
+    let filename = path.join(root, req.url ?? "");
+    if (path.basename(filename).match(/\.[a-z]{1,3}$/)) {
+      return undefined;
     }
-  }
-  return undefined;
-};
+    while (filename.startsWith(root)) {
+      const index = path.join(filename, "index.html");
+      try {
+        const stat = await fs.stat(index);
+        return fileResponse(index, stat);
+      } catch (e) {
+        filename = path.dirname(filename);
+      }
+    }
+    return undefined;
+  };

@@ -1,20 +1,24 @@
 {
   "name": "@jefri/jiffies",
+  "version": "1.0.0",
   "displayName": "JEFRi Jiffies",
   "type": "module",
+  "exports": {
+    "./*": "./build/*"
+  },
   "scripts": {
     "node": "node --experimental-loader ./src/loader.mjs",
     "start": "npm run node ./src/server/main.js",
-    "test": "node --experimental-loader ./src/loader.mjs ./src/test.mjs",
-    "ci": "node --experimental-loader ./src/loader.mjs ./src/test.mjs --mode=junit",
+    "test": "npm run node ./src/test.mjs",
+    "ci": "npm run test --mode=junit",
     "lint": "npx prettier . --check",
     "check": "npx tsc --noEmit",
     "format": "npx prettier . --write",
-    "build": "npx tsc --outDir ./build",
+    "build": "npx tsc",
     "all": "npm run lint && npm run ci && npm run build"
   },
   "devDependencies": {
     "@types/node": "^17.0.24",
-    "typescript": "^4.7.0-dev.20220408"
+    "typescript": "^4.7.0-dev.20220415"
   }
 }

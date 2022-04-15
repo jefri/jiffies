@@ -1,6 +1,6 @@
-import { FC } from "../../../jiffies/dom/fc.js";
-import { Err, Ok, isOk } from "../../../jiffies/result.js";
-import { range } from "../../../jiffies/range.js";
+import { FC } from "../../../dom/fc.js";
+import { Err, Ok, isOk } from "../../../result.js";
+import { range } from "../../../range.js";
 import {
   button,
   input,
@@ -12,7 +12,7 @@ import {
   th,
   thead,
   tr,
-} from "../../../jiffies/dom/html.js";
+} from "../../../dom/html.js";
 import { BLACK, ChessGame, Color, Move, WHITE } from "../game/chess.js";
 
 export const history = FC(

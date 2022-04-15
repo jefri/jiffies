@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { parse } from "./jiffies/flags.js";
-import { execute } from "./jiffies/scope/execute.js";
-import { asXML } from "./jiffies/scope/display/junit.js";
-import { onConsole } from "./jiffies/scope/display/console.js";
+import { parse } from "./flags.js";
+import { execute } from "./scope/execute.js";
+import { asXML } from "./scope/display/junit.js";
+import { onConsole } from "./scope/display/console.js";
 
-import * as all from "./jiffies/test_all.js";
+import * as all from "./test_all.js";
 
 (async function () {
   const results = await execute();

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "../../../../jiffies/scope/index.js";
+import { describe, it, expect } from "../../../../scope/index.js";
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { HACK } from "../../testing/mult.js";

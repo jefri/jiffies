@@ -1,5 +1,5 @@
-import { describe, it } from "../../../jiffies/scope/describe.js";
-import { expect } from "../../../jiffies/scope/expect.js";
+import { describe, it } from "../../../scope/describe.js";
+import { expect } from "../../../scope/expect.js";
 import {
   BISHOP,
   BLACK,

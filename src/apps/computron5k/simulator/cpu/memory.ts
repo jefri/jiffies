@@ -1,4 +1,4 @@
-import { assert } from "../../../../jiffies/assert.js";
+import { assert } from "../../../../assert.js";
 import { op } from "../../util/asm.js";
 import { int10, int16, int2 } from "../../util/twos.js";
 

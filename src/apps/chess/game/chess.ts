@@ -1,7 +1,7 @@
-import { Err, Ok, Result } from "../../../jiffies/result.js";
-import { assert } from "../../../jiffies/assert.js";
-import { takeWhile } from "../../../jiffies/generator.js";
-import { range } from "../../../jiffies/range.js";
+import { Err, Ok, Result } from "../../../result.js";
+import { assert } from "../../../assert.js";
+import { takeWhile } from "../../../generator.js";
+import { range } from "../../../range.js";
 
 export const WHITE = -1;
 export const BLACK = 1;

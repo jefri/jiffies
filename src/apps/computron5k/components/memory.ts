@@ -6,21 +6,14 @@ import {
 import { asm } from "../util/asm.js";
 import { bin, dec, hex } from "../util/twos.js";
 
-import ButtonBar from "../../../jiffies/components/button_bar.js";
-import InlineEdit from "../../../jiffies/components/inline_edit.js";
-import VirtualScroll from "../../../jiffies/components/virtual_scroll.js";
-import {
-  article,
-  code,
-  header,
-  nav,
-  span,
-  ul,
-} from "../../../jiffies/dom/html.js";
-import { rounded } from "../../../jiffies/dom/css/border.js";
-import { text } from "../../../jiffies/dom/css/typography.js";
-import { FC, State } from "../../../jiffies/dom/fc.js";
-import { li } from "../../../jiffies/dom/html.js";
+import ButtonBar from "../../../components/button_bar.js";
+import InlineEdit from "../../../components/inline_edit.js";
+import VirtualScroll from "../../../components/virtual_scroll.js";
+import { article, code, header, nav, span, ul } from "../../../dom/html.js";
+import { rounded } from "../../../dom/css/border.js";
+import { text } from "../../../dom/css/typography.js";
+import { FC, State } from "../../../dom/fc.js";
+import { li } from "../../../dom/html.js";
 
 const MemoryBlock = FC<
   {

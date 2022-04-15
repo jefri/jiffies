@@ -1,5 +1,5 @@
-import { assert, assertString } from "../../../../jiffies/assert.js";
-import { range } from "../../../../jiffies/range.js";
+import { assert, assertString } from "../../../../assert.js";
+import { range } from "../../../../range.js";
 
 export const HIGH = 1;
 export const LOW = 0;

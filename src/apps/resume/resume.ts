@@ -1,4 +1,4 @@
-import { compileFStyle } from "../../jiffies/dom/css/fstyle.js";
+import { compileFStyle } from "../../dom/css/fstyle.js";
 import {
   a,
   article,
@@ -20,7 +20,7 @@ import {
   span,
   style,
   ul,
-} from "../../jiffies/dom/html.js";
+} from "../../dom/html.js";
 import * as ResumeTypes from "./type.js";
 
 export const Resume = (resume: ResumeTypes.ResumeData) => [
