@@ -7,50 +7,46 @@ import {
   update,
 } from "./dom.js";
 
-export type Scope<S> = S & Partial<DomAttrs>;
-export type AttrSet = object;
+export type Attrs<S> = S & Partial<DomAttrs>;
 
 export const State = Symbol();
-export interface FCComponent<Props extends Object, State extends Object>
+export interface FCComponent<P extends object, S extends object>
   extends HTMLElement {
-  [State]: Partial<State>;
+  [State]: Partial<S>;
   update(
-    attrs?: Partial<Scope<Props>> | DenormChildren,
+    attrs?: Partial<Attrs<P>> | DenormChildren,
     ...children: DenormChildren[]
   ): void;
 }
 export interface RenderFn<P extends object, S extends object> {
-  (el: FCComponent<P, S>, attrs: Scope<P>, children: DenormChildren[]):
+  (el: FCComponent<P, S>, attrs: Attrs<P>, children: DenormChildren[]):
     | Updatable<Element>
     | Updatable<Element>[];
 }
 
-export interface FCComponentCtor<Props extends Object, State extends Object> {
+export interface FCComponentCtor<P extends object, S extends object> {
   (
-    attrs?: Scope<Props> | DenormChildren,
+    attrs?: Attrs<P> | DenormChildren,
     ...children: DenormChildren[]
-  ): FCComponent<Props, State>;
+  ): FCComponent<P, S>;
 }
 
-export function FC<Props extends object, State extends Object = {}>(
+export function FC<P extends object, S extends object = {}>(
   name: string,
-  component: RenderFn<Props, State>
-): FCComponentCtor<Props, State> {
+  component: RenderFn<P, S>
+): FCComponentCtor<P, S> {
   class FCImpl extends HTMLElement {
     constructor() {
       super();
     }
 
-    [State]: Partial<State> = {};
-    #attrs: Scope<Props> = {} as Scope<Props>;
+    [State]: Partial<S> = {};
+    #attrs: Attrs<P> = {} as Attrs<P>;
     #children: DenormChildren[] = [];
 
-    update(
-      attrs?: Scope<Props> | DenormChildren,
-      ...children: DenormChildren[]
-    ) {
+    update(attrs?: Attrs<P> | DenormChildren, ...children: DenormChildren[]) {
       [attrs, children] = normalizeArguments(attrs, children) as [
-        Scope<Props>,
+        Attrs<P>,
         DenormChildren[]
       ];
       if (children[0] === CLEAR) {
@@ -58,7 +54,7 @@ export function FC<Props extends object, State extends Object = {}>(
       } else if (children.length > 0) {
         this.#children = children;
       }
-      this.#attrs = { ...this.#attrs, ...(attrs as Scope<Props>) };
+      this.#attrs = { ...this.#attrs, ...(attrs as Attrs<P>) };
       // Apply updates from the attrs to the dom node itself
       // @ts-ignore
       update(this, this.#attrs, []);
@@ -70,11 +66,11 @@ export function FC<Props extends object, State extends Object = {}>(
 
   customElements.define(name, FCImpl);
 
-  const ctor: FCComponentCtor<Props, State> = (
-    attrs?: Scope<Props> | DenormChildren,
+  const ctor: FCComponentCtor<P, S> = (
+    attrs?: Attrs<P> | DenormChildren,
     ...children: DenormChildren[]
-  ): FCComponent<Props, State> => {
-    const element = document.createElement(name) as FCComponent<Props, State>;
+  ): FCComponent<P, S> => {
+    const element = document.createElement(name) as FCComponent<P, S>;
     element.update(attrs, ...children);
     return element;
   };

@@ -8,9 +8,9 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
 const parity = (file: typeof FILES[number], rank: number) =>
   (file.charCodeAt(0) - 97 + rank) % 2 == 0;
 
-export const ChessBoard = FC(
+export const ChessBoard = FC<{ game: ChessGame }>(
   "chess-board",
-  (el, { game }: { game: ChessGame }) =>
+  (el, { game }) =>
     table(
       {
         style: {

@@ -9,11 +9,9 @@ describe("FC", () => {
       name: string;
       required?: boolean;
       type?: string;
-    }>("fc-input", (el, attrs, children) => {
-      const field = input(attrs);
-      const block = label(attrs.placeholder ?? attrs.name, field, ...children);
-      return block;
-    });
+    }>("fc-input", (el, attrs, children) =>
+      label(attrs.placeholder ?? attrs.name, input(attrs), ...children)
+    );
 
     const f = form(
       { action: "#", method: "POST" },

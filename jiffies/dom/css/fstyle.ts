@@ -4,7 +4,7 @@ import { Properties } from "../types/css.js";
 export type FStyle =
   | Properties
   | {
-      [K in string]: FStyle;
+      [k: string]: FStyle;
     };
 
 export function compileFStyle(fstyle: FStyle, prefix = ""): string {

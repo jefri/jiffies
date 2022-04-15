@@ -3,6 +3,7 @@ import { FC } from "../dom/fc.js";
 import { a, li, ul } from "../dom/html.js";
 
 const ButtonBar = FC<{
+  // T extends Display
   value: T;
   values: T[];
   events: { onSelect: (current: T) => void };

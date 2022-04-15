@@ -89,10 +89,7 @@ export const Chip = () => {
         display: "flex",
         flexDirection: "column",
         "> h2": { order: "0" },
-        ...[1, 2, 4].reduce(
-          (p, n) => ((p[`> article:nth-of-type(${n})`] = { order: "1" }), p),
-          {} as FStyle
-        ),
+        "> article:not(nth-of-type(3))": { order: "1" },
         "> article:nth-of-type(3)": { order: "2" },
       },
     },

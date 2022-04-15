@@ -45,7 +45,7 @@ const MemoryBlock = FC<
         row: ([i, v]) =>
           MemoryCell({
             index: i,
-            value: format(v),
+            value: v,
             editable: editable,
             highlight: i === highlight,
             onChange: (value) => onChange(i, value, v),
@@ -95,7 +95,9 @@ const MemoryCell = FC<{
         editable
           ? InlineEdit({
               value: `${value}`,
-              events: { change: onChange },
+              events: {
+                change: (newValue) => onChange(index, newValue, value),
+              },
             })
           : span(`${value}`)
       ),
@@ -137,9 +139,9 @@ const Memory = FC<
       memory,
       highlight,
       editable,
-      format: (v) => doFormat(state.format, v),
+      format: (v) => doFormat(state.format ?? "dec", v),
       onChange: (i, v) => {
-        memory.update(i, v, state.format);
+        memory.update(i, v, state.format ?? "dec");
         memoryBlock.update();
       },
     });

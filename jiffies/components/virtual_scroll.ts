@@ -1,7 +1,6 @@
 import { debounce } from "../debounce.js";
-import { Updatable } from "../dom/dom.js";
 import { FC, State } from "../dom/fc.js";
-import { div } from "../dom/html.js";
+import { div, UHTMLElement } from "../dom/html.js";
 
 export interface VirtualScrollSettings {
   minIndex: number;
@@ -23,7 +22,7 @@ export function arrayAdapter<T>(data: T[]): VirtualScrollDataAdapter<T> {
 export interface VirtualScrollProps<T, U extends HTMLElement> {
   settings: Partial<VirtualScrollSettings>;
   get: VirtualScrollDataAdapter<T>;
-  row: (t: T) => Updatable<U>;
+  row: (t: T) => UHTMLElement<U>;
 }
 
 export function fillVirtualScrollSettings(
@@ -41,11 +40,6 @@ export function fillVirtualScrollSettings(
   return { minIndex, maxIndex, startIndex, itemHeight, count, tolerance };
 }
 
-/**
- * @template T
- * @param {VirtualScrollSettings} settings
- * @returns {VirtualScrollState<T>}
- */
 export function initialState<T>(
   settings: VirtualScrollSettings
 ): VirtualScrollState<T> {
@@ -72,6 +66,7 @@ export function initialState<T>(
     topPaddingHeight,
     bottomPaddingHeight,
     data: [],
+    rows: [],
   };
 }
 
@@ -116,7 +111,7 @@ export function doScroll<T>(
   return { scrollTop, topPaddingHeight, bottomPaddingHeight, data };
 }
 
-interface VirtualScrollState<T> {
+interface VirtualScrollState<T, U extends HTMLElement = HTMLElement> {
   settings: VirtualScrollSettings;
   scrollTop: number; // px
   bufferedItems: number; // count
@@ -126,70 +121,74 @@ interface VirtualScrollState<T> {
   bottomPaddingHeight: number; // px
   toleranceHeight: number; // px
   data: T[];
+  rows: UHTMLElement<U>[];
 }
 
-export interface VirtualScroll<T, U extends HTMLElement> {
-  state: VirtualScrollState<T>;
-  rows: U[];
-}
+// export interface VirtualScroll<T, U extends HTMLElement> {
+//   state: VirtualScrollState<T>;
+//   rows: UHTMLElement<U>[];
+// }
 
-export const VirtualScroll = FC<VirtualScrollProps, VirtualScroll>(
-  "virtual-scroll",
-  (element, props) => {
-    const settings = fillVirtualScrollSettings(props.settings);
-    const state = (element[State].state ??= initialState(settings));
+export const VirtualScroll = FC<
+  VirtualScrollProps<unknown, HTMLElement>,
+  VirtualScrollState<unknown, HTMLElement>
+>("virtual-scroll", (element, props) => {
+  const settings = fillVirtualScrollSettings(props.settings);
+  const state = (element[State] = {
+    ...initialState(settings),
+    ...element[State],
+  });
 
-    const scrollTo = (
-      { target }: { target?: { scrollTop: number } } = { target: state }
-    ) => {
-      const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
-      const updatedSate = {
-        ...state,
-        ...doScroll(scrollTop, state, props.get),
-      };
-      setState(updatedSate);
+  const scrollTo = (
+    { target }: { target?: { scrollTop: number } } = { target: state }
+  ) => {
+    const scrollTop = target?.scrollTop ?? state.topPaddingHeight;
+    const updatedSate = {
+      ...state,
+      ...doScroll(scrollTop, state, props.get),
     };
+    setState(updatedSate);
+  };
 
-    const viewportElement = div({
-      style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
-      events: { scroll: debounce(scrollTo, 0) },
-    });
-    setTimeout(() => {
-      viewportElement.scroll({ top: state.scrollTop });
-    });
+  const viewportElement = div({
+    style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
+    events: { scroll: debounce(scrollTo, 0) },
+  });
+  setTimeout(() => {
+    viewportElement.scroll({ top: state.scrollTop });
+  });
 
-    const setState = (newState: VirtualScrollState<T>) => {
-      state.scrollTop = newState.scrollTop;
-      state.topPaddingHeight = newState.topPaddingHeight;
-      state.bottomPaddingHeight = newState.bottomPaddingHeight;
-      state.data = newState.data;
-      element[State].rows = state.data.map(props.row);
+  const setState = (newState: VirtualScrollState<unknown>) => {
+    state.scrollTop = newState.scrollTop;
+    state.topPaddingHeight = newState.topPaddingHeight;
+    state.bottomPaddingHeight = newState.bottomPaddingHeight;
+    state.data = newState.data;
+    element[State].rows = state.data.map(props.row);
 
-      viewportElement.update(
-        div({
-          class: "VirtualScroll__topPadding",
-          style: { height: `${state.topPaddingHeight}px` },
-        }),
-        ...element[State].rows.map((row, i) =>
-          div(
-            {
-              class: `VirtualScroll__item_${i}`,
-              style: { height: `${settings.itemHeight}px` },
-            },
-            row
-          )
-        ),
-        div({
-          class: "VirtualScroll__bottomPadding",
-          style: { height: `${state.bottomPaddingHeight}px` },
-        })
-      );
-    };
+    viewportElement.update(
+      div({
+        class: "VirtualScroll__topPadding",
+        style: { height: `${state.topPaddingHeight}px` },
+      }),
+      ...(element[State].rows ?? []).map((row, i) =>
+        div(
+          {
+            class: `VirtualScroll__item_${i}`,
+            style: { height: `${settings.itemHeight}px` },
+          },
+          row
+        )
+      ),
+      div({
+        class: "VirtualScroll__bottomPadding",
+        style: { height: `${state.bottomPaddingHeight}px` },
+      })
+    );
+  };
 
-    scrollTo();
+  scrollTo();
 
-    return viewportElement;
-  }
-);
+  return viewportElement;
+});
 
 export default VirtualScroll;
