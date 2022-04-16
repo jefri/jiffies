@@ -11,7 +11,6 @@ import InlineEdit from "../../../components/inline_edit.js";
 import VirtualScroll from "../../../components/virtual_scroll.js";
 import { article, code, header, nav, span, ul } from "../../../dom/html.js";
 import { rounded } from "../../../dom/css/border.js";
-import { text } from "../../../dom/css/typography.js";
 import { FC, State } from "../../../dom/fc.js";
 import { li } from "../../../dom/html.js";
 
@@ -79,9 +78,9 @@ const MemoryCell = FC<{
       code(
         {
           style: {
-            flexGrow: "1",
+            flex: "1",
+            textAlign: "right",
             ...rounded("none"),
-            ...text("right"),
             ...(highlight
               ? { background: "var(--code-kbd-background-color)" }
               : {}),
