@@ -13,11 +13,14 @@
       ]
     }
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "node": "node --experimental-loader ./src/loader.mjs",
     "start": "npm run node ./src/server/main.js",
     "test": "npm run node ./src/test.mjs",
-    "ci": "npm run test --mode=junit",
+    "ci": "node --experimental-loader ./src/loader.mjs ./src/test.mjs --mode=junit",
     "lint": "npx prettier . --check",
     "check": "npx tsc --noEmit",
     "format": "npx prettier . --write",

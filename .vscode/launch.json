@@ -1,16 +1,20 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-node",
+      "type": "node",
+      "nodeVersionHint": 16,
       "request": "launch",
       "name": "Server",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/server/main.ts",
-      "args": ["--port=8080"]
+      "runtimeArgs": [
+        "--experimental-loader",
+        "${workspaceFolder}/src/loader.mjs"
+      ],
+      "program": "${workspaceFolder}/src/server/main.ts",
+      "args": ["--port=8080"],
+      // TODO(fix)
+      "runtimeExecutable": "/usr/local/bin/node"
     }
   ]
 }
