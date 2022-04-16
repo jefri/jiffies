@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
-import { createServer, IncomingMessage, ServerResponse } from "http";
+import {
+  createServer,
+  IncomingMessage,
+  RequestListener,
+  ServerResponse,
+} from "http";
 import { AddressInfo } from "net";
 import * as path from "path";
 import { info } from "../../log.js";
@@ -40,7 +45,7 @@ const notFound: MiddlewareFactory =
       404
     );
 
-const middlewares: MiddlewareFactory[] = [
+const BASE_MIDDLEWARES: MiddlewareFactory[] = [
   sitemap,
   tsFileServer,
   staticFileServer,
@@ -60,7 +65,7 @@ const sendContent = async (
   res: ServerResponse,
   { content, contentType, contentLength }: StaticResponse
 ) => {
-  res.setHeader("content-length", "" + contentLength);
+  res.setHeader("content-length", `${contentLength}`);
   res.setHeader("content-type", contentType);
   await res.write(content);
   res.end();
@@ -75,9 +80,14 @@ const log = (req: IncomingMessage) => {
   info("Request", { when, who, how });
 };
 
-export const makeServer = async (config: ServerConfig) => {
-  const handlers = await Promise.all(middlewares.map(async (m) => m(config)));
-  const server = createServer(async (req, res) => {
+export const makeServer = async (
+  config: ServerConfig,
+  middlewares: MiddlewareFactory[] = []
+) => {
+  const handlers = await Promise.all(
+    [...middlewares, ...BASE_MIDDLEWARES].map(async (m) => m(config))
+  );
+  const middlewareHandler: RequestListener = async (req, res) => {
     log(req);
     let handler: undefined | (() => Promise<StaticResponse>);
     try {
@@ -95,7 +105,10 @@ export const makeServer = async (config: ServerConfig) => {
     } catch (e) {
       error(res, (e as Error).message + "\n" + (e as Error).stack);
     }
-  });
+  };
+
+  // TODO(https)
+  const server = createServer(middlewareHandler);
 
   server.on("listening", () => {
     const { address, port } = server.address() as AddressInfo;

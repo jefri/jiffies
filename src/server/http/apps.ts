@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { MiddlewareFactory, StaticMiddleware } from "./index.js";
+import { MiddlewareFactory } from "./index.js";
 import { fileResponse } from "./response.js";
 
 /**
