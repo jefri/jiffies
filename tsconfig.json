@@ -21,6 +21,7 @@
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
 
+    "incremental": true,
     "outDir": "build",
     "declaration": true
   },
