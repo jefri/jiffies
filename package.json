@@ -6,6 +6,13 @@
   "exports": {
     "./*": "./build/*"
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./build/*"
+      ]
+    }
+  },
   "scripts": {
     "node": "node --experimental-loader ./src/loader.mjs",
     "start": "npm run node ./src/server/main.js",
