@@ -1,1 +1,2 @@
-import * as virtualScroll from "./virtual_scroll.test.js";
+export {};
+await import("./virtual_scroll.test.js");

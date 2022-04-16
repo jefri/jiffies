@@ -8,10 +8,14 @@ import { MiddlewareFactory, StaticMiddleware } from "./index.js";
  * Serves .js files statically. Finds .ts files and transpiles them to JS.
  */
 export const tsFileServer: MiddlewareFactory =
-  async ({ root }) =>
+  async ({ root, scopes = {} }) =>
   async (req) => {
     if (req.url?.endsWith(".js")) {
-      let filename = path.join(root, req.url);
+      let scope = Object.entries(scopes).find(([s, r]) =>
+        req.url?.startsWith(s)
+      );
+      let url = scope ? req.url.replace(scope[0], scope[1]) : req.url;
+      let filename = path.join(root, url);
       try {
         const stat = await fs.stat(filename);
         if (stat.isFile()) {

@@ -22,13 +22,13 @@ export const Sides = {
   br: "BottomRight",
 };
 
-/** @typedef {keyof typeof Sizes} Size */
-/** @typedef {keyof typeof Sides} Side */
-
 export const Widths = {
   "1/4": "25%",
   "1/2": "50%",
   "3/4": "75%",
   full: "100%",
 };
-/** @typedef {keyof typeof Widths} Width */
+
+export type Size = keyof typeof Sizes;
+export type Side = keyof typeof Sides;
+export type Width = keyof typeof Widths;

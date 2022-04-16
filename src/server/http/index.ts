@@ -19,6 +19,7 @@ export interface StaticResponse {
 
 export interface ServerConfig {
   root: string;
+  scopes?: Record<`@${string}`, string>;
 }
 
 export interface MiddlewareFactory {

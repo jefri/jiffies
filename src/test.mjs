@@ -5,7 +5,7 @@ import { execute } from "./scope/execute.js";
 import { asXML } from "./scope/display/junit.js";
 import { onConsole } from "./scope/display/console.js";
 
-import * as all from "./test_all.js";
+await import("./test_all.js");
 
 (async function () {
   const results = await execute();

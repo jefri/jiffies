@@ -2,12 +2,14 @@
 // discarded during transpilation.
 import { describe, expect, it } from "./scope/index.js";
 
-import * as result from "./result.test.js";
-import * as equal from "./equal.test.js";
-import * as lock from "./lock.test.js";
-import * as context from "./context.test.js";
-import * as flags from "./flags.test.js";
-import * as generator from "./generator.test.js";
+await Promise.all([
+  import("./context.test.js"),
+  import("./equal.test.js"),
+  import("./flags.test.js"),
+  import("./generator.test.js"),
+  import("./lock.test.js"),
+  import("./result.test.js"),
+]);
 
 describe("Test executor", () => {
   it("matches equality", () => {
