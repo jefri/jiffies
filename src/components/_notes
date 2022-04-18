@@ -1,17 +1,25 @@
+Nav
+  ButtonBar
+
 Form
+  FormGroup
   Input
-  ~Select~
+  Select
+    CheckGroup
+    RadioGroup
   Textarea
   Switch
   Button
-  CheckGroup
-  RadioGroup
 
 Datatable
   Column
   Header
   Row
   Cell
+  Sort
+
+Virtual Scroll
+  Logs Viewer
 
 Chart
   Axis
@@ -19,9 +27,6 @@ Chart
   Bar
   Scatter
   Line
-
-Infinite Scroll
-  Logs Viewer
 
 Graph
   Node

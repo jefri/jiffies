@@ -1,5 +1,5 @@
 import { display, Display } from "../display.js";
-import { DOMElement, Updatable, Updater } from "../dom/dom.js";
+import { DOMElement, Updatable } from "../dom/dom.js";
 import { div, span, ul, li, pre, code } from "../dom/html.js";
 import { LEVEL, Logger } from "../log.js";
 
