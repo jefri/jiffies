@@ -1,8 +1,11 @@
 export type None = null;
 export type Some<T> = T;
 export type Option<T> = Some<T> | None;
-export type Err<E extends Error> = { err: E };
-export type Ok<T> = { ok: T };
+export type Err<E extends Error> = {
+  err: E;
+  map: <U>(fn: (t: unknown) => Result<U>) => Result<U>;
+};
+export type Ok<T> = { ok: T; map: <U>(fn: (t: T) => Result<U>) => Result<U> };
 export type Result<T, E extends Error = Error> = Ok<T> | Err<E>;
 
 export const isNone = <T>(s: Option<T>): s is None => s == null;
@@ -30,7 +33,14 @@ export const isResult = <T, E extends Error>(
 export function Ok<T>(ok: Ok<T>): T;
 export function Ok<T>(t: T): Ok<T>;
 export function Ok(t: any): any {
-  return t.ok ? t.ok : { ok: t };
+  return t.ok
+    ? t.ok
+    : {
+        ok: t,
+        map: <U>(fn: (_: typeof t) => Result<U>): Result<U> => {
+          return fn(Ok(this));
+        },
+      };
 }
 
 // Beware: Order matters for correct inference.
@@ -38,7 +48,12 @@ export function Err<E extends Error>(e: Err<E>): E;
 export function Err<E extends Error>(e: E): Err<E>;
 export function Err<E extends Error>(e: string): Err<E>;
 export function Err(e: any): any {
-  return e.err ?? { err: typeof e === "string" ? new Error(e) : e };
+  return (
+    e.err ?? {
+      err: typeof e === "string" ? new Error(e) : e,
+      map: <U>(fn: (t: unknown) => Result<U>): Result<U> => this,
+    }
+  );
 }
 
 export function unwrap<T, E extends Error>(result: Result<T, E>): T | never;

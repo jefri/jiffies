@@ -2,6 +2,7 @@ import {
   Err,
   None,
   Ok,
+  Result,
   Some,
   unwrap,
   unwrapOr,
@@ -18,18 +19,18 @@ describe("Result", () => {
     const b = None<string>();
     expect(b).toBeNull();
 
-    const c = Some<string>(a);
+    const c = Some(a);
     expect(c).toBeNull();
 
-    const d = Some<string>(b);
+    const d = Some(b);
     expect(d).toBeNull();
   });
 
   it("converts Somes", () => {
-    const a = Some<string>("a");
+    const a = Some("a");
     expect(a).toBe("a");
 
-    const b = Some<string>(a);
+    const b = Some(a);
     expect(b).toBe("a");
   });
 
@@ -37,18 +38,24 @@ describe("Result", () => {
     const a = Err(new Error("a error"));
     const b = Err(a);
     expect(b).toMatchObject({ message: "a error" });
+
+    // Assign Err to Result
+    const c: Result<string> = a;
   });
 
   it("converts Oks", () => {
-    const a = Ok<string>("a ok");
-    const b = Ok<string>(a);
+    const a = Ok("a ok");
+    const b = Ok(a);
     expect(b).toBe("a ok");
+
+    // Assign ok to Result
+    const c: Result<string> = a;
   });
 
   it("unwraps", () => {
-    const a = Some<string>("some");
+    const a = Some("some");
     const b = None<string>();
-    const c = Ok<string>("ok");
+    const c = Ok("ok");
     const d = Err(new Error("err"));
     const e: string = "else";
 
