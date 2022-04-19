@@ -1,7 +1,6 @@
 # Jiffies DOM
 
-Jiffies DOM is an HTML microframework, exposing access to the DOM in a
-functional-first way.
+Jiffies DOM is an HTML microframework, exposing access to the DOM in a functional-first way.
 
 ```js
 import {form, input, label} from 'jiffies/dom/html';
@@ -51,17 +50,14 @@ document.body.append(
 );
 ```
 
-Exposing HTML as a tree of function calls makes it very easy to compose units of
-HTML. Creating new functions which pass HTML fragments is natural and intuitive,
-and creating reusable chunks of common HTML patterns is easy.
+Exposing HTML as a tree of function calls makes it very easy to compose units of HTML.
+Creating new functions which pass HTML fragments is natural and intuitive, and creating reusable chunks of common HTML patterns is easy.
 
 ## Functional Components
 
-Exposing HTML as functions makes it easy on the programmer to create and compose
-HTML, but those functions lose context when they return. To capture HTML chunks
-and update them, use the `FC` function. The `FC` function creates new
-WebComponent elements in the DOM, and exposes an interface that matches native
-HTML elements.
+Exposing HTML as functions makes it easy on the programmer to create and compose HTML, but those functions lose context when they return.
+To capture HTML chunks and update them, use the `FC` function.
+The `FC` function creates new WebComponent elements in the DOM, and exposes an interface that matches native HTML elements.
 
 ```js
 export const GameSquare = FC<{piece: Piece}>('game-square', (el, {piece}) => {
@@ -77,9 +73,8 @@ export const GameBoard = FC<{pieces: Piece[]}>('game-board', (el, {pieces} => {
 
 ## Style Blocks
 
-The `compileFstyle` function streamlines creating nested style rules. When used
-with the `style` HTML tag, this can create complex layouts inline with
-components.
+The `compileFstyle` function streamlines creating nested style rules.
+When used with the `style` HTML tag, this can create complex layouts inline with components.
 
 ```js
 const MyPage = () => [
@@ -104,5 +99,4 @@ const MyPage = () => [
 
 ## Pico CSS
 
-Including [Pico.css](https://picocss.com/) provides a high-quality semantic HTML
-base to begin styling from.
+Including [Pico.css](https://picocss.com/) provides a high-quality semantic HTML base to begin styling from.
