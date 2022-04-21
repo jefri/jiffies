@@ -32,12 +32,12 @@ export const isResult = <T, E extends Error>(
 // Beware: Order matters for correct inference.
 export function Ok<T>(ok: Ok<T>): T;
 export function Ok<T>(t: T): Ok<T>;
-export function Ok(t: any): any {
+export function Ok<T, E extends Error>(t: any): any {
   return t.ok
     ? t.ok
     : {
         ok: t,
-        map: <U>(fn: (_: typeof t) => Result<U>): Result<U> => {
+        map<U>(fn: (_: typeof t) => Result<U, E>): Result<U, E> {
           return fn(Ok(this));
         },
       };
@@ -47,11 +47,13 @@ export function Ok(t: any): any {
 export function Err<E extends Error>(e: Err<E>): E;
 export function Err<E extends Error>(e: E): Err<E>;
 export function Err<E extends Error>(e: string): Err<E>;
-export function Err(e: any): any {
+export function Err<T, E extends Error>(e: any): any {
   return (
     e.err ?? {
       err: typeof e === "string" ? new Error(e) : e,
-      map: <U>(fn: (t: unknown) => Result<U>): Result<U> => this,
+      map<U>(this: Result<T, E>, fn: (t: unknown) => Result<U>): Result<U, E> {
+        return this as Result<U, E>;
+      },
     }
   );
 }
