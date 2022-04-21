@@ -1,4 +1,4 @@
-import { DOMElement, Updatable } from "../dom/dom";
+import { DOMElement, Updatable } from "../dom";
 import { Link } from "./link";
 
 export interface Router {
