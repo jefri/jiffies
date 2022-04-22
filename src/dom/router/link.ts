@@ -9,6 +9,6 @@ export interface Link {
 
 export const link = ({ href, link }: Link) =>
   a(
-    { href: Router.href(href), events: { click: () => Router.navigate(href) } },
+    { href: Router.href(href), events: { click: Router.navigate(href) } },
     link
   );

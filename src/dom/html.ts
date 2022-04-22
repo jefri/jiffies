@@ -1,4 +1,4 @@
-import { DenormAttrs, DenormChildren, up, Updatable, Updater } from "./dom.js";
+import { DenormAttrs, DenormChildren, up, Updatable } from "./dom.js";
 import { Properties } from "./types/css.js";
 
 export type UHTMLElement<E extends HTMLElement = HTMLElement> = Updatable<

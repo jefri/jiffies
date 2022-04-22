@@ -64,6 +64,6 @@ export const Router = {
   },
 
   navigate(href: string) {
-    globalRouter?.navigate(href);
+    return globalRouter?.navigate(href);
   },
 };
