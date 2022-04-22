@@ -7,12 +7,20 @@ import {
   SelectAttributes,
 } from "../types/html.js";
 
-export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) =>
-  form(attrs as Attrs<HTMLFormElement>, ...children);
+export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
+  if (attrs.events?.submit) {
+    const submit = attrs.events.submit;
+    attrs.events.submit = (event) => {
+      event.preventDefault();
+      submit(event);
+    };
+  }
+  return form(attrs as Attrs<HTMLFormElement>, ...children);
+};
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
-  label({}, input(attrs as Attrs<HTMLInputElement>), ...children);
+  label(input(attrs as Attrs<HTMLInputElement>), ...children);
 export const Select = ({ options }: { options: string[] | {} }) =>
-  label({}, select(...prepareOptions(options).map(Option)));
+  label(select(...prepareOptions(options).map(Option)));
 export const Button = () => {};
 
 const prepareOptions = (

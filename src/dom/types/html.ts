@@ -1,7 +1,7 @@
 import { Properties } from "./css.js";
 
 export interface AriaAttributes {
-  [_: `aria${string}`]: string;
+  [_: `aria-${string}`]: string;
 }
 
 export interface Sized {
@@ -337,14 +337,14 @@ interface FormElementAttributes {
 }
 
 interface FormActionAttributes {
-  formaction?: string;
-  formenctype?:
+  formAction?: string;
+  formEnctype?:
     | "application/x-www-form-urlencoded"
     | "multipart/form-data"
     | "text/plain";
-  formmethod?: "get" | "post";
-  formnovalidate?: boolean;
-  formtarget?: boolean;
+  formMethod?: "get" | "post";
+  formNoValidate?: boolean;
+  formTarget?: boolean;
 }
 
 export interface ButtonAttributes
@@ -365,7 +365,7 @@ export interface FormAttributes extends GlobalAttributes {
     | "multipart/form-data"
     | "text/plain";
   method?: "get" | "post" | "dialog";
-  novalidate?: boolean;
+  noValidate?: boolean;
   target?: boolean;
 }
 export interface InputAttributes
@@ -378,12 +378,12 @@ export interface InputAttributes
   capture?: boolean;
   list?: string;
   max?: number;
-  maxlength?: number;
+  maxLength?: number;
   min?: number;
-  minlength?: number;
+  minLength?: number;
   multiple?: boolean;
   pattern?: string;
-  readonly?: boolean;
+  readOnly?: boolean;
   required?: boolean;
   role?: "switch" | "switch-disabled";
   size?: string;
