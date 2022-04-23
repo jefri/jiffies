@@ -1,6 +1,7 @@
 {
-  "name": "@jefri/jiffies",
+  "name": "@davidsouther/jiffies",
   "version": "1.0.0-beta.1",
+  "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
   "exports": {
