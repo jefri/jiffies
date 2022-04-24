@@ -45,17 +45,21 @@ export function getLogger(name: string): Logger {
 export const DEFAULT_LOGGER = getLogger("default");
 
 export function debug(message: Display, data?: {}) {
-  DEFAULT_LOGGER.debug(message, data);
+  if (data) DEFAULT_LOGGER.debug(message, data);
+  else DEFAULT_LOGGER.debug(message);
 }
 
 export function info(message: Display, data?: {}) {
-  DEFAULT_LOGGER.info(message, data);
+  if (data) DEFAULT_LOGGER.info(message, data);
+  else DEFAULT_LOGGER.info(message);
 }
 
 export function warn(message: Display, data?: {}) {
-  DEFAULT_LOGGER.warn(message, data);
+  if (data) DEFAULT_LOGGER.warn(message, data);
+  else DEFAULT_LOGGER.warn(message);
 }
 
 export function error(message: Display, data?: {}) {
-  DEFAULT_LOGGER.error(message, data);
+  if (data) DEFAULT_LOGGER.error(message, data);
+  else DEFAULT_LOGGER.error(message);
 }
