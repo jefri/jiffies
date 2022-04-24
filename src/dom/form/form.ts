@@ -3,6 +3,7 @@ import { form, input, label, option, select } from "../html.js";
 import {
   FormAttributes,
   InputAttributes,
+  LabelAttributes,
   OptionAttributes,
   SelectAttributes,
 } from "../types/html.js";
@@ -19,8 +20,16 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
 };
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
   label(input(attrs as Attrs<HTMLInputElement>), ...children);
-export const Select = ({ options }: { options: string[] | {} }) =>
-  label(select(...prepareOptions(options).map(Option)));
+export const Select = (
+  attrs: { options: string[] | {} } & SelectAttributes & LabelAttributes
+) =>
+  label(
+    { style: attrs.style ?? {} },
+    select(
+      { events: attrs.events ?? {} },
+      ...prepareOptions(attrs.options).map(Option)
+    )
+  );
 export const Button = () => {};
 
 const prepareOptions = (
@@ -40,8 +49,9 @@ export const Option = (attrs: OptionAttributes) =>
   option(attrs as Attrs<HTMLOptionElement>);
 
 export const Dropdown = (
-  attrs: SelectAttributes | { options: Parameters<typeof prepareOptions>[0] }
-) => {};
+  attrs: SelectAttributes | { selected?: string },
+  ...options: Parameters<typeof prepareOptions>[0][]
+) => Select({ ...attrs, options });
 export const Radios = () => {};
 export const Checks = () => {};
 export const Switches = () => {};
