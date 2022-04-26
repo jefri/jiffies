@@ -14,6 +14,15 @@ function asArray(a: Record<string, unknown>): [string, unknown][] {
   return Object.entries(a).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
+export const matchObjects = (a: {}, b: {}, strict = false) => {
+  for (const [k, v] of Object.entries(a)) {
+    if (strict && !b.hasOwnProperty(k)) return false;
+    // @ts-ignore
+    if (!equals(v, b[k])) return false;
+  }
+  return true;
+};
+
 export function equals<A>(a: A | A[], b: A | A[]): boolean {
   // runtime type checking
   switch (typeof a) {
@@ -21,11 +30,10 @@ export function equals<A>(a: A | A[], b: A | A[]): boolean {
       if (a instanceof Array && b instanceof Array) {
         return matchArrays(a, b);
       } else {
-        return matchArrays(
-          asArray(a as Record<string, unknown>),
-          asArray(b as Record<string, unknown>)
-        );
+        return matchObjects(a, b);
       }
+    case "function":
+      return a.name == (b as unknown as Function).name;
     default:
       return Object.is(a, b);
   }
