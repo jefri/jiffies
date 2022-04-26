@@ -35,6 +35,7 @@ interface FileSystemAdapter {
 
 export class FileSystem implements FileSystemAdapter {
   protected wd = "/";
+  protected stack: string[] = [];
 
   constructor(protected adapter = new ObjectFileSystemAdapter()) {}
 
@@ -44,6 +45,17 @@ export class FileSystem implements FileSystemAdapter {
 
   cd(dir: string) {
     this.wd = this.p(dir);
+  }
+
+  pushd(dir: string) {
+    this.stack.push(this.wd);
+    this.cd(dir);
+  }
+
+  popd() {
+    if (this.stack.length > 0) {
+      this.wd = this.stack.pop()!;
+    }
   }
 
   stat(path: PathLike): Promise<Stats> {
@@ -145,7 +157,7 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
   }
 }
 
-class LocalStorageFileSystemAdapter extends ObjectFileSystemAdapter {
+export class LocalStorageFileSystemAdapter extends ObjectFileSystemAdapter {
   constructor() {
     super(window.localStorage);
   }
