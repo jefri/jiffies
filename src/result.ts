@@ -23,7 +23,7 @@ export function Some(t: any): any {
 
 export const isOk = <T, E extends Error>(t: Result<T, E>): t is Ok<T> =>
   (t as Ok<T>).ok !== undefined;
-export const isErr = <T, E extends Error>(e: Result<T, E>) =>
+export const isErr = <T, E extends Error>(e: Result<T, E>): e is Err<E> =>
   (e as Err<E>).err !== undefined;
 export const isResult = <T, E extends Error>(
   t: Result<T, E>
