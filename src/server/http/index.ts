@@ -10,6 +10,7 @@ import { AddressInfo } from "net";
 import * as path from "path";
 import { info } from "../../log.js";
 import { findIndex } from "./apps.js";
+import { cssFileServer } from "./css.js";
 import { fileResponse } from "./response.js";
 import { sitemap } from "./sitemap.js";
 import { staticFileServer } from "./static.js";
@@ -48,6 +49,7 @@ const notFound: MiddlewareFactory =
 const BASE_MIDDLEWARES: MiddlewareFactory[] = [
   sitemap,
   tsFileServer,
+  cssFileServer,
   staticFileServer,
   findIndex,
   notFound,

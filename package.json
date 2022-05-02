@@ -32,5 +32,8 @@
   "devDependencies": {
     "@types/node": "^17.0.24",
     "typescript": "^4.7.0-dev.20220415"
+  },
+  "dependencies": {
+    "sass": "^1.49.9"
   }
 }
