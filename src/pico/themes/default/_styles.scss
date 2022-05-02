@@ -75,6 +75,34 @@
   --transition: 0.2s ease-in-out;
 }
 
+@mixin centered-viewport {
+  @if map-get($breakpoints, "sm") {
+    @media (min-width: map-get($breakpoints, "sm")) {
+      max-width: map-get($viewports, "sm");
+      margin: 0 auto;
+      padding: 0;
+    }
+  }
+
+  @if map-get($breakpoints, "md") {
+    @media (min-width: map-get($breakpoints, "md")) {
+      max-width: map-get($viewports, "md");
+    }
+  }
+
+  @if map-get($breakpoints, "lg") {
+    @media (min-width: map-get($breakpoints, "lg")) {
+      max-width: map-get($viewports, "lg");
+    }
+  }
+
+  @if map-get($breakpoints, "xl") {
+    @media (min-width: map-get($breakpoints, "xl")) {
+      max-width: map-get($viewports, "xl");
+    }
+  }
+}
+
 // Responsives spacings
 @if $enable-responsive-spacings {
   // Sectionning
@@ -84,25 +112,25 @@
   section {
     @if map-get($breakpoints, "sm") {
       @media (min-width: map-get($breakpoints, "sm")) {
-        --block-spacing-vertical: calc(var(--spacing) * 2.5);
+        --block-spacing-vertical: calc(var(--spacing) * 1.25);
       }
     }
 
     @if map-get($breakpoints, "md") {
       @media (min-width: map-get($breakpoints, "md")) {
-        --block-spacing-vertical: calc(var(--spacing) * 3);
+        --block-spacing-vertical: calc(var(--spacing) * 1.5);
       }
     }
 
     @if map-get($breakpoints, "lg") {
       @media (min-width: map-get($breakpoints, "lg")) {
-        --block-spacing-vertical: calc(var(--spacing) * 3.5);
+        --block-spacing-vertical: calc(var(--spacing) * 1.75);
       }
     }
 
     @if map-get($breakpoints, "xl") {
       @media (min-width: map-get($breakpoints, "xl")) {
-        --block-spacing-vertical: calc(var(--spacing) * 4);
+        --block-spacing-vertical: calc(var(--spacing) * 2);
       }
     }
   }

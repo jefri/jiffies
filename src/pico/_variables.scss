@@ -2,14 +2,14 @@
 // ––––––––––––––––––––
 
 // Enable <header>, <main>, <footer> inside <body> as a container
-$enable-semantic-container: false !default;
+$enable-semantic-container: true !default;
 
 // Enable .container and .container-fluid
-$enable-class-container: true !default;
+$enable-class-container: false !default;
 
 // Enable a centered viewport for <header>, <main>, <footer> inside <body>
-// Fluid layout if disabled
-$enable-viewport: true !default;
+// Options are "all" to center all, "main" to only center main, and "none" to treat all as fluid.
+$enable-viewport: "main" !default;
 
 // Enable responsive spacings for <header>, <main>, <footer>, <section>, <article>
 // Fixed spacings if disabled

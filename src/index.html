@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="/pico/pico.css" />
   </head>
   <body>
-    <header id="menu"></header>
+    <header></header>
 
-    <main class="container">
+    <main>
       <article id="test_output"></article>
     </main>
 
@@ -67,7 +67,7 @@
       }));
 
       document
-        .getElementById("menu")
+        .querySelector("body > header")
         .appendChild(
           nav(
             ul(li(strong("Jiffy Apps"))),
