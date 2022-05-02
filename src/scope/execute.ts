@@ -87,7 +87,7 @@ function makeResult(
         stats: { executed: 1, failed: 1 },
       },
     ];
-  if ((result as TestPassed).passed) {
+  if ((result as TestPassed).passed === true) {
     return [{ test, stats: { executed: 1, failed: 0 } }];
   }
   return flattenResults(result as TestResult, test);
