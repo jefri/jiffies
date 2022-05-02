@@ -1,0 +1,34 @@
+// Change the cursor on control elements in all browsers (opinionated)
+[aria-controls] {
+  cursor: pointer;
+}
+
+// Change the cursor on disabled, not-editable, or otherwise inoperable elements in all browsers (opinionated)
+[aria-disabled="true"],
+[disabled] {
+  cursor: not-allowed;
+}
+
+// Change the display on visually hidden accessible elements in all browsers (opinionated)
+[aria-hidden="false"][hidden] {
+  display: initial;
+}
+
+[aria-hidden="false"][hidden]:not(:focus) {
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+}
+
+// User interaction
+// Remove the tapping delay in IE 10
+a,
+area,
+button,
+input,
+label,
+select,
+summary,
+textarea,
+[tabindex] {
+  -ms-touch-action: manipulation;
+}

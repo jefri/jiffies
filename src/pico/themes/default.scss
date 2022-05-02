@@ -1,0 +1,34 @@
+/**
+ * Theme: default
+ */
+
+// Variables
+@import "../variables";
+@import "default/colors";
+
+// Common styles
+@import "default/styles";
+
+@import "default/light";
+@import "default/dark";
+
+// Light theme (Default)
+// Can be forced with data-theme="light"
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+  @include light;
+}
+
+// Dark theme (Auto)
+// Automatically enabled if user has Dark mode enabled
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    @include dark;
+  }
+}
+
+// Dark theme (Forced)
+// Enabled if forced with data-theme="dark"
+[data-theme="dark"] {
+  @include dark;
+}

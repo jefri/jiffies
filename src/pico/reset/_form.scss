@@ -1,0 +1,97 @@
+// 1. Change the font styles in all browsers
+// 2. Remove the margin in Firefox and Safari
+input,
+optgroup,
+select,
+textarea {
+  margin: 0; // 2
+  font-size: 1rem; // 1
+  line-height: var(--line-height); // 1
+  font-family: inherit; // 1
+  letter-spacing: inherit; // 2
+}
+
+// Show the overflow in IE.
+input {
+  overflow: visible;
+}
+
+// Remove the inheritance of text transform in Edge, Firefox, and IE
+select {
+  text-transform: none;
+}
+
+// 1. Correct the text wrapping in Edge and IE
+// 2. Correct the color inheritance from `fieldset` elements in IE
+// 3. Remove the padding so developers are not caught out when they zero out
+// `fieldset` elements in all browsers
+legend {
+  max-width: 100%; // 1
+  padding: 0; // 3
+  color: inherit; // 2
+  white-space: normal; // 1
+}
+
+// 1. Remove the default vertical scrollbar in IE
+textarea {
+  overflow: auto; // 1
+}
+
+// Remove the padding in IE 10
+[type="checkbox"],
+[type="radio"] {
+  padding: 0;
+}
+
+// Correct the cursor style of increment and decrement buttons in Safari
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+// 1. Correct the odd appearance in Chrome and Safari
+// 2. Correct the outline style in Safari
+[type="search"] {
+  -webkit-appearance: textfield; // 1
+  outline-offset: -2px; // 2
+}
+
+// Remove the inner padding in Chrome and Safari on macOS
+[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+// 1. Correct the inability to style clickable types in iOS and Safari
+// 2. Change font properties to `inherit` in Safari
+::-webkit-file-upload-button {
+  -webkit-appearance: button; // 1
+  font: inherit; // 2
+}
+
+// Remove the inner border and padding of focus outlines in Firefox
+::-moz-focus-inner {
+  padding: 0;
+  border-style: none;
+}
+
+//  Remove the focus outline in Firefox
+:-moz-focusring {
+  outline: none;
+}
+
+// Remove the additional :invalid styles in Firefox
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+// Change the inconsistent appearance in IE (opinionated)
+::-ms-expand {
+  display: none;
+}
+
+// Remove the border and padding in all browsers (opinionated)
+[type="file"],
+[type="range"] {
+  padding: 0;
+  border-width: 0;
+}
