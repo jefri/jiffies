@@ -27,6 +27,9 @@ export function equals<A>(a: A | A[], b: A | A[]): boolean {
   // runtime type checking
   switch (typeof a) {
     case "object":
+      if (b === undefined) {
+        return false;
+      }
       if (a instanceof Array && b instanceof Array) {
         return matchArrays(a, b);
       } else {
