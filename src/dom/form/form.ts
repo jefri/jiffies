@@ -20,6 +20,7 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
 };
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
   label(input(attrs as Attrs<HTMLInputElement>), ...children);
+
 export const Select = (
   attrs: { options: string[] | {} } & SelectAttributes & LabelAttributes
 ) =>
@@ -51,7 +52,11 @@ export const Option = (attrs: OptionAttributes) =>
 export const Dropdown = (
   attrs: SelectAttributes | { selected?: string },
   ...options: Parameters<typeof prepareOptions>[0][]
-) => Select({ ...attrs, options });
+) =>
+  Select({
+    ...attrs,
+    options: typeof options[0] == "string" ? options : options[0],
+  });
 export const Radios = () => {};
 export const Checks = () => {};
 export const Switches = () => {};
