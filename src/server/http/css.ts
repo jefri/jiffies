@@ -3,7 +3,8 @@ import * as path from "path";
 import { contentResponse } from "./response.js";
 import { MiddlewareFactory } from "./index.js";
 import sass from "sass";
-const { compileAsync } = sass;
+import { error, info } from "../../log.js";
+const { compileStringAsync } = sass;
 
 function render(source: string) {
   // Replace `from "@scope` with `from "/@scope`, for browsers
@@ -13,18 +14,29 @@ function render(source: string) {
   return contentResponse(source, "text/css");
 }
 
+async function compile(
+  filename: string,
+  root: string,
+  vars: string
+): Promise<string> {
+  vars = vars.substring(1).replaceAll("=", ":");
+  const sassString = `// Using variables: ${vars}\n${vars};\n@import "${filename}";`;
+  return (await compileStringAsync(sassString, { loadPaths: [root] })).css;
+}
+
 /**
  * Serves .css files statically. Finds .sass files and transpiles them to css.
  */
 export const cssFileServer: MiddlewareFactory =
   async ({ root, scopes = {} }) =>
   async (req) => {
-    if (req.url?.endsWith(".css")) {
+    const Url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+    if (Url.pathname.endsWith(".css")) {
       let scope = Object.entries(scopes).find(([s]) =>
-        req.url?.startsWith(`/${s}`)
+        Url.pathname.startsWith(`/${s}`)
       );
       // Expand url with found scope
-      let url = scope ? req.url.replace(scope[0], scope[1]) : req.url;
+      let url = scope ? Url.pathname.replace(scope[0], scope[1]) : Url.pathname;
       let filename = path.join(root, url);
       try {
         const stat = await fs.stat(filename);
@@ -38,7 +50,11 @@ export const cssFileServer: MiddlewareFactory =
       try {
         const stat = await fs.stat(filename);
         if (stat.isFile()) {
-          const { css } = await compileAsync(filename);
+          const css = await compile(
+            filename.replace(root, "."),
+            root,
+            Url.search
+          );
           return render(css);
         }
       } catch {}
