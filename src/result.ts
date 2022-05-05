@@ -1,12 +1,12 @@
 export type None = null;
 export type Some<T> = T;
 export type Option<T> = Some<T> | None;
-export type Err<E extends Error> = {
+export type Err<E = Error> = {
   err: E;
   map: <U>(fn: (t: unknown) => Result<U>) => Result<U>;
 };
 export type Ok<T> = { ok: T; map: <U>(fn: (t: T) => Result<U>) => Result<U> };
-export type Result<T, E extends Error = Error> = Ok<T> | Err<E>;
+export type Result<T, E = Error> = Ok<T> | Err<E>;
 
 export const isNone = <T>(s: Option<T>): s is None => s == null;
 export const isSome = <T>(s: Option<T>): s is Some<T> => s != null;
@@ -21,18 +21,17 @@ export function Some(t: any): any {
   return t;
 }
 
-export const isOk = <T, E extends Error>(t: Result<T, E>): t is Ok<T> =>
+export const isOk = <T, E>(t: Result<T, E>): t is Ok<T> =>
   (t as Ok<T>).ok !== undefined;
-export const isErr = <T, E extends Error>(e: Result<T, E>): e is Err<E> =>
+export const isErr = <T, E>(e: Result<T, E>): e is Err<E> =>
   (e as Err<E>).err !== undefined;
-export const isResult = <T, E extends Error>(
-  t: Result<T, E>
-): t is Result<T, E> => isOk(t) || isErr(t);
+export const isResult = <T, E>(t: Result<T, E>): t is Result<T, E> =>
+  isOk(t) || isErr(t);
 
 // Beware: Order matters for correct inference.
 export function Ok<T>(ok: Ok<T>): T;
 export function Ok<T>(t: T): Ok<T>;
-export function Ok<T, E extends Error>(t: any): any {
+export function Ok<T, E>(t: any): any {
   return t.ok
     ? t.ok
     : {
@@ -44,21 +43,21 @@ export function Ok<T, E extends Error>(t: any): any {
 }
 
 // Beware: Order matters for correct inference.
-export function Err<E extends Error>(e: Err<E>): E;
-export function Err<E extends Error>(e: E): Err<E>;
-export function Err<E extends Error>(e: string): Err<E>;
-export function Err<T, E extends Error>(e: any): any {
+export function Err<E>(e: Err<E>): E;
+export function Err<E>(e: E): Err<E>;
+export function Err<E>(e: string): Err<E>;
+export function Err<T, E>(e: any): any {
   return (
     e.err ?? {
-      err: typeof e === "string" ? new Error(e) : e,
-      map<U>(this: Result<T, E>, fn: (t: unknown) => Result<U>): Result<U, E> {
+      err: e,
+      map<U>(this: Result<T, E>, _fn: (t: unknown) => Result<U>): Result<U, E> {
         return this as Result<U, E>;
       },
     }
   );
 }
 
-export function unwrap<T, E extends Error>(result: Result<T, E>): T | never;
+export function unwrap<T, E>(result: Result<T, E>): T | never;
 export function unwrap<O>(some: Option<O>): O | never;
 export function unwrap(t: any): any {
   if (isNone(t)) {
@@ -73,7 +72,7 @@ export function unwrap(t: any): any {
   return t;
 }
 
-export function unwrapOr<T, E extends Error>(result: Result<T, E>, def: T): T;
+export function unwrapOr<T, E>(result: Result<T, E>, def: T): T;
 export function unwrapOr<T>(some: Some<T>, def: T): T;
 export function unwrapOr(t: any, def: any): any {
   if (isNone(t)) {
@@ -88,10 +87,7 @@ export function unwrapOr(t: any, def: any): any {
   return t;
 }
 
-export function unwrapOrElse<T, E extends Error>(
-  result: Result<T, Error>,
-  def: () => T
-): T;
+export function unwrapOrElse<T, E>(result: Result<T, Error>, def: () => T): T;
 export function unwrapOrElse<T>(some: Some<T>, def: () => T): T;
 export function unwrapOrElse(t: any, def: any): any {
   if (isNone(t)) {

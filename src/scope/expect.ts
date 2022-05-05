@@ -15,9 +15,9 @@ export class Matcher<T> {
     assert(this.actual === expected, () => `${this.actual} !== ${expected}`);
   }
 
-  toEqual(expected: T) {
+  toEqual(expected: T, partial = false) {
     assert(
-      equals(this.actual, expected),
+      equals(this.actual, expected, partial),
       () =>
         `Objects are not equivalent: ${JSON.stringify(
           this.actual
@@ -50,7 +50,7 @@ export class Matcher<T> {
       // @ts-expect-error
       const actual: Partial<T> = this.actual[k];
       assert(
-        equals(actual, v),
+        equals(actual, v, true),
         () =>
           `Comparing ${k}, properties not equal: ${JSON.stringify(
             actual
