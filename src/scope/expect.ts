@@ -1,4 +1,5 @@
 import { assert } from "../assert.js";
+import { display } from "../display.js";
 import { equals } from "../equal.js";
 
 export class Matcher<T> {
@@ -19,9 +20,9 @@ export class Matcher<T> {
     assert(
       equals(this.actual, expected, partial),
       () =>
-        `Objects are not equivalent: ${JSON.stringify(
-          this.actual
-        )}, ${JSON.stringify(expected)}`
+        `Objects are not equivalent: ${display(this.actual)}, ${display(
+          expected
+        )}`
     );
   }
 
@@ -52,9 +53,9 @@ export class Matcher<T> {
       assert(
         equals(actual, v, true),
         () =>
-          `Comparing ${k}, properties not equal: ${JSON.stringify(
-            actual
-          )}, ${JSON.stringify(v)}`
+          `Comparing ${k}, properties not equal: ${display(actual)}, ${display(
+            v
+          )}`
       );
     }
   }
