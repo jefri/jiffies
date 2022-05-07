@@ -17,13 +17,16 @@ main {
 // ––––––––––––––––––––
 
 // 1. Remove the margin in all browsers (opinionated)
+// 2. Body should be at least the height of the viewport (opinionated)
 body {
   width: 100%;
+  min-height: 100vh; // 2
   margin: 0; // 1
 
   @if $enable-viewport == all {
     > header,
-    > main > footer {
+    > main,
+    > footer {
       @include centered-viewport();
     }
   } @else if $enable-viewport == main {
