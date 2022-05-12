@@ -134,10 +134,10 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
   readFile(path: PathLike): Promise<string> {
     return new Promise((resolve, reject) => {
       let file = this.fs[path];
-      if (file) {
-        resolve(file);
-      } else {
+      if (file === undefined) {
         reject();
+      } else {
+        resolve(file);
       }
     });
   }
