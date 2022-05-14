@@ -1,51 +1,60 @@
 // Config
 @import "variables";
 
-// Rest
-@import "reset/document";
-@import "reset/typography";
-@import "reset/embedded";
-@import "reset/button";
-@import "reset/form";
-@import "reset/table";
-@import "reset/misc";
-@import "reset/nav";
-@import "reset/progress";
+@layer reset, theme, layout, content, component, utility, user;
 
-// Theming
-@import "themes/default";
+@layer reset {
+  @import "reset/document";
+  @import "reset/typography";
+  @import "reset/embedded";
+  @import "reset/button";
+  @import "reset/form";
+  @import "reset/table";
+  @import "reset/misc";
+  @import "reset/nav";
+  @import "reset/progress";
+}
 
-// Layout
-@import "layout/document"; // html
-@import "layout/sectioning"; // body, header, main, footer
-@import "layout/container"; // .container, .container-fluid
-@import "layout/section"; // section
-@import "layout/flex"; // .flex-*
-@import "layout/grid"; // .grid
-@import "layout/scroller"; // figure
+@layer theme {
+  @import "themes/default";
+}
 
-// Content
-@import "content/typography"; // a, headings, p, ul, blockquote, ...
-@import "content/embedded"; // audio, canvas, iframe, img, svg, video
-@import "content/button"; // button, a[role=button], type=button, type=submit ...
-@import "content/form"; // input, select, textarea, label, fieldset, legend
-@import "content/toggle"; // type=checkbox, type=radio, role=switch
-@import "content/form-alt"; // type=color, type=date, type=file, type=search, ...
-@import "content/table"; // table, tr, td, ...
-@import "content/code"; // pre, code, ...
+@layer layout {
+  @import "layout/document"; // html
+  @import "layout/sectioning"; // body, header, main, footer
+  @import "layout/container"; // .container, .container-fluid
+  @import "layout/section"; // section
+  @import "layout/flex"; // .flex-*
+  @import "layout/grid"; // .grid
+  @import "layout/scroller"; // figure
+}
 
-// Components
-@import "components/accordion"; // details, summary
-@import "components/card"; // article
-@import "components/modal"; // dialog
-@import "components/nav"; // nav
-@import "components/progress"; // progress
-@import "components/dropdown"; // details[role="list"], li[role="list"]
-@import "components/property"; // dl, dt, dd
-@import "components/button-group"; // .input-group, .button-group, fieldset
+@layer content {
+  @import "content/typography"; // a, headings, p, ul, blockquote, ...
+  @import "content/embedded"; // audio, canvas, iframe, img, svg, video
+  @import "content/button"; // button, a[role=button], type=button, type=submit ...
+  @import "content/form"; // input, select, textarea, label, fieldset, legend
+  @import "content/toggle"; // type=checkbox, type=radio, role=switch
+  @import "content/form-alt"; // type=color, type=date, type=file, type=search, ...
+  @import "content/table"; // table, tr, td, ...
+  @import "content/code"; // pre, code, ...
+}
+
+@layer component {
+  @import "components/accordion"; // details, summary
+  @import "components/card"; // article
+  @import "components/modal"; // dialog
+  @import "components/nav"; // nav
+  @import "components/progress"; // progress
+  @import "components/dropdown"; // details[role="list"], li[role="list"]
+  @import "components/property"; // dl, dt, dd
+  @import "components/button-group"; // .input-group, .button-group, fieldset
+}
 
 // Utilities
-@import "utilities/loading"; // aria-busy=true
-@import "utilities/tooltip"; // data-tooltip
-@import "utilities/accessibility"; // -ms-touch-action, aria-*
-@import "utilities/reduce-motion"; // prefers-reduced-motion
+@layer utility {
+  @import "utilities/loading"; // aria-busy=true
+  @import "utilities/tooltip"; // data-tooltip
+  @import "utilities/accessibility"; // -ms-touch-action, aria-*
+  @import "utilities/reduce-motion"; // prefers-reduced-motion
+}
