@@ -23,17 +23,30 @@ dialog {
   // Content
   article {
     max-height: calc(100vh - var(--spacing) * 2);
+    width: calc(100vw - var(--spacing) * 2);
     overflow: auto;
 
     @if map-get($breakpoints, "sm") {
       @media (min-width: map-get($breakpoints, "sm")) {
-        max-width: map-get($viewports, "sm");
+        width: map-get($viewports, "sm");
       }
     }
 
     @if map-get($breakpoints, "md") {
       @media (min-width: map-get($breakpoints, "md")) {
-        max-width: map-get($viewports, "md");
+        width: map-get($viewports, "md");
+      }
+    }
+
+    @if map-get($breakpoints, "lg") {
+      @media (min-width: map-get($breakpoints, "lg")) {
+        width: map-get($viewports, "lg");
+      }
+    }
+
+    @if map-get($breakpoints, "xl") {
+      @media (min-width: map-get($breakpoints, "xl")) {
+        width: map-get($viewports, "xl");
       }
     }
 
