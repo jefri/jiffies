@@ -40,6 +40,8 @@
 @import "components/modal"; // dialog
 @import "components/nav"; // nav
 @import "components/progress"; // progress
+@import "components/dropdown"; // details[role="list"], li[role="list"]
+@import "components/property"; // dl, dt, dd
 @import "components/button-group"; // .input-group, .button-group, fieldset
 
 // Utilities
