@@ -22,13 +22,14 @@ export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
   label(input(attrs as Attrs<HTMLInputElement>), ...children);
 
 export const Select = (
-  attrs: { options: string[] | {} } & SelectAttributes & LabelAttributes
+  attrs: { options: string[] | {}; selected?: string } & SelectAttributes &
+    LabelAttributes
 ) =>
   label(
     { style: attrs.style ?? {} },
     select(
       { events: attrs.events ?? {} },
-      ...prepareOptions(attrs.options).map(Option)
+      ...prepareOptions(attrs.options, attrs.selected).map(Option)
     )
   );
 export const Button = () => {};
@@ -39,12 +40,19 @@ const prepareOptions = (
     | Record<
         string,
         string | { label: string; disabled?: boolean; selected?: boolean }
-      >
+      >,
+  selected?: string
 ): Parameters<typeof Option>[0][] =>
   Array.isArray(attrs)
-    ? attrs.map((value) => ({ value, label: value }))
+    ? attrs.map((value) => ({
+        value,
+        label: value,
+        selected: selected == value,
+      }))
     : Object.entries(attrs).map(([value, label]) =>
-        typeof label === "string" ? { value, label } : { value, ...label }
+        typeof label === "string"
+          ? { value, label, selected: selected === value }
+          : { value, ...label }
       );
 export const Option = (attrs: OptionAttributes) =>
   option(attrs as Attrs<HTMLOptionElement>);
