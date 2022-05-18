@@ -67,8 +67,8 @@ const sendContent = async (
   res: ServerResponse,
   { content, contentType, contentLength }: StaticResponse
 ) => {
-  res.setHeader("content-length", `${contentLength}`);
-  res.setHeader("content-type", contentType);
+  res.setHeader("Content-Length", `${contentLength}`);
+  res.setHeader("Content-Type", contentType);
   await res.write(content);
   res.end();
   return true;
