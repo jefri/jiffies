@@ -1,6 +1,6 @@
 import { Stats } from "fs";
 import * as fs from "fs/promises";
-import { StaticMiddleware, StaticResponse } from ".";
+import { StaticResponse } from ".";
 
 const MIME_TYPES: Record<string, string> = {
   js: "text/javascript",
@@ -18,7 +18,9 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 const mime = (basename: string) => {
-  const extension = basename.substr(basename.lastIndexOf(".") + 1);
+  const extension = basename
+    .substring(basename.lastIndexOf(".") + 1)
+    .toLowerCase();
   return MIME_TYPES[extension] ?? "application/octet-stream";
 };
 
@@ -34,13 +36,14 @@ export const fileResponse =
     return { status, contentType, contentLength, content };
   };
 
+const CHARSET = "utf-8";
 export const contentResponse =
   (content: string, contentType: string, status: 200 | 404 | 500 = 200) =>
   async (): Promise<StaticResponse> => {
-    const contentBuffer = Buffer.from(content, "utf-8");
+    const contentBuffer = Buffer.from(content, CHARSET);
     return {
       content: contentBuffer,
-      contentType,
+      contentType: contentType.split(";")[0] + "; charset=" + CHARSET,
       status,
       contentLength: contentBuffer.length,
     };
