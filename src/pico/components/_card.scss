@@ -9,6 +9,9 @@ article {
 
   > header,
   > footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     margin-right: calc(var(--block-spacing-horizontal) * -1);
     margin-left: calc(var(--block-spacing-horizontal) * -1);
     padding: calc(var(--block-spacing-vertical) * 0.66)
