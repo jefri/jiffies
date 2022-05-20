@@ -1,6 +1,6 @@
 import { display } from "../display.js";
 import { FC } from "../dom/fc.js";
-import { div, fieldset, input, label } from "../dom/html.js";
+import { fieldset, input, label } from "../dom/html.js";
 
 let buttonBarId = 1;
 let nextId = () => buttonBarId++;
@@ -22,17 +22,20 @@ const ButtonBar = FC<{
         const opt = `${option}`.replace(/\s+/g, "_").toLowerCase();
         const id = `${name}-${opt}`;
         return [
-          input({
-            type: "radio",
-            id,
-            name,
-            value: option,
-            checked: option === value,
-            events: {
-              change: () => events.onSelect(option),
-            },
-          }),
-          label({ role: "button", htmlFor: id }, display(option)),
+          label(
+            { role: "button", htmlFor: id },
+            input({
+              type: "radio",
+              id,
+              name,
+              value: option,
+              checked: option === value,
+              events: {
+                change: () => events.onSelect(option),
+              },
+            }),
+            display(option)
+          ),
         ];
       })
       .flat()

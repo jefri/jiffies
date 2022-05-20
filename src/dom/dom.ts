@@ -115,6 +115,7 @@ export function update<E extends DOMElement>(
 
     let useAttributes =
       k.startsWith("aria-") ||
+      k == "role" ||
       element.namespaceURI != "http://www.w3.org/1999/xhtml";
 
     if (useAttributes) {
