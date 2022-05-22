@@ -3,7 +3,6 @@ import * as path from "path";
 import { contentResponse } from "./response.js";
 import { MiddlewareFactory } from "./index.js";
 import sass from "sass";
-import { error, info } from "../../log.js";
 const { compileStringAsync } = sass;
 
 function render(source: string) {
@@ -20,6 +19,7 @@ async function compile(
   vars: string
 ): Promise<string> {
   vars = vars.substring(1).replaceAll("=", ":");
+  filename = filename.replaceAll("\\", "/"); // Normalize for dart-sass
   const sassString = `// Using variables: ${vars}\n${vars};\n@import "${filename}";`;
   return (await compileStringAsync(sassString, { loadPaths: [root] })).css;
 }
@@ -36,6 +36,7 @@ export const cssFileServer: MiddlewareFactory =
         Url.pathname.startsWith(`/${s}`)
       );
       // Expand url with found scope
+      Url.protocol = "file";
       let url = scope ? Url.pathname.replace(scope[0], scope[1]) : Url.pathname;
       let filename = path.join(root, url);
       try {
