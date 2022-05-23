@@ -9,6 +9,7 @@ import "./fs.test.js";
 import "./generator.test.js";
 import "./lock.test.js";
 import "./result.test.js";
+import "./observable/observable.test.js";
 
 describe("Test executor", () => {
   it("matches equality", () => {

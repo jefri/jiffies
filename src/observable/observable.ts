@@ -1,45 +1,53 @@
 import { display } from "../display.js";
 import { DEFAULT_LOGGER, Logger } from "../log.js";
 
-export interface Subscriber<T, E> {
-  next(t: T): void;
-  error(e: E): void;
-  complete(): void;
+export interface FullSubscriber<T, E> {
+  next?: (t: T) => void | Promise<undefined>;
+  error?: (e: E) => void | Promise<undefined>;
+  complete?: () => void | Promise<undefined>;
 }
+
+export type Subscriber<T, E> =
+  | FullSubscriber<T, E>
+  | ((t: T) => void | Promise<undefined>);
 
 export interface Subscription {
   // (): void;
   unsubscribe(): void;
 }
 
-export interface Observable<T, E> {
+export interface Observable<T, E = unknown> {
   // (subscriber: Subscriber<T, E>): Subscription;
   subscribe(subscriber: Subscriber<T, E>): Subscription;
-  pipe<T1>(o1: (t: T) => T1): Observable<T1, E>;
-  pipe<T1, T2>(o1: (t: T) => T1, o2: (t: T) => T2): Observable<T2, E>;
-  pipe<T1, T2, T3>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3
-  ): Observable<T3, E>;
-  pipe<T1, T2, T3, T4>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3,
-    o4: (t: T3) => T4
-  ): Observable<T4, E>;
-  pipe<T1, T2, T3, T4, T5>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3,
-    o4: (t: T3) => T4,
-    o5: (t: T4) => T5
-  ): Observable<T5, E>;
+  pipe<T1>(o1: Subscriber<T, E> & Observable<T1, E>): Observable<T1, E>;
+  pipe<T1, T2>(
+    o1: Subscriber<T, E> & Observable<T1, E>,
+    o2: Subscriber<T1, E> & Observable<T2, E>
+  ): Observable<T2, E>;
 }
 
 export const Observable = {
-  of<T, E>(...T: T[]) {},
-  combineLatest<T, E>(...O: Observable<T, E>[]) {},
+  of<T, E>(...ts: T[]): Observable<T, E> {
+    const subject = new Subject<T, E>();
+    (async function next() {
+      if (subject.cold) {
+        subject.onWarm(next);
+        return;
+      }
+      if (ts.length === 0) {
+        subject.complete();
+        return;
+      }
+      const t = ts.shift()!;
+      await subject.next(t);
+      next();
+    })();
+    return subject;
+  },
+  combineLatest<T1, T2, E>(
+    o1: Observable<T1, E>[],
+    o2: Observable<T2, E>[]
+  ): Observable<[T1, T2], E> {},
   from<T, E>(f: Promise<T> | Iterable<T> | Observable<T, E>) {},
   fromEvent<T, E>(
     element: { addEventListener<Ev>(fn: (e: Ev) => void): void },
@@ -47,66 +55,89 @@ export const Observable = {
   ) {},
 };
 
-export class Subject<T, E> implements Subscriber<T, E>, Observable<T, E> {
-  #subscribers = new Set<Subscriber<T, E>>();
+export class Subject<T, E = unknown, T2 = T>
+  implements FullSubscriber<T, E>, Observable<T, E>
+{
+  #coldWaiters = new Set<Function>();
+  #subscribers = new Set<FullSubscriber<T, E>>();
   #complete = false;
 
-  next(t: T): void {
+  get hot(): boolean {
+    return this.#subscribers.size > 0;
+  }
+
+  get cold(): boolean {
+    return !this.hot;
+  }
+
+  onWarm(fn: Function) {
+    if (this.cold) this.#coldWaiters.add(fn);
+  }
+
+  next(t: T | T2): void | Promise<undefined> {
     if (this.#complete)
       throw new Error("Cannot call next on a completed subject");
-    for (const subscriber of this.#subscribers) {
-      new Promise(() => subscriber.next(t));
-    }
+    return Promise.all(
+      [...this.#subscribers].map((s) => s.next?.(t as T))
+    ).then(() => undefined);
   }
 
-  error(e: E): void {
+  error(e: E): void | Promise<undefined> {
     if (this.#complete)
       throw new Error("Cannot call error on a completed subject");
-    for (const subscriber of this.#subscribers) {
-      new Promise(() => subscriber.error(e));
-    }
+    return Promise.all([...this.#subscribers].map((s) => s.error?.(e))).then(
+      () => undefined
+    );
   }
 
-  complete(): void {
+  complete(): void | Promise<undefined> {
     if (this.#complete)
       throw new Error("Cannot call complete on a completed subject");
     this.#complete = true;
-    for (const subscriber of this.#subscribers) {
-      new Promise(() => subscriber.complete());
-    }
+    const finished = Promise.all(
+      [...this.#subscribers].map((s) => s.complete?.())
+    );
+    this.#subscribers.clear(); // Free subscribers for garbage collection
+    return finished.then(() => undefined);
   }
 
   subscribe(subscriber: Subscriber<T, E>): Subscription {
+    if (this.#complete)
+      throw new Error("Cannot call subscribe on a completed subject");
+
+    if (subscriber instanceof Function) {
+      subscriber = { next: subscriber };
+    }
+
     this.#subscribers.add(subscriber);
-    return { unsubscribe: () => this.#subscribers.delete(subscriber) };
+
+    [...this.#coldWaiters].forEach((w) => w());
+    this.#coldWaiters.clear();
+
+    return {
+      unsubscribe: () =>
+        this.#subscribers.delete(subscriber as FullSubscriber<T, E>),
+    };
   }
 
-  pipe<T1>(o1: (t: T) => T1): Observable<T1, E>;
-  pipe<T1, T2>(o1: (t: T) => T1, o2: (t: T1) => T2): Observable<T2, E>;
-  pipe<T1, T2, T3>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3
-  ): Observable<T3, E>;
-  pipe<T1, T2, T3, T4>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3,
-    o4: (t: T3) => T4
-  ): Observable<T4, E>;
-  pipe<T1, T2, T3, T4, T5>(
-    o1: (t: T) => T1,
-    o2: (t: T1) => T2,
-    o3: (t: T2) => T3,
-    o4: (t: T3) => T4,
-    o5: (t: T4) => T5
-  ): Observable<T5, E>;
-  pipe(o1: any, o2?: any, o3?: any, o4?: any, o5?: any): any {
-    let o = o1.subscribe(this);
+  pipe<T1>(o1: Subscriber<T, E> & Observable<T1, E>): Observable<T1, E>;
+  pipe<T1, T2>(
+    o1: Subscriber<T, E> & Observable<T1, E>,
+    o2: Subscriber<T1, E> & Observable<T2, E>
+  ): Observable<T2, E>;
+  pipe(
+    ...os: (Subscriber<unknown, unknown> & Observable<unknown, unknown>)[]
+  ): Observable<unknown, E> {
+    this.subscribe(os[0]);
+    for (let i = 1; i < os.length; i++) {
+      // What do do w/ this subscription?
+      os[i - 1].subscribe(os[i]);
+    }
+    return os[os.length - 1];
   }
 }
 
-export class BehaviorSubject<T, E> extends Subject<T, E> {
+export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
   #current: T;
 
   constructor(t: T) {
@@ -114,13 +145,16 @@ export class BehaviorSubject<T, E> extends Subject<T, E> {
     this.#current = t;
   }
 
-  next(t: T) {
-    this.#current = t;
-    super.next(t);
+  next(t: T | T2) {
+    this.#current = t as T;
+    return super.next(t);
   }
 
   subscribe(subscriber: Subscriber<T, E>): Subscription {
-    subscriber.next(this.#current);
+    if (subscriber instanceof Function) {
+      subscriber = { next: subscriber };
+    }
+    subscriber.next?.(this.#current);
     return super.subscribe(subscriber);
   }
 
@@ -129,7 +163,7 @@ export class BehaviorSubject<T, E> extends Subject<T, E> {
   }
 }
 
-export class ReplaySubject<T, E> extends Subject<T, E> {
+export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
   #history: T[] = [];
   constructor(private readonly n: number) {
     super();
@@ -140,30 +174,102 @@ export class ReplaySubject<T, E> extends Subject<T, E> {
     if (this.#history.length > this.n) {
       this.#history.shift();
     }
-    super.next(t);
+    return super.next(t);
   }
 
   subscribe(subscriber: Subscriber<T, E>): Subscription {
+    if (subscriber instanceof Function) {
+      subscriber = { next: subscriber };
+    }
     const history = [...this.#history];
     (function send() {
       if (history.length == 0) return;
       const t = history.shift()!;
-      subscriber.next(t);
+      subscriber.next?.(t);
       new Promise(send);
     })();
     return super.subscribe(subscriber);
   }
 }
 
-const operator = {
-  filter<T, E>(fn: (t: T) => boolean): void {},
+export interface Operator<T, E> extends FullSubscriber<T, E> {}
+
+class MapOperator<T, U, E>
+  extends Subject<U, E, T>
+  implements FullSubscriber<T, E>, Observable<U, E>
+{
+  constructor(private readonly mapFn: (t: T) => U) {
+    super();
+  }
+
+  next(t: T): void | Promise<undefined> {
+    return super.next(this.mapFn(t));
+  }
+}
+
+class FilterOperator<T, E>
+  extends Subject<T, E>
+  implements FullSubscriber<T, E>, Observable<T, E>
+{
+  constructor(private readonly filterFn: (t: T) => boolean) {
+    super();
+  }
+
+  next(t: T): void | Promise<undefined> {
+    return this.filterFn(t) ? super.next(t) : undefined;
+  }
+}
+
+class ReduceOperator<A, T, E> extends BehaviorSubject<A, E, T> {
+  constructor(private readonly fn: (acc: A, t: T) => A, init: A) {
+    super(init);
+  }
+
+  next(t: T) {
+    return super.next(this.fn(this.current, t));
+  }
+}
+
+export class TakeUntilOperator<T, E> extends Subject<T, E> {
+  constructor(o: Observable<unknown, unknown>) {
+    super();
+    o.subscribe(() => this.complete());
+  }
+}
+export class TapOperator<T, E> extends Subject<T, E> {
+  private readonly subscriber: FullSubscriber<T, E>;
+  constructor(fn: Subscriber<T, E>) {
+    super();
+    this.subscriber = fn instanceof Function ? { next: fn } : fn;
+  }
+
+  next(t: T) {
+    this.subscriber.next?.(t);
+    return super.next(t);
+  }
+
+  error(e: E) {
+    this.subscriber.error?.(e);
+    return super.error(e);
+  }
+
+  complete() {
+    this.subscriber.complete?.();
+    return super.complete();
+  }
+}
+
+export const operator = {
+  filter: <T, E>(fn: (t: T) => boolean) => new FilterOperator<T, E>(fn),
   first(): void {},
   last(): void {},
-  map<T1, T2, E>(fn: (t: T1) => T2): void {},
-  publishReplay<T, E>(n: number): void {},
-  reduce<A, T, E>(fn: (acc: A, t: T) => A): void {},
-  takeUntil<T, E>(o: Observable<unknown, unknown>): void {},
-  tap<T, E>(fn: (t: T) => void | Subscriber<T, E>): void {},
+  map: <T1, T2, E>(fn: (t: T1) => T2) => new MapOperator<T1, T2, E>(fn),
+  publishReplay: <T, E>(n: number) => new ReplaySubject<T, E>(n),
+  reduce: <A, T, E>(fn: (acc: A, t: T) => A, init: A) =>
+    new ReduceOperator<A, T, E>(fn, init),
+  takeUntil: <T, E>(o: Observable<unknown, unknown>) =>
+    new TakeUntilOperator<T, E>(o),
+  tap: <T, E>(fn: Subscriber<T, E>) => new TapOperator<T, E>(fn),
 };
 
 export interface Next<T> {
@@ -237,9 +343,15 @@ export const collect = <T, E>(input$: Observable<T, E>) => {
   const collected: Event<T, E>[] = [];
 
   const subscription = input$.subscribe({
-    next: (x: T) => collected.push(next(x)),
-    error: (e: E) => collected.push(error(e)),
-    complete: () => collected.push(completed()),
+    next: (x: T) => {
+      collected.push(next(x));
+    },
+    error: (e: E) => {
+      collected.push(error(e));
+    },
+    complete: () => {
+      collected.push(completed());
+    },
   });
 
   subscription.unsubscribe();
