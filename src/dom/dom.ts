@@ -40,10 +40,10 @@ function isAttrs<E extends Element>(
   if (!attrs) {
     return false;
   }
-  if (typeof attrs === "string") {
-    return false;
+  if (typeof attrs === "object") {
+    return !(attrs as Node).nodeType;
   }
-  return !(attrs as Node).nodeType;
+  return false;
 }
 
 export function normalizeArguments<E extends Element>(

@@ -61,5 +61,15 @@ describe("Observables", () => {
     });
   });
 
-  describe("subjects", () => {});
+  describe("Subject", () => {
+    it("is callable", async () => {
+      const subject = new Subject<number>();
+      let resolved = 0;
+      subject.subscribe((n) => {
+        resolved = n;
+      });
+      await subject.next(42);
+      expect(resolved).toBe(42);
+    });
+  });
 });

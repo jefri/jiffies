@@ -1,14 +1,44 @@
 import { display } from "../display.js";
 import { DEFAULT_LOGGER, Logger } from "../log.js";
 
+export interface Next<T> {
+  value: T;
+  completed: false;
+  failed: false;
+}
+
+export interface Error<E> {
+  error: E;
+  completed: false;
+  failed: true;
+}
+
+export interface Completed {
+  completed: true;
+  failed: false;
+}
+
+export interface Failed {
+  completed: true;
+  failed: true;
+}
+
+export type Event<T, E> = Next<T> | Error<E> | Completed | Failed;
+
 export interface FullSubscriber<T, E> {
+  // (t: T): void | Promise<undefined>;
   next?: (t: T) => void | Promise<undefined>;
   error?: (e: E) => void | Promise<undefined>;
   complete?: () => void | Promise<undefined>;
 }
 
+export interface EventSubscriber<T, E> {
+  next(e: Event<T, E>): void;
+}
+
 export type Subscriber<T, E> =
   | FullSubscriber<T, E>
+  // | EventSubscriber<T, E>
   | ((t: T) => void | Promise<undefined>);
 
 export interface Subscription {
@@ -165,6 +195,7 @@ export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
 
 export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
   #history: T[] = [];
+
   constructor(private readonly n: number) {
     super();
   }
@@ -189,6 +220,17 @@ export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
       new Promise(send);
     })();
     return super.subscribe(subscriber);
+  }
+}
+
+export class EventHandler<E extends Event> extends Subject<E> {
+  constructor(private readonly eventFn: (e: E) => void | Promise<undefined>) {
+    super();
+  }
+
+  next(e: E) {
+    e.preventDefault();
+    super.next(e);
   }
 }
 
@@ -271,30 +313,6 @@ export const operator = {
     new TakeUntilOperator<T, E>(o),
   tap: <T, E>(fn: Subscriber<T, E>) => new TapOperator<T, E>(fn),
 };
-
-export interface Next<T> {
-  value: T;
-  completed: false;
-  failed: false;
-}
-
-export interface Error<E> {
-  error: E;
-  completed: false;
-  failed: true;
-}
-
-export interface Completed {
-  completed: true;
-  failed: false;
-}
-
-export interface Failed {
-  completed: true;
-  failed: true;
-}
-
-export type Event<T, E> = Next<T> | Error<E> | Completed | Failed;
 
 export const next = <T>(value: T): Next<T> => ({
   value,
