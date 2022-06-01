@@ -1,6 +1,6 @@
 import { debounce } from "../debounce.js";
 import { FC, State } from "../dom/fc.js";
-import { div, UHTMLElement } from "../dom/html.js";
+import { div } from "../dom/html.js";
 
 export interface VirtualScrollSettings {
   minIndex: number;
@@ -22,7 +22,7 @@ export function arrayAdapter<T>(data: T[]): VirtualScrollDataAdapter<T> {
 export interface VirtualScrollProps<T, U extends HTMLElement> {
   settings: Partial<VirtualScrollSettings>;
   get: VirtualScrollDataAdapter<T>;
-  row: (t: T) => UHTMLElement<U>;
+  row: (t: T) => U;
 }
 
 export function fillVirtualScrollSettings(
@@ -121,7 +121,7 @@ interface VirtualScrollState<T, U extends HTMLElement = HTMLElement> {
   bottomPaddingHeight: number; // px
   toleranceHeight: number; // px
   data: T[];
-  rows: UHTMLElement<U>[];
+  rows: U[];
 }
 
 // export interface VirtualScroll<T, U extends HTMLElement> {
@@ -163,14 +163,14 @@ export const VirtualScroll = FC<
     state.topPaddingHeight = newState.topPaddingHeight;
     state.bottomPaddingHeight = newState.bottomPaddingHeight;
     state.data = newState.data;
-    element[State].rows = state.data.map(props.row);
+    state.rows = state.data.map(props.row);
 
     viewportElement.update(
       div({
         class: "VirtualScroll__topPadding",
         style: { height: `${state.topPaddingHeight}px` },
       }),
-      ...(element[State].rows ?? []).map((row, i) =>
+      ...(state.rows ?? []).map((row, i) =>
         div(
           {
             class: `VirtualScroll__item_${i}`,

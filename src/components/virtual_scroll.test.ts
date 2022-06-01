@@ -18,10 +18,10 @@ describe("VirtualScroll", () => {
     // @ts-ignore TODO(TFC)
     const scroll = VirtualScroll(props);
 
-    expect(scroll[State].bufferedItems).toBe(9);
-    expect(scroll[State].data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(scroll[State]?.bufferedItems).toBe(9);
+    expect(scroll[State]?.data).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     //expect(scroll.state.topPaddingHeight).toBe(0);
-    expect(scroll[State].viewportHeight).toBe(60);
+    expect(scroll[State]?.viewportHeight).toBe(60);
     //expect(scroll.state.totalHeight).toBe(200);
   });
 });

@@ -1,4 +1,4 @@
-import * as CSS from "./types/css";
+import { Properties } from "./types/css.js";
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");
@@ -10,29 +10,29 @@ export type DOMElement = Element &
   DocumentAndElementEventHandlers &
   ElementCSSInlineStyle;
 
-export type Updater<E extends DOMElement> = Omit<E, "style"> & {
-  [Events]?: Map<string, EventHandler>;
-  update?: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
-};
-
-export type Updatable<E extends Element> = Omit<E, "style"> & {
-  [Events]: Map<string, EventHandler>;
-  update: (attrs?: DenormAttrs<E>, ...children: DenormChildren[]) => Node;
-};
-
 export type DomAttrs = {
   class: string;
-  style: Partial<CSS.Properties>;
+  style: Partial<Properties> | string;
+  role: "button" | "list";
   events: Partial<{
     [K in keyof HTMLElementEventMap]: EventHandler;
   }>;
 };
 
-export type Attrs<E extends Element, S = {}> = Partial<E & S & DomAttrs>;
+export type Attrs<E extends Omit<Element, "update">, S = {}> = Partial<
+  Omit<E, "style"> & S & DomAttrs
+>;
 
-export type DenormAttrs<E extends Element, S = {}> =
+export type DenormAttrs<E extends Omit<Element, "update">, S = {}> =
   | Attrs<E, S>
   | DenormChildren;
+
+declare global {
+  interface Element {
+    [Events]: Map<string, EventHandler>;
+    update(attrs?: DenormAttrs<Element>, ...children: DenormChildren[]): this;
+  }
+}
 
 function isAttrs<E extends Element>(
   attrs: DenormAttrs<E> | undefined
@@ -63,19 +63,19 @@ export function normalizeArguments<E extends Element>(
   return [attributes, children.flat()];
 }
 
-export function up<E extends DOMElement>(
-  element: E,
+export function up<E extends Element>(
+  element: Omit<E, "update">,
   attrs?: DenormAttrs<E>,
   ...children: DenormChildren[]
-): Updatable<E> {
-  return update(element, ...normalizeArguments(attrs, children));
+): E {
+  return update(element, ...normalizeArguments(attrs, children)) as E;
 }
 
-export function update<E extends DOMElement>(
-  element: Updater<E>,
-  attrs: Attrs<E>,
+export function update(
+  element: Omit<Element, "update">,
+  attrs: Attrs<Element>,
   children: DenormChildren[]
-): Updatable<E> {
+): Element {
   // Track events, to remove later
   const $events = (element[Events] ??= new Map<string, EventHandler>());
   const { style = {}, events = {}, ...rest } = attrs;
@@ -147,8 +147,8 @@ export function update<E extends DOMElement>(
     }
   }
 
-  element.update ??= (attrs, ...children) =>
+  (element as Element).update ??= (attrs, ...children) =>
     update(element, ...normalizeArguments(attrs, children));
 
-  return element as Updatable<E>;
+  return element as Element;
 }
