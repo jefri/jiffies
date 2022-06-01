@@ -1,10 +1,11 @@
 import { Observable } from "../observable/observable.js";
-import { DenormChildren } from "./dom.js";
 
-export function o(Element: DomCtor, observable: Observable<DenormChildren>) {
-  const dom = Element();
+export function O<E extends Element>(
+  element: E,
+  observable: Observable<Parameters<E["update"]>>
+): E {
   observable.subscribe((t) => {
-    dom.update(t);
+    element.update(...t);
   });
-  return dom;
+  return element;
 }
