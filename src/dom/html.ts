@@ -1,19 +1,16 @@
-import { DenormAttrs, DenormChildren, up, Updatable } from "./dom.js";
-import { Properties } from "./types/css.js";
-
-export type UHTMLElement<E extends HTMLElement = HTMLElement> = Updatable<
-  Omit<E, "style">
-> & { style: Properties };
+import { DenormAttrs, DenormChildren, up } from "./dom.js";
 
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>
   (
-    attrs?: DenormAttrs<Omit<HTMLElementTagNameMap[K], "style">>,
+    attrs?: DenormAttrs<HTMLElementTagNameMap[K]>,
     ...children: DenormChildren[]
   ) =>
-    up(document.createElement(name), attrs, ...children) as UHTMLElement<
-      HTMLElementTagNameMap[K]
-    >;
+    up(
+      document.createElement(name),
+      attrs,
+      ...children
+    ) as HTMLElementTagNameMap[K];
 
 export const a = makeHTMLElement("a");
 export const abbr = makeHTMLElement("abbr");

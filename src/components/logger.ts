@@ -1,10 +1,9 @@
 import { display, Display } from "../display.js";
-import { DOMElement, Updatable } from "../dom/dom.js";
 import { div, span, ul, li, pre, code } from "../dom/html.js";
 import { LEVEL, Logger } from "../log.js";
 
 export interface HTMLLogger extends Logger {
-  root: Updatable<DOMElement>;
+  root: Element;
 }
 
 export function isHTMLLogger(logger: Logger): logger is HTMLLogger {
@@ -12,7 +11,7 @@ export function isHTMLLogger(logger: Logger): logger is HTMLLogger {
 }
 
 export function makeHTMLLogger(name: string): HTMLLogger {
-  let log: Updatable<DOMElement>;
+  let log: Element;
   const root = div(div(span(name)), (log = ul()));
   const logger: Partial<HTMLLogger> = { level: LEVEL.INFO, root };
 

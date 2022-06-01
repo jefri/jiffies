@@ -7,6 +7,5 @@ export function xml(
     (attrs, [attr, val]) => `${attrs} ${attr}="${val}"`,
     ""
   );
-  const kids = children.join("");
-  return `<${tag} ${attrs}>${kids}</${tag}>`;
+  return `<${tag} ${attrs}>${children.join("")}</${tag}>`;
 }

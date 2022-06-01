@@ -1,10 +1,10 @@
-import { DOMElement, Updatable } from "../dom";
+import { DOMElement } from "../dom";
 import { Link } from "./link";
 
 export interface Router {
   current?: string;
   navigate: (url: string) => (event: Event) => void;
-  (target: Updatable<DOMElement>): Updatable<DOMElement>;
+  (target: DOMElement): DOMElement;
 }
 
 let baseURI = `${document.baseURI}`;
@@ -15,8 +15,8 @@ const normalizeHref = () => {
 let globalRouter: Router;
 export const Router = {
   for(links: Link[], index: string, setGlobalRouter = true): Router {
-    let target: Updatable<Element>;
-    const partialRouter: Partial<Router> = (t: Updatable<Element>) => {
+    let target: Element;
+    const partialRouter: Partial<Router> = (t: Element) => {
       target = t;
       const href = normalizeHref();
       const route = href === baseURI ? baseURI + index : href;

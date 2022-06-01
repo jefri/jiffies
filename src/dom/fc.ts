@@ -3,7 +3,6 @@ import {
   DenormChildren,
   DomAttrs,
   normalizeArguments,
-  Updatable,
   update,
 } from "./dom.js";
 
@@ -11,17 +10,17 @@ export type Attrs<S> = S & Partial<DomAttrs>;
 
 export const State = Symbol();
 export interface FCComponent<P extends object, S extends object>
-  extends HTMLElement {
-  [State]: Partial<S>;
+  extends Element {
+  [State]?: Partial<S>;
   update(
-    attrs?: Partial<Attrs<P>> | DenormChildren,
+    attrs?: Partial<Attrs<P> & DomAttrs> | DenormChildren,
     ...children: DenormChildren[]
-  ): void;
+  ): this;
 }
 export interface RenderFn<P extends object, S extends object> {
   (el: FCComponent<P, S>, attrs: Attrs<P>, children: DenormChildren[]):
-    | Updatable<Element>
-    | Updatable<Element>[];
+    | Element
+    | Element[];
 }
 
 export interface FCComponentCtor<P extends object, S extends object> {
@@ -35,7 +34,7 @@ export function FC<P extends object, S extends object = {}>(
   name: string,
   component: RenderFn<P, S>
 ): FCComponentCtor<P, S> {
-  class FCImpl extends HTMLElement {
+  class FCImpl extends HTMLElement implements FCComponent<P, S> {
     constructor() {
       super();
     }
@@ -61,6 +60,7 @@ export function FC<P extends object, S extends object = {}>(
       // Re-run the component function using new element, attrs, and children.
       const replace = [component(this, this.#attrs, this.#children)];
       this.replaceChildren(...replace.flat());
+      return this;
     }
   }
 

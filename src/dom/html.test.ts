@@ -49,7 +49,7 @@ describe("html", () => {
   it("sets style properties", () => {
     const btn = button({
       style: { flexDirection: "column" },
-    }) as unknown as HTMLButtonElement;
+    });
 
     expect(btn.style.flexDirection).toBe("column");
   });
