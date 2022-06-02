@@ -1,6 +1,5 @@
 import { describe, expect, it } from "../scope/index.js";
-import { Observable, Subject } from "./observable.js";
-import { filter, map } from "./operator.js";
+import { Observable, Subject, filter, map } from "./observable.js";
 
 describe("Observables", () => {
   describe("basics", () => {
