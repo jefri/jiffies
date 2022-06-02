@@ -3,6 +3,7 @@ import { Subject, map } from "../observable/observable.js";
 import { describe, it } from "../scope/describe.js";
 import { expect } from "../scope/expect.js";
 import { div, span } from "./html.js";
+import { DOMUpdates } from "./dom.js";
 
 describe("DOM Observable", () => {
   it("updates a dom node with observable results", async () => {
@@ -20,7 +21,7 @@ describe("DOM Observable", () => {
 
   it("updates a dom node's attributes", async () => {
     const classes = new Subject<string[]>();
-    const observable = classes.pipe(map((c) => [{ class: c.join(" ") }]));
+    const observable = classes.map<DOMUpdates>((c) => [{ class: c.join(" ") }]);
 
     const element = O(span(), observable);
 

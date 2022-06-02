@@ -34,6 +34,10 @@ declare global {
   }
 }
 
+export type DOMUpdates<E extends Element = Element> =
+  | [DenormAttrs<E>, ...DenormChildren[]]
+  | DenormChildren[];
+
 function isAttrs<E extends Element>(
   attrs: DenormAttrs<E> | undefined
 ): attrs is Attrs<E> {
