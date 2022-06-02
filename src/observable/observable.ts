@@ -1,5 +1,5 @@
 import { DEFAULT_LOGGER, Logger } from "../log.js";
-import { tap } from "./operator.js";
+import * as operator from "./operator.js";
 
 export interface FullSubscriber<T, E> {
   // (t: T): void | Promise<undefined>;
@@ -26,6 +26,11 @@ export interface Observable<T, E = unknown> {
     o1: Subscriber<T, E> & Observable<T1, E>,
     o2: Subscriber<T1, E> & Observable<T2, E>
   ): Observable<T2, E>;
+  filter(fn: (t: T) => boolean): Observable<T, E>;
+  map<U>(fn: (t: T) => U): Observable<U, E>;
+  reduce<A>(fn: (acc: A, t: T) => A, init: A): Observable<A, E>;
+  replay(n: number): Observable<T, E>;
+  tap(s: Subscriber<T, E>): Observable<T, E>;
 }
 
 export const Observable = {
@@ -47,14 +52,49 @@ export const Observable = {
     return subject;
   },
   combineLatest<T1, T2, E>(
-    o1: Observable<T1, E>[],
-    o2: Observable<T2, E>[]
-  ): Observable<[T1, T2], E> {},
-  from<T, E>(f: Promise<T> | Iterable<T> | Observable<T, E>) {},
-  fromEvent<T, E>(
-    element: { addEventListener<Ev>(fn: (e: Ev) => void): void },
-    eventName: string
-  ) {},
+    o1: Observable<T1, E>,
+    o2: Observable<T2, E>
+  ): Observable<[T1, T2], E> {
+    let latestSubject = new Subject<[T1, T2], E>();
+    let o1Latest: T1;
+    let o2Latest: T2;
+
+    function next() {
+      if (o1Latest && o2Latest) {
+        latestSubject.next([o1Latest, o2Latest]);
+      }
+    }
+
+    function error(e: E) {
+      latestSubject.error(e);
+    }
+
+    function complete() {
+      latestSubject.complete();
+      o1sub.unsubscribe();
+      o2sub.unsubscribe();
+    }
+
+    let o1sub = o1.subscribe({
+      next(t: T1) {
+        o1Latest = t;
+        next();
+      },
+      error,
+      complete,
+    });
+
+    let o2sub = o2.subscribe({
+      next(t: T2) {
+        o2Latest = t;
+        next();
+      },
+      error,
+      complete,
+    });
+
+    return latestSubject;
+  },
 };
 
 export class Subject<T, E = unknown, T2 = T>
@@ -136,6 +176,26 @@ export class Subject<T, E = unknown, T2 = T>
     }
     return os[os.length - 1];
   }
+
+  filter(fn: (t: T) => boolean): Observable<T, E> {
+    return this.pipe(operator.filter(fn));
+  }
+
+  map<U>(fn: (t: T) => U): Observable<U, E> {
+    return this.pipe(operator.map(fn));
+  }
+
+  reduce<A>(fn: (acc: A, t: T) => A, init: A): Observable<A, E> {
+    return this.pipe(operator.reduce(fn, init));
+  }
+
+  replay(n: number): Observable<T, E> {
+    return this.pipe(operator.replay(n));
+  }
+
+  tap(s: Subscriber<T, E>): Observable<T, E> {
+    return this.pipe(operator.tap(s));
+  }
 }
 
 export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
@@ -194,6 +254,16 @@ export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
   }
 }
 
+export function eventListener<E extends Event>() {
+  const observable = new Subject<E, unknown>();
+  function listener(e: E) {
+    e.preventDefault();
+    observable.next(e);
+  }
+
+  return [observable, listener];
+}
+
 export class EventHandler<E extends Event> extends Subject<E> {
   constructor(private readonly eventFn: (e: E) => void | Promise<undefined>) {
     super();
@@ -208,17 +278,15 @@ export class EventHandler<E extends Event> extends Subject<E> {
 export const watch =
   <T, E>(logger: Logger = DEFAULT_LOGGER) =>
   (observable: Observable<T, E>) => {
-    observable.pipe(
-      tap({
-        next(t: T) {
-          logger.info(t);
-        },
-        complete() {
-          logger.info("Observable completed");
-        },
-        error(e: E) {
-          logger.warn(e);
-        },
-      })
-    );
+    observable.tap({
+      next(t: T) {
+        logger.info(t);
+      },
+      complete() {
+        logger.info("Observable completed");
+      },
+      error(e: E) {
+        logger.warn(e);
+      },
+    });
   };

@@ -74,13 +74,36 @@ export class TapOperator<T, E> extends Subject<T, E> {
   }
 }
 
+class FirstOperator<T, E> extends Subject<T, E> {
+  next(t: T): void | Promise<undefined> {
+    const next = super.next(t);
+    this.complete();
+    return next;
+  }
+}
+
+class LastOperator<T, E = Error> extends Subject<T, E> {
+  #latest?: T;
+
+  next(t: T) {
+    this.#latest = t;
+  }
+
+  complete(): void | Promise<undefined> {
+    if (this.#latest !== undefined) {
+      super.next(this.#latest);
+    }
+    return super.complete();
+  }
+}
+
 export const filter = <T, E>(fn: (t: T) => boolean) =>
   new FilterOperator<T, E>(fn);
-export const first = (): void => {};
-export const last = (): void => {};
+export const first = <T, E>() => new FirstOperator<T, E>(1);
+export const last = <T, E>() => new LastOperator<T, E>();
 export const map = <T1, T2, E>(fn: (t: T1) => T2) =>
   new MapOperator<T1, T2, E>(fn);
-export const publishReplay = <T, E>(n: number) => new ReplaySubject<T, E>(n);
+export const replay = <T, E>(n: number) => new ReplaySubject<T, E>(n);
 export const reduce = <A, T, E>(fn: (acc: A, t: T) => A, init: A) =>
   new ReduceOperator<A, T, E>(fn, init);
 export const takeUntil = <T, E>(o: Observable<unknown, unknown>) =>
