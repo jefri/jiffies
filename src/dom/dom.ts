@@ -110,7 +110,13 @@ export function update(
     if (k === "class" && typeof v === "string") {
       v.split(/\s+/m)
         .filter((s) => s !== "")
-        .forEach((c) => element.classList.add(c));
+        .forEach((c) => {
+          if (c.startsWith("!")) {
+            element.classList.remove(c.substring(1));
+          } else {
+            element.classList.add(c);
+          }
+        });
     }
 
     let useAttributes =
