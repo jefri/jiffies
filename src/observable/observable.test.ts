@@ -1,5 +1,6 @@
 import { describe, expect, it } from "../scope/index.js";
-import { Observable, operator, Subject } from "./observable.js";
+import { Observable, Subject } from "./observable.js";
+import { filter, map } from "./operator.js";
 
 describe("Observables", () => {
   describe("basics", () => {
@@ -49,9 +50,7 @@ describe("Observables", () => {
         resolved = n;
       };
 
-      subject
-        .pipe(operator.map(inflate(22)), operator.filter(biggerThan(70)))
-        .subscribe(assign);
+      subject.pipe(map(inflate(22)), filter(biggerThan(70))).subscribe(assign);
 
       expect(resolved).toBe(0);
       await subject.next(42);

@@ -1,39 +1,11 @@
-import { display } from "../display.js";
 import { DEFAULT_LOGGER, Logger } from "../log.js";
-
-export interface Next<T> {
-  value: T;
-  completed: false;
-  failed: false;
-}
-
-export interface Error<E> {
-  error: E;
-  completed: false;
-  failed: true;
-}
-
-export interface Completed {
-  completed: true;
-  failed: false;
-}
-
-export interface Failed {
-  completed: true;
-  failed: true;
-}
-
-export type Event<T, E> = Next<T> | Error<E> | Completed | Failed;
+import { tap } from "./operator.js";
 
 export interface FullSubscriber<T, E> {
   // (t: T): void | Promise<undefined>;
   next?: (t: T) => void | Promise<undefined>;
   error?: (e: E) => void | Promise<undefined>;
   complete?: () => void | Promise<undefined>;
-}
-
-export interface EventSubscriber<T, E> {
-  next(e: Event<T, E>): void;
 }
 
 export type Subscriber<T, E> =
@@ -160,7 +132,6 @@ export class Subject<T, E = unknown, T2 = T>
   ): Observable<unknown, E> {
     this.subscribe(os[0]);
     for (let i = 1; i < os.length; i++) {
-      // What do do w/ this subscription?
       os[i - 1].subscribe(os[i]);
     }
     return os[os.length - 1];
@@ -234,154 +205,11 @@ export class EventHandler<E extends Event> extends Subject<E> {
   }
 }
 
-export interface Operator<T, E> extends FullSubscriber<T, E> {}
-
-class MapOperator<T, U, E>
-  extends Subject<U, E, T>
-  implements FullSubscriber<T, E>, Observable<U, E>
-{
-  constructor(private readonly mapFn: (t: T) => U) {
-    super();
-  }
-
-  next(t: T): void | Promise<undefined> {
-    return super.next(this.mapFn(t));
-  }
-}
-
-class FilterOperator<T, E>
-  extends Subject<T, E>
-  implements FullSubscriber<T, E>, Observable<T, E>
-{
-  constructor(private readonly filterFn: (t: T) => boolean) {
-    super();
-  }
-
-  next(t: T): void | Promise<undefined> {
-    return this.filterFn(t) ? super.next(t) : undefined;
-  }
-}
-
-class ReduceOperator<A, T, E> extends BehaviorSubject<A, E, T> {
-  constructor(private readonly fn: (acc: A, t: T) => A, init: A) {
-    super(init);
-  }
-
-  next(t: T) {
-    return super.next(this.fn(this.current, t));
-  }
-}
-
-export class TakeUntilOperator<T, E> extends Subject<T, E> {
-  constructor(o: Observable<unknown, unknown>) {
-    super();
-    o.subscribe(() => this.complete());
-  }
-}
-export class TapOperator<T, E> extends Subject<T, E> {
-  private readonly subscriber: FullSubscriber<T, E>;
-  constructor(fn: Subscriber<T, E>) {
-    super();
-    this.subscriber = fn instanceof Function ? { next: fn } : fn;
-  }
-
-  next(t: T) {
-    this.subscriber.next?.(t);
-    return super.next(t);
-  }
-
-  error(e: E) {
-    this.subscriber.error?.(e);
-    return super.error(e);
-  }
-
-  complete() {
-    this.subscriber.complete?.();
-    return super.complete();
-  }
-}
-
-export const operator = {
-  filter: <T, E>(fn: (t: T) => boolean) => new FilterOperator<T, E>(fn),
-  first(): void {},
-  last(): void {},
-  map: <T1, T2, E>(fn: (t: T1) => T2) => new MapOperator<T1, T2, E>(fn),
-  publishReplay: <T, E>(n: number) => new ReplaySubject<T, E>(n),
-  reduce: <A, T, E>(fn: (acc: A, t: T) => A, init: A) =>
-    new ReduceOperator<A, T, E>(fn, init),
-  takeUntil: <T, E>(o: Observable<unknown, unknown>) =>
-    new TakeUntilOperator<T, E>(o),
-  tap: <T, E>(fn: Subscriber<T, E>) => new TapOperator<T, E>(fn),
-};
-
-export const next = <T>(value: T): Next<T> => ({
-  value,
-  completed: false,
-  failed: false,
-});
-export const error = <E>(e: E): Error<E> => ({
-  error: e,
-  completed: false,
-  failed: true,
-});
-export const completed = (): Completed => ({ completed: true, failed: false });
-export const failed = (): Failed => ({ completed: true, failed: true });
-
-export const isNext = <T>(event: Event<T, unknown>): event is Next<T> =>
-  !event.completed && !event.failed && event.value !== undefined;
-export const isError = <E>(event: Event<unknown, E>): event is Error<E> =>
-  event.failed && !event.completed;
-export const isCompleted = (
-  event: Event<unknown, unknown>
-): event is Completed => event.completed && !event.failed;
-export const isFailed = (event: Event<unknown, unknown>): event is Failed =>
-  event.completed && event.failed;
-
-export const isEvent = <T, E>(t: T | Event<T, E>): t is Event<T, E> => {
-  const b = t as Event<unknown, unknown>;
-  return isNext(b) || isError(b) || isCompleted(b);
-};
-
-export const asEvents = <T, E>(a: (T | Event<T, E>)[]): Event<T, E>[] =>
-  a.map((e) => (isEvent(e) ? e : next(e)));
-
-const marble = <T, E>(event: Event<T, E>): string =>
-  isError(event)
-    ? "X"
-    : isFailed(event)
-    ? "!"
-    : isCompleted(event)
-    ? "|"
-    : `(${display(event.value)})`;
-
-export const marbles = <T, E>(events: Event<T, E>[]): string =>
-  `:${events.map(marble).join("-")}`;
-
-export const collect = <T, E>(input$: Observable<T, E>) => {
-  const collected: Event<T, E>[] = [];
-
-  const subscription = input$.subscribe({
-    next: (x: T) => {
-      collected.push(next(x));
-    },
-    error: (e: E) => {
-      collected.push(error(e));
-    },
-    complete: () => {
-      collected.push(completed());
-    },
-  });
-
-  subscription.unsubscribe();
-
-  return collected;
-};
-
 export const watch =
   <T, E>(logger: Logger = DEFAULT_LOGGER) =>
   (observable: Observable<T, E>) => {
     observable.pipe(
-      operator.tap({
+      tap({
         next(t: T) {
           logger.info(t);
         },
