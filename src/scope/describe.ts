@@ -11,6 +11,7 @@ const logger = getLogger("scope");
 const CASES: TestCase = {};
 let cases = [CASES];
 let totalCases = 0;
+let skippedCases = 0;
 
 function push(title: string) {
   const next = (cases[0][title] = {});
@@ -29,6 +30,10 @@ export function getTotalCases() {
   return totalCases;
 }
 
+export function getSkippedCases() {
+  return skippedCases;
+}
+
 export function describe(title: string, block: Function) {
   logger.debug(`describe(${title})`);
   push(title);
@@ -41,6 +46,12 @@ export function it(title: string, block: Function) {
   totalCases += 1;
   cases[0][title] = block;
 }
+
+it.skip = (title: string, _block: Function) => {
+  logger.debug(`it.skip(${title})`);
+  totalCases += 1;
+  skippedCases += 1;
+};
 
 export function beforeEach(fn: () => void) {
   cases[0][beforeeach] = fn;
