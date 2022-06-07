@@ -1,13 +1,26 @@
-Subject
-    BehaviorSubject
-    ReplaySubject
+Subscriber
+    next(t: T)
+    error(e: E)
+    complete()
+
 Observable
-    of
-    from
-    fromEvent
-    pipe
+    ::of(...Ts)
+    ::combineLatest([...])
+    ::from(promise|Iterable|Subscribable)
+    ::fromEvent(element, eventName)
+    (subscriber) -> subscription
+    .subscribe(subscriber) -> subscription
+    .pipe(...operators) -> Observable
+
+Subject
+    -> BehaviorSubject(t)
+    -> ReplaySubject(n)
+
 operator
-    map
     filter
+    first/last
+    map
+    publishReplay
     reduce
+    takeUntil
     tap

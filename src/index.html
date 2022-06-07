@@ -15,11 +15,14 @@
     <div style="display: none" id="status"></div>
     <div style="display: none" id="json"></div>
     <div style="display: none" id="xml"></div>
-    <script type="module" src="./test_all.js"></script>
-    <script type="module" src="./dom/test.js"></script>
-    <script type="module" src="./components/test.js"></script>
 
     <script type="module">
+      await Promise.all([
+        import("./test_all.js"),
+        import("./dom/test.js"),
+        import("./components/test.js"),
+      ]);
+
       import { execute } from "./scope/execute.js";
       import { displayStatistics } from "./scope/display/dom.js";
       import { onConsole } from "./scope/display/console.js";

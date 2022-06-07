@@ -34,16 +34,20 @@ declare global {
   }
 }
 
+export type DOMUpdates<E extends Element = Element> =
+  | [DenormAttrs<E>, ...DenormChildren[]]
+  | DenormChildren[];
+
 function isAttrs<E extends Element>(
   attrs: DenormAttrs<E> | undefined
 ): attrs is Attrs<E> {
   if (!attrs) {
     return false;
   }
-  if (typeof attrs === "string") {
-    return false;
+  if (typeof attrs === "object") {
+    return !(attrs as Node).nodeType;
   }
-  return !(attrs as Node).nodeType;
+  return false;
 }
 
 export function normalizeArguments<E extends Element>(
@@ -110,7 +114,13 @@ export function update(
     if (k === "class" && typeof v === "string") {
       v.split(/\s+/m)
         .filter((s) => s !== "")
-        .forEach((c) => element.classList.add(c));
+        .forEach((c) => {
+          if (c.startsWith("!")) {
+            element.classList.remove(c.substring(1));
+          } else {
+            element.classList.add(c);
+          }
+        });
     }
 
     const useNamespace =
