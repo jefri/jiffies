@@ -13,7 +13,7 @@ export type DOMElement = Element &
 export type DomAttrs = {
   class: string;
   style: Partial<Properties> | string;
-  role: "button" | "list";
+  role: "button" | "list" | "listbox";
   events: Partial<{
     [K in keyof HTMLElementEventMap]: EventHandler;
   }>;
@@ -123,29 +123,27 @@ export function update(
         });
     }
 
-    let useAttributes =
-      k.startsWith("aria-") ||
-      k == "role" ||
+    const useNamespace =
+      element.namespaceURI &&
       element.namespaceURI != "http://www.w3.org/1999/xhtml";
+    const remove = !v;
 
-    if (useAttributes) {
-      switch (v) {
-        case false:
-          element.removeAttributeNS(element.namespaceURI, k);
-          break;
-        case true:
-          element.setAttributeNS(element.namespaceURI, k, k);
-          break;
-        default:
-          if (v === "") {
-            element.removeAttributeNS(element.namespaceURI, k);
-          } else {
-            element.setAttributeNS(element.namespaceURI, k, v);
-          }
+    if (useNamespace) {
+      if (remove) {
+        element.removeAttributeNS(element.namespaceURI, k);
+      } else if (v === true) {
+        element.setAttributeNS(element.namespaceURI, k, k);
+      } else {
+        element.setAttributeNS(element.namespaceURI, k, v);
       }
     } else {
-      // @ts-ignore Object.entries is unable to statically look into args
-      element[k] = v;
+      if (remove) {
+        element.removeAttribute(k);
+      } else if (v === true) {
+        element.setAttribute(k, k);
+      } else {
+        element.setAttribute(k, v);
+      }
     }
   });
 
