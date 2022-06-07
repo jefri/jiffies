@@ -71,6 +71,10 @@ export function diff<T>(
   a: Partial<T>,
   b: Partial<T>
 ): (DiffEntry | DiffList)[] {
+  if (typeof a != "object" && !Object.is(a, b)) {
+    // @ts-ignore
+    return [{ key: "", left: a, right: b }];
+  }
   return (
     Array.isArray(a)
       ? // @ts-ignore

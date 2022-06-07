@@ -4,11 +4,16 @@ import { expect } from "./scope/expect.js";
 
 describe("diff", () => {
   it("diffs primitives", () => {
+    const diffed = diff(1, 2);
+    expect(diffed).toEqual([{ key: "", left: 1, right: 2 }]);
+  });
+
+  it("diffs objects", () => {
     const diffed = diff({ a: 1, b: 2 }, { a: 2, b: 2 });
     expect(diffed).toEqual([{ key: "a", left: 1, right: 2 }]);
   });
 
-  it("diffs objects", () => {
+  it("diffs nested objects", () => {
     const diffed = diff({ a: { c: 1 }, b: 2 }, { a: { c: 2 }, b: 2 });
     expect(diffed).toEqual([
       { key: "a", children: [{ key: "c", left: 1, right: 2 }] },
