@@ -113,25 +113,27 @@ export function update(
         .forEach((c) => element.classList.add(c));
     }
 
-    const useAria = k.startsWith("aria-") || k == "role";
-    const useNamespace = element.namespaceURI != "http://www.w3.org/1999/xhtml";
-    const remove = v === "" || v === false;
+    const useNamespace =
+      element.namespaceURI &&
+      element.namespaceURI != "http://www.w3.org/1999/xhtml";
+    const remove = !v;
 
-    if (useAria) {
-      if (remove) {
-        element.removeAttribute(k);
-      } else {
-        element.setAttribute(k, v);
-      }
-    } else if (useNamespace) {
+    if (useNamespace) {
       if (remove) {
         element.removeAttributeNS(element.namespaceURI, k);
+      } else if (v === true) {
+        element.setAttributeNS(element.namespaceURI, k, k);
       } else {
         element.setAttributeNS(element.namespaceURI, k, v);
       }
     } else {
-      // @ts-ignore Object.entries is unable to statically look into args
-      element[k] = v;
+      if (remove) {
+        element.removeAttribute(k);
+      } else if (v === true) {
+        element.setAttribute(k, k);
+      } else {
+        element.setAttribute(k, v);
+      }
     }
   });
 
