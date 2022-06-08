@@ -15,7 +15,7 @@ export type DomAttrs = {
   style: Partial<Properties> | string;
   role: "button" | "list" | "listbox";
   events: Partial<{
-    [K in keyof HTMLElementEventMap]: EventHandler;
+    [K in keyof HTMLElementEventMap]: EventHandler | null;
   }>;
 };
 
@@ -86,10 +86,12 @@ export function update(
 
   Object.entries(events as NonNullable<typeof attrs.events>).forEach(
     ([k, v]) => {
-      if (v === null && $events.has(k)) {
-        const listener = $events.get(k)!;
-        element.removeEventListener(k, listener);
-      } else if (!$events.has(k)) {
+      if (v === null) {
+        if ($events.has(k)) {
+          const listener = $events.get(k)!;
+          element.removeEventListener(k, listener);
+        }
+      } else if (v !== undefined) {
         element.addEventListener(k as keyof ElementEventMap, v);
         $events.set(k, v);
       }

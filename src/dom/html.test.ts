@@ -16,16 +16,16 @@ describe("html", () => {
   });
 
   it("attaches event handlers", () => {
-    let clicked = false;
+    let clicked = 0;
     const btn = button({
       events: {
         click: () => {
-          clicked = true;
+          clicked += 1;
         },
       },
     });
     btn.dispatchEvent(new Event("click"));
-    expect(clicked).toBe(true);
+    expect(clicked).toBe(1);
   });
 
   it("removes event handlers", () => {
@@ -41,7 +41,7 @@ describe("html", () => {
 
     expect(clicked).toBe(1);
 
-    btn.update({ events: { click: undefined } });
+    btn.update({ events: { click: null } });
     btn.dispatchEvent(new Event("click"));
     expect(clicked).toBe(1);
   });
