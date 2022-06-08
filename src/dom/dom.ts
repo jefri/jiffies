@@ -11,7 +11,7 @@ export type DOMElement = Element &
   ElementCSSInlineStyle;
 
 export type DomAttrs = {
-  class: string;
+  class: string | string[];
   style: Partial<Properties> | string;
   role: "button" | "list" | "listbox";
   events: Partial<{
@@ -113,8 +113,11 @@ export function update(
   }
 
   Object.entries(rest).forEach(([k, v]) => {
-    if (k === "class" && typeof v === "string") {
-      v.split(/\s+/m)
+    if (k === "class") {
+      v = Array.isArray(v)
+        ? v
+        : (typeof v === "string" ? v : `${v}`).split(/\s+/m);
+      (v as string[])
         .filter((s) => s !== "")
         .forEach((c) => {
           if (c.startsWith("!")) {
@@ -123,6 +126,7 @@ export function update(
             element.classList.add(c);
           }
         });
+      return;
     }
 
     const useNamespace =
@@ -150,11 +154,9 @@ export function update(
   });
 
   if (children?.length > 0) {
-    if (children[0] === CLEAR) {
-      element.replaceChildren();
-    } else {
-      element.replaceChildren(...(children as (string | Node)[]));
-    }
+    element.replaceChildren(
+      ...(children[0] === CLEAR ? [] : (children as (string | Node)[]))
+    );
   }
 
   (element as Element).update ??= (attrs, ...children) =>
