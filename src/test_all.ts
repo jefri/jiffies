@@ -13,6 +13,7 @@ describe("Test executor", () => {
 });
 
 import "./context.test.js";
+import "./diff.test.js";
 import "./equal.test.js";
 import "./flags.test.js";
 import "./fs.test.js";
