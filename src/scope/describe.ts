@@ -1,3 +1,4 @@
+import { assert } from "../assert.js";
 import { getLogger } from "../log.js";
 import { TestCase } from "./scope.js";
 
@@ -14,7 +15,7 @@ let totalCases = 0;
 let skippedCases = 0;
 
 function push(title: string) {
-  const next = (cases[0][title] = {});
+  const next = (cases[0][title] = cases[0][title] ?? {}) as TestCase;
   cases.unshift(next);
 }
 
@@ -43,6 +44,7 @@ export function describe(title: string, block: Function) {
 
 export function it(title: string, block: Function) {
   logger.debug(`it(${title})`);
+  assert(cases[0][title] == undefined, `Block already has test ${title}`);
   totalCases += 1;
   cases[0][title] = block;
 }

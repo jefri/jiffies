@@ -7,10 +7,7 @@ import {
 } from "./describe.js";
 import { TestFailed, TestPassed, TestResult, TestSummary } from "./scope.js";
 
-export async function execute(
-  prefix = "",
-  cases = rootCases()
-): Promise<TestResult> {
+export async function execute(cases = rootCases()): Promise<TestResult> {
   const beforeallfn = cases[beforeall] ?? (() => {});
   const beforeeachfn = cases[beforeeach] ?? (() => {});
   const afterallfn = cases[afterall] ?? (() => {});
@@ -42,7 +39,7 @@ export async function execute(
         result[title] = { error: /** @type Error */ e };
       }
     } else if (block) {
-      const run = await execute(title, block);
+      const run = await execute(block);
       result.executed += run.executed;
       result.passed += run.passed;
       result.failed += run.failed;
