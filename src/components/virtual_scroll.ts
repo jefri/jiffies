@@ -30,7 +30,7 @@ export function fillVirtualScrollSettings(
 ): VirtualScrollSettings {
   const {
     minIndex = 0,
-    maxIndex = 1,
+    maxIndex = Number.MAX_SAFE_INTEGER,
     startIndex = 0,
     itemHeight = 20,
     count = maxIndex - minIndex + 1,
@@ -130,8 +130,8 @@ interface VirtualScrollState<T, U extends HTMLElement = HTMLElement> {
 // }
 
 export const VirtualScroll = FC<
-  VirtualScrollProps<unknown, HTMLElement>,
-  VirtualScrollState<unknown, HTMLElement>
+  VirtualScrollProps<any, HTMLElement>,
+  VirtualScrollState<any, HTMLElement>
 >("virtual-scroll", (element, props) => {
   const settings = fillVirtualScrollSettings(props.settings);
   const state = (element[State] = {

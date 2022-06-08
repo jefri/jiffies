@@ -54,9 +54,10 @@ export function FC<P extends object, S extends object = {}>(
         this.#children = children;
       }
       this.#attrs = { ...this.#attrs, ...(attrs as Attrs<P>) };
+
       // Apply updates from the attrs to the dom node itself
-      // @ts-ignore
       update(this, this.#attrs, []);
+
       // Re-run the component function using new element, attrs, and children.
       const replace = [component(this, this.#attrs, this.#children)];
       this.replaceChildren(...replace.flat());
