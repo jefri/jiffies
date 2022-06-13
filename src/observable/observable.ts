@@ -55,11 +55,13 @@ export const Observable = {
     o2: Observable<T2, E>
   ): Observable<[T1, T2], E> {
     let latestSubject = new Subject<[T1, T2], E>();
+    let o1LatestSet = false;
     let o1Latest: T1;
+    let o2LatestSet = false;
     let o2Latest: T2;
 
     function next() {
-      if (o1Latest && o2Latest) {
+      if (o1LatestSet && o2LatestSet) {
         latestSubject.next([o1Latest, o2Latest]);
       }
     }
@@ -77,6 +79,7 @@ export const Observable = {
     let o1sub = o1.subscribe({
       next(t: T1) {
         o1Latest = t;
+        o1LatestSet = true;
         next();
       },
       error,
@@ -86,6 +89,7 @@ export const Observable = {
     let o2sub = o2.subscribe({
       next(t: T2) {
         o2Latest = t;
+        o2LatestSet = true;
         next();
       },
       error,
@@ -93,6 +97,22 @@ export const Observable = {
     });
 
     return latestSubject;
+  },
+};
+
+interface Scheduler {
+  execute(fn: () => (void | Promise<undefined>)[]): void | Promise<undefined>;
+}
+
+export const AsyncScheduler: Scheduler = {
+  execute(fn: () => Promise<undefined>[]): Promise<undefined> {
+    return Promise.all(fn()).then(() => undefined);
+  },
+};
+
+export const SyncScheduler: Scheduler = {
+  execute(fn: () => void[]): void {
+    fn();
   },
 };
 
@@ -111,6 +131,8 @@ export class Subject<T, E = unknown, T2 = T>
     return !this.hot;
   }
 
+  constructor(private readonly scheduler: Scheduler = AsyncScheduler) {}
+
   onWarm(fn: Function) {
     if (this.cold) this.#coldWaiters.add(fn);
   }
@@ -118,16 +140,16 @@ export class Subject<T, E = unknown, T2 = T>
   next(t: T | T2): void | Promise<undefined> {
     if (this.#complete)
       throw new Error("Cannot call next on a completed subject");
-    return Promise.all(
+    return this.scheduler.execute(() =>
       [...this.#subscribers].map((s) => s.next?.(t as T))
-    ).then(() => undefined);
+    );
   }
 
   error(e: E): void | Promise<undefined> {
     if (this.#complete)
       throw new Error("Cannot call error on a completed subject");
-    return Promise.all([...this.#subscribers].map((s) => s.error?.(e))).then(
-      () => undefined
+    return this.scheduler.execute(() =>
+      [...this.#subscribers].map((s) => s.error?.(e))
     );
   }
 
@@ -135,11 +157,11 @@ export class Subject<T, E = unknown, T2 = T>
     if (this.#complete)
       throw new Error("Cannot call complete on a completed subject");
     this.#complete = true;
-    const finished = Promise.all(
+    const finished = this.scheduler.execute(() =>
       [...this.#subscribers].map((s) => s.complete?.())
     );
     this.#subscribers.clear(); // Free subscribers for garbage collection
-    return finished.then(() => undefined);
+    return finished;
   }
 
   subscribe(subscriber: Subscriber<T, E>): Subscription {
@@ -200,8 +222,8 @@ export class Subject<T, E = unknown, T2 = T>
 export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
   #current: T;
 
-  constructor(t: T) {
-    super();
+  constructor(t: T, scheduler?: Scheduler) {
+    super(scheduler);
     this.#current = t;
   }
 
@@ -226,8 +248,8 @@ export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
 export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
   #history: T[] = [];
 
-  constructor(private readonly n: number) {
-    super();
+  constructor(private readonly n: number, scheduler?: Scheduler) {
+    super(scheduler);
   }
 
   next(t: T) {
