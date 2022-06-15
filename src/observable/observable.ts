@@ -123,6 +123,10 @@ export class Subject<T, E = unknown, T2 = T>
   #subscribers = new Set<FullSubscriber<T, E>>();
   #complete = false;
 
+  get $(): Observable<T, E> {
+    return this;
+  }
+
   get hot(): boolean {
     return this.#subscribers.size > 0;
   }
