@@ -26,6 +26,7 @@ export interface Observable<T, E = unknown> {
     o2: Subscriber<T1, E> & Observable<T2, E>
   ): Observable<T2, E>;
   filter(fn: (t: T) => boolean): Observable<T, E>;
+  distinct(fn?: (t1: T, t2: T) => boolean): Observable<T, E>;
   map<U>(fn: (t: T) => U): Observable<U, E>;
   reduce<A>(fn: (acc: A, t: T) => A, init: A): Observable<A, E>;
   replay(n: number): Observable<T, E>;
@@ -206,6 +207,10 @@ export class Subject<T, E = unknown, T2 = T>
     return this.pipe(operator.filter(fn));
   }
 
+  distinct(fn: (t1: T, t2: T) => boolean = Object.is): Observable<T, E> {
+    return this.pipe(operator.distinct(fn));
+  }
+
   map<U>(fn: (t: T) => U): Observable<U, E> {
     return this.pipe(operator.map(fn));
   }
@@ -342,6 +347,32 @@ class FilterOperator<T, E>
   }
 }
 
+class DistinctOperator<T, E>
+  extends Subject<T, E>
+  implements FullSubscriber<T, E>, Observable<T, E>
+{
+  #prior: T | undefined = undefined;
+
+  constructor(
+    private readonly distinctFn: (t1: T, t2: T) => boolean = Object.is
+  ) {
+    super();
+  }
+
+  next(t: T): void | Promise<undefined> {
+    if (this.#prior === undefined) {
+      this.#prior = t;
+      return super.next(t);
+    }
+    const same = this.distinctFn(this.#prior!, t);
+    if (!same) {
+      this.#prior = t;
+      return super.next(t);
+    }
+    return undefined;
+  }
+}
+
 class ReduceOperator<A, T, E> extends BehaviorSubject<A, E, T> {
   constructor(private readonly fn: (acc: A, t: T) => A, init: A) {
     super(init);
@@ -406,6 +437,8 @@ class LastOperator<T, E = Error> extends Subject<T, E> {
 
 export const filter = <T, E>(fn: (t: T) => boolean) =>
   new FilterOperator<T, E>(fn);
+export const distinct = <T, E>(fn?: (t1: T, t2: T) => boolean) =>
+  new DistinctOperator<T, E>(fn ?? Object.is);
 export const first = <T, E>() => new FirstOperator<T, E>();
 export const last = <T, E>() => new LastOperator<T, E>();
 export const map = <T1, T2, E>(fn: (t: T1) => T2) =>
@@ -419,6 +452,7 @@ export const tap = <T, E>(fn: Subscriber<T, E>) => new TapOperator<T, E>(fn);
 
 export const operator = {
   filter,
+  distinct,
   first,
   last,
   map,
