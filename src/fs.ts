@@ -135,7 +135,7 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
     return new Promise((resolve, reject) => {
       let file = this.fs[path];
       if (file === undefined) {
-        reject();
+        reject(new Error(`File Not Found ${path}`));
       } else {
         resolve(file);
       }
