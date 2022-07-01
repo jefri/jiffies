@@ -1,6 +1,6 @@
-import { assert } from "../assert.js";
-import { display } from "../display.js";
-import { equals } from "../equal.js";
+import { assert } from "../assert"
+import { display } from "../display"
+import { equals } from "../equal"
 
 export class Matcher<T> {
   actual: T;

@@ -1,5 +1,5 @@
-import { dashCase } from "../../case.js";
-import { Properties } from "../types/css.js";
+import { dashCase } from "../../case"
+import { Properties } from "../types/css"
 
 export type FStyle =
   | Properties

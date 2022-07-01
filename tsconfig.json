@@ -2,11 +2,12 @@
   "compilerOptions": {
     // Assume browser environment & esm
     "lib": ["es2021", "DOM", "DOM.Iterable"],
-    "target": "es2022",
-    "module": "es2022",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "allowJs": true,
     "checkJs": true,
+    "jsx": "react",
 
     // Checks and strictness
     "strict": true,
@@ -22,8 +23,8 @@
     // "noUnusedParameters": true,
 
     "incremental": true,
-    "outDir": "build",
+    "outDir": "lib/esm",
     "declaration": true
   },
-  "include": ["src/**/*"]
+  "include": ["src"]
 }

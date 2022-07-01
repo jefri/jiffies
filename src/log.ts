@@ -1,4 +1,4 @@
-import { display, Display } from "./display.js";
+import { display, Display } from "./display"
 
 export interface Log {
   (message: Display, data?: {}): void;

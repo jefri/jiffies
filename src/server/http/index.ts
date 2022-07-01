@@ -8,13 +8,13 @@ import {
 } from "http";
 import { AddressInfo } from "net";
 import * as path from "path";
-import { info } from "../../log.js";
-import { findIndex } from "./apps.js";
-import { cssFileServer } from "./css.js";
-import { fileResponse } from "./response.js";
-import { sitemap } from "./sitemap.js";
-import { staticFileServer } from "./static.js";
-import { tsFileServer } from "./typescript.js";
+import { info } from "../../log"
+import { findIndex } from "./apps"
+import { cssFileServer } from "./css"
+import { fileResponse } from "./response"
+import { sitemap } from "./sitemap"
+import { staticFileServer } from "./static"
+import { tsFileServer } from "./typescript"
 
 export interface StaticResponse {
   status: 200 | 404 | 500;

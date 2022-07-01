@@ -1,8 +1,8 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { contentResponse } from "./response.js";
+import { contentResponse } from "./response"
 import { transpile } from "../../transpile.mjs";
-import { MiddlewareFactory } from "./index.js";
+import { MiddlewareFactory } from "./index"
 
 function render(source: string) {
   // Replace `from "@scope` with `from "/@scope`, for browsers

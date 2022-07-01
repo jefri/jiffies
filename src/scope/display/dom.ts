@@ -1,9 +1,9 @@
-import { isHTMLLogger, makeHTMLLogger } from "../../components/logger.js";
-import { DOMElement } from "../../dom/dom.js";
-import { DEFAULT_LOGGER, LEVEL } from "../../log.js";
-import { getTotalCases } from "../describe.js";
-import { flattenResults } from "../execute.js";
-import { TestResult } from "../scope.js";
+import { isHTMLLogger, makeHTMLLogger } from "../../components/logger"
+import { DOMElement } from "../../dom/dom"
+import { DEFAULT_LOGGER, LEVEL } from "../../log"
+import { getTotalCases } from "../describe"
+import { flattenResults } from "../execute"
+import { TestResult } from "../scope"
 
 export function displayStatistics(
   results: TestResult,

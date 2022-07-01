@@ -1,4 +1,4 @@
-import { Width, Widths } from "./constants.js";
+import { Width, Widths } from "./constants"
 
 export function width(amount: Width, block?: "inline") {
   if (amount === undefined && Widths[block as Width] !== undefined) {

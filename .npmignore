@@ -1,4 +1,4 @@
 *
-!build/**/*
-build/tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+!lib/**/*
 !src/**/*

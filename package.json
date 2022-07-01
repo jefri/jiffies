@@ -4,15 +4,11 @@
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
-  "exports": {
-    "./*": "./build/*"
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./build/*"
-      ]
-    }
+  "main": "./lib/cjs/",
+  "module": "./lib/esm/",
+  "types": "./lib/esm/index.d.ts",
+  "directories": {
+    "lib": "./lib/cjs"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -22,10 +18,12 @@
     "start": "npm run node ./src/server/main.js",
     "test": "npm run node ./src/test.mjs",
     "ci": "node --experimental-loader ./src/loader.mjs ./src/test.mjs --mode=junit",
-    "lint": "npx prettier . --check",
-    "check": "npx tsc --noEmit",
-    "format": "npx prettier . --write",
-    "build": "npx tsc",
+    "lint": "prettier . --check",
+    "check": "tsc --noEmit",
+    "format": "prettier . --write",
+    "build": "tsc",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir lib/cjs",
     "watch": "npx tsc --watch",
     "all": "npm run lint && npm run test && npm run build"
   },

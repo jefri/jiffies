@@ -2,5 +2,6 @@ bower_components/
 node_modules/
 build/
 dist/
+lib/
 .parcel-cache
 jefri-jiffies-*.tgz

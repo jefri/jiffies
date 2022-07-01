@@ -23,10 +23,10 @@
         import("./components/test.js"),
       ]);
 
-      import { execute } from "./scope/execute.js";
-      import { displayStatistics } from "./scope/display/dom.js";
-      import { onConsole } from "./scope/display/console.js";
-      import { asXML } from "./scope/display/junit.js";
+      import { execute } from "./scope/execute"
+      import { displayStatistics } from "./scope/display/dom"
+      import { onConsole } from "./scope/display/console"
+      import { asXML } from "./scope/display/junit"
 
       function write(id, value) {
         const start = `--- START_${id.toUpperCase()} ---`;
@@ -46,8 +46,8 @@
       })();
     </script>
     <script type="module">
-      import { nav, ul, li, strong } from "./dom/html.js";
-      import { link } from "./dom/router/link.js";
+      import { nav, ul, li, strong } from "./dom/html"
+      import { link } from "./dom/router/link"
 
       const getUrls = async () => {
         const sitemap = await fetch("/sitemap.json");

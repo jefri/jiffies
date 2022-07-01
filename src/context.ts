@@ -1,4 +1,4 @@
-import { Ok, Err, isResult, Result } from "./result.js";
+import { Ok, Err, isResult, Result } from "./result"
 
 export const Enter = Symbol("Context Enter");
 export const Exit = Symbol("Context Exit");

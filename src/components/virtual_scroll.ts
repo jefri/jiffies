@@ -1,6 +1,6 @@
-import { debounce } from "../debounce.js";
-import { FC, State } from "../dom/fc.js";
-import { div } from "../dom/html.js";
+import { debounce } from "../debounce"
+import { FC, State } from "../dom/fc"
+import { div } from "../dom/html"
 
 export interface VirtualScrollSettings {
   minIndex: number;

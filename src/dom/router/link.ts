@@ -1,5 +1,5 @@
-import { a } from "../html.js";
-import { Router } from "./router.js";
+import { a } from "../html"
+import { Router } from "./router"
 
 export interface Link {
   href: string;

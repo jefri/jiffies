@@ -1,5 +1,5 @@
-import { range } from "./range.js";
-import { isSome, None, Option, Some } from "./result.js";
+import { range } from "./range"
+import { isSome, None, Option, Some } from "./result"
 
 export const DiffA = Symbol("A");
 export const DiffB = Symbol("B");

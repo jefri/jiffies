@@ -1,12 +1,12 @@
-import { Attrs, DenormChildren } from "../dom.js";
-import { form, input, label, option, select } from "../html.js";
+import { Attrs, DenormChildren } from "../dom"
+import { form, input, label, option, select } from "../html"
 import {
   FormAttributes,
   InputAttributes,
   LabelAttributes,
   OptionAttributes,
   SelectAttributes,
-} from "../types/html.js";
+} from "../types/html"
 
 export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
   if (attrs.events?.submit) {

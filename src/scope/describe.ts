@@ -1,6 +1,7 @@
-import { assert } from "../assert.js";
-import { getLogger } from "../log.js";
-import { TestCase } from "./scope.js";
+import { assert } from "../assert"
+import { getLogger } from "../log"
+import { TestCase } from "./scope"
+import * as state from './state';
 
 export const beforeall = Symbol("beforeAll");
 export const beforeeach = Symbol("beforeEach");
@@ -75,9 +76,5 @@ export function cleanState<State extends {}>(
   init: () => State,
   runner: (action: () => void) => void = beforeEach
 ): State {
-  const state = {};
-  runner(() => {
-    Object.assign(state, init());
-  });
-  return state as State;
+  return state.cleanState(init, runner);
 }

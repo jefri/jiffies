@@ -1,5 +1,5 @@
-export { expect } from "./expect.js";
-export { fix } from "./fix.js";
+export { expect } from "./expect";
+export { fix } from "./fix";
 export {
   afterAll,
   afterEach,
@@ -8,4 +8,4 @@ export {
   cleanState,
   describe,
   it,
-} from "./describe.js";
+} from "./describe";

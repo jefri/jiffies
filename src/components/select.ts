@@ -1,6 +1,6 @@
-import { EventHandler } from "../dom/dom.js";
-import { FC } from "../dom/fc.js";
-import { option, select } from "../dom/html.js";
+import { EventHandler } from "../dom/dom"
+import { FC } from "../dom/fc"
+import { option, select } from "../dom/html"
 
 export const Select = FC<{
   name: string;

@@ -1,10 +1,10 @@
-import { State } from "../dom/fc.js";
-import { div } from "../dom/html.js";
-import { describe, it, expect } from "../scope/index.js";
+import { State } from "../dom/fc"
+import { div } from "../dom/html"
+import { describe, it, expect } from "../scope/index"
 import VirtualScroll, {
   arrayAdapter,
   VirtualScrollProps,
-} from "./virtual_scroll.js";
+} from "./virtual_scroll"
 
 describe("VirtualScroll", () => {
   it("tracks scroll position", () => {
