@@ -1,5 +1,5 @@
-import { DOMElement } from "../dom";
-import { Link } from "./link";
+import { DOMElement } from "../dom.js";
+import { Link } from "./link.js";
 
 export interface Router {
   current?: string;

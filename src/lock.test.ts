@@ -1,5 +1,5 @@
-import { describe, it, expect } from "./scope/index"
-import { lock } from "./lock"
+import { describe, it, expect } from "./scope/index.js";
+import { lock } from "./lock.js";
 
 describe("Lock", () => {
   it("prevents reentry", function () {

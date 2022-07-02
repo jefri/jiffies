@@ -1,7 +1,7 @@
-import { Context, Enter, Exit, using } from "./context"
-import { Err, isErr, isOk, Ok, unwrap } from "./result"
-import { describe, it } from "./scope/describe"
-import { expect } from "./scope/expect"
+import { Context, Enter, Exit, using } from "./context.js";
+import { Err, isErr, isOk, Ok, unwrap } from "./result.js";
+import { describe, it } from "./scope/describe.js";
+import { expect } from "./scope/expect.js";
 
 describe("Context", () => {
   it("performs an operation using a context", () => {

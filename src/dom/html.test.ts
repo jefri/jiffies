@@ -1,6 +1,6 @@
-import { describe, it } from "../scope/describe"
-import { expect } from "../scope/expect"
-import { table, tbody, td, th, thead, tr, button } from "./html"
+import { describe, it } from "../scope/describe.js"
+import { expect } from "../scope/expect.js"
+import { table, tbody, td, th, thead, tr, button } from "./html.js"
 
 describe("html", () => {
   it("creates HTML Elements", () => {

@@ -1,5 +1,5 @@
-import { display } from "../display"
-import { Observable } from "./observable"
+import { display } from "../display.js"
+import { Observable } from "./observable.js"
 
 export interface Next<T> {
   value: T;

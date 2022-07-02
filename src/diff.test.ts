@@ -1,6 +1,6 @@
-import { diff } from "./diff"
-import { describe, it } from "./scope/describe"
-import { expect } from "./scope/expect"
+import { diff } from "./diff.js";
+import { describe, it } from "./scope/describe.js";
+import { expect } from "./scope/expect.js";
 
 describe("diff", () => {
   it("diffs primitives", () => {

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { parse } from "./flags"
-import { execute } from "./scope/execute"
-import { asXML } from "./scope/display/junit"
-import { onConsole } from "./scope/display/console"
+import { parse } from "./flags.js";
+import { execute } from "./scope/execute.js";
+import { asXML } from "./scope/display/junit.js";
+import { onConsole } from "./scope/display/console.js";
 
 async function main() {
   await import("./test_all.js");

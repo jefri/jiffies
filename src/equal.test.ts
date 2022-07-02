@@ -1,5 +1,5 @@
-import { describe, it, expect } from "./scope/index"
-import { equalArrays, equals, matchArrays } from "./equal"
+import { describe, it, expect } from "./scope/index.js";
+import { equalArrays, equals, matchArrays } from "./equal.js";
 
 describe("Equality", () => {
   it("compares objects", () => {

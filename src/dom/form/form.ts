@@ -1,5 +1,5 @@
-import { Attrs, DenormChildren } from "../dom"
-import { form, input, label, option, select } from "../html"
+import { Attrs, DenormChildren } from "../dom.js"
+import { form, input, label, option, select } from "../html.js"
 import {
   FormAttributes,
   InputAttributes,

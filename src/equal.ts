@@ -36,7 +36,7 @@ export function equals<A>(a: A | A[], b: A | A[], partial = false): boolean {
         return matchObjects(a, b, partial);
       }
     case "function":
-      return a.name == (b as unknown as Function).name;
+      return a.name === (b as unknown as Function).name;
     default:
       return Object.is(a, b);
   }

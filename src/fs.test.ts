@@ -1,5 +1,5 @@
-import { FileSystem, ObjectFileSystemAdapter } from "./fs"
-import { describe, it, expect } from "./scope/index"
+import { FileSystem, ObjectFileSystemAdapter } from "./fs.js";
+import { describe, it, expect } from "./scope/index.js";
 
 describe("FileSystem", () => {
   describe("Writing", () => {

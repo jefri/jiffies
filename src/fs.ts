@@ -83,7 +83,7 @@ export class FileSystem implements FileSystemAdapter {
   }
 
   private p(path: PathLike): string {
-    return path[0] == "/" ? path : join(this.cwd(), path);
+    return path[0] === "/" ? path : join(this.cwd(), path);
   }
 }
 
@@ -115,7 +115,7 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
           const end = filename.indexOf("/", path.length + 1);
           const basename = filename.substring(
             path.length,
-            end == -1 ? undefined : end
+            end === -1 ? undefined : end
           );
           dir.push(basename);
         }
@@ -169,7 +169,7 @@ export interface Tree {
 
 export async function reset(fs: FileSystem, tree: Tree): Promise<void> {
   for (const [path, file] of Object.entries(tree)) {
-    if (typeof file == "string") {
+    if (typeof file === "string") {
       await fs.writeFile(path, file);
     } else {
       fs.cd(path);

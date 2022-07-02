@@ -1,6 +1,6 @@
-import { xml } from "../../dom/xml"
-import { FlatResult, flattenResults } from "../execute"
-import { TestResult } from "../scope"
+import { xml } from "../../dom/xml.js"
+import { FlatResult, flattenResults } from "../execute.js"
+import { TestResult } from "../scope.js"
 
 const cases = (results: TestResult) =>
   Object.entries(results).filter(

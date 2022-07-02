@@ -1,7 +1,7 @@
-import { assert } from "../assert"
-import { getLogger } from "../log"
-import { TestCase } from "./scope"
-import * as state from './state';
+import { assert } from "../assert.js";
+import { getLogger } from "../log.js";
+import { TestCase } from "./scope.js";
+import * as state from "./state.js";
 
 export const beforeall = Symbol("beforeAll");
 export const beforeeach = Symbol("beforeEach");

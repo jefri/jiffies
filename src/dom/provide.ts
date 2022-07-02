@@ -1,4 +1,4 @@
-import { Option } from "../result"
+import { Option } from "../result.js"
 
 let registry: Record<string, unknown> = {};
 

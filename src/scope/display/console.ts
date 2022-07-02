@@ -1,7 +1,7 @@
-import { getLogger } from "../../log"
-import { getTotalCases } from "../describe"
-import { flattenResults } from "../execute"
-import { TestResult } from "../scope"
+import { getLogger } from "../../log.js"
+import { getTotalCases } from "../describe.js"
+import { flattenResults } from "../execute.js"
+import { TestResult } from "../scope.js"
 
 const logger = getLogger("Scope Test Runner");
 

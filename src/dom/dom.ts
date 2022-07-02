@@ -1,4 +1,4 @@
-import { Properties } from "./types/css"
+import { Properties } from "./types/css.js"
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");

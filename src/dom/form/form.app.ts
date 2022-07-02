@@ -1,5 +1,5 @@
-import { article, button, div, main, small } from "../html"
-import { Form, Input } from "./form"
+import { article, button, div, main, small } from "../html.js"
+import { Form, Input } from "./form.js"
 
 export const App = () =>
   main(

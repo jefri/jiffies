@@ -8,7 +8,7 @@ export type Err<E = Error> = {
 export type Ok<T> = { ok: T; map: <U>(fn: (t: T) => Result<U>) => Result<U> };
 export type Result<T, E = Error> = Ok<T> | Err<E>;
 
-export const isNone = <T>(s: Option<T>): s is None => s == null;
+export const isNone = <T>(s: Option<T>): s is None => s === null;
 export const isSome = <T>(s: Option<T>): s is Some<T> => s != null;
 
 export function None<T = unknown>(_?: T): Option<T> {

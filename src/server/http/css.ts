@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { contentResponse } from "./response"
-import { MiddlewareFactory } from "./index"
+import { contentResponse } from "./response.js";
+import { MiddlewareFactory } from "./index.js";
 // @ts-ignore
 import sass from "sass";
 const { compileStringAsync } = sass;
