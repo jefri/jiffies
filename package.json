@@ -1,6 +1,6 @@
 {
   "name": "@davidsouther/jiffies",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
@@ -21,9 +21,10 @@
     "lint": "prettier . --check",
     "check": "tsc --noEmit",
     "format": "prettier . --write",
-    "build": "tsc",
+    "build": "npm run build:esm & npm run build:cjs & npm run build:css",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir lib/cjs",
+    "build:css": "sass ./src/pico/pico.scss ./build/pico.css",
     "watch": "npx tsc --watch",
     "all": "npm run lint && npm run test && npm run build"
   },
