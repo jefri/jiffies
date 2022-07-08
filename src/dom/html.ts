@@ -1,4 +1,4 @@
-import { DenormAttrs, DenormChildren, up } from "./dom.js";
+import { DenormAttrs, DenormChildren, up } from "./dom.js"
 
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>

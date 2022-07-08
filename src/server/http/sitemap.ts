@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { info } from "../../log.js";
-import { MiddlewareFactory, StaticMiddleware } from "./index.js";
+import { MiddlewareFactory } from "./index.js";
 import { contentResponse } from "./response.js";
 
 const findSiteMap = async (root: string, prefix = root) => {

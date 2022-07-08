@@ -22,7 +22,7 @@ export const parse = (parseArgs: string[]) => {
   };
 
   while (hasNext()) {
-    if (peek().substr(0, 2) == "--") {
+    if (peek().substr(0, 2) === "--") {
       parseLong(advance().substr(2));
     } else {
       args.push(advance());

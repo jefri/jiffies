@@ -35,7 +35,7 @@ export function assertString(
   n: unknown,
   message: AssertMessage = () => `Assertion failed: ${n} is not a string`
 ): string {
-  assert(typeof n == "string", message);
+  assert(typeof n === "string", message);
   return n as string;
 }
 

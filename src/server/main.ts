@@ -9,5 +9,12 @@ const FLAGS = parse(process.argv);
 import { makeServer } from "./http/index.js";
 import * as path from "node:path";
 
-const server = await makeServer({ root: path.join(process.cwd(), "src") });
-server.listen(FLAGS.asNumber("port", 8080), FLAGS.asString("host", "0.0.0.0"));
+async function main() {
+  const server = await makeServer({ root: path.join(process.cwd(), "src") });
+  server.listen(
+    FLAGS.asNumber("port", 8080),
+    FLAGS.asString("host", "0.0.0.0")
+  );
+}
+
+main();

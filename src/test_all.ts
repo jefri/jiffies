@@ -21,3 +21,13 @@ import "./generator.test.js";
 import "./lock.test.js";
 import "./result.test.js";
 import "./observable/observable.test.js";
+
+import * as components from "./components/test.js";
+import * as dom from "./dom/test.js";
+
+if (process?.env.CI?.toLowerCase() !== "true") {
+  (async () => {
+    await components.loadTests();
+    await dom.loadTests();
+  })();
+}

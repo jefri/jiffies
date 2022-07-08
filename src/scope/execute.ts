@@ -4,8 +4,8 @@ import {
   beforeall,
   beforeeach,
   rootCases,
-} from "./describe.js";
-import { TestFailed, TestPassed, TestResult, TestSummary } from "./scope.js";
+} from "./describe.js"
+import { TestFailed, TestPassed, TestResult, TestSummary } from "./scope.js"
 
 export async function execute(cases = rootCases()): Promise<TestResult> {
   const beforeallfn = cases[beforeall] ?? (() => {});

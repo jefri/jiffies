@@ -1,4 +1,4 @@
-import { Properties } from "./css.js";
+import { Properties } from "./css"
 
 export interface AriaAttributes {
   [_: `aria-${string}`]: string;

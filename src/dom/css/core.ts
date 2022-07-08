@@ -1,4 +1,4 @@
-import { Side, Sides, Size, Sizes } from "./constants.js";
+import { Side, Sides, Size, Sizes } from "./constants.js"
 
 export function isSide(v: string): v is Side {
   return Sides[v as keyof typeof Sides] !== undefined;

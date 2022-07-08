@@ -9,7 +9,7 @@ $enable-class-container: false !default;
 
 // Enable a centered viewport for <header>, <main>, <footer> inside <body>
 // Options are "all" to center all, "main" to only center main, and "none" to treat all as fluid.
-$enable-viewport: "main" !default;
+$enable-viewport: "none" !default;
 
 // Enable responsive spacings for <header>, <main>, <footer>, <section>, <article>
 // Fixed spacings if disabled

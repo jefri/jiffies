@@ -21,8 +21,8 @@ export function using<T, E extends Error, C extends Context>(
   operation?: Operation<T, E, C>,
   normalizeError: (e: Error | unknown | any) => Err<E> = (e) => Err(e)
 ): Result<T, E> {
-  if (typeof context == "function") {
-    if (context.length == 1) {
+  if (typeof context === "function") {
+    if (context.length === 1) {
       operation = context as Operation<T, E, C>;
       context = {} as C;
     } else {
@@ -47,7 +47,7 @@ export async function asyncUsing<T, E extends Error, C extends Context>(
   operation: AsyncOperation<T, E, C>,
   normalizeError: (e: Error | unknown | any) => Err<E> = (e: E) => Err(e)
 ): Promise<Result<T, E>> {
-  context = typeof context == "function" ? await context() : context;
+  context = typeof context === "function" ? await context() : context;
   let result: Result<T, E>;
   try {
     context[Enter]();

@@ -23,9 +23,9 @@ function doDiff<T>(va: T, vb: T, k: DiffIndex): Option<DiffList | DiffEntry> {
     // @ts-ignore
     return diffArray(va, vb, k);
   }
-  if (typeof va == "object") {
+  if (typeof va === "object") {
     const d = diffObject(va, vb, k);
-    if (d.children.length == 0) {
+    if (d.children.length === 0) {
       return None();
     } else {
       return Some(d);

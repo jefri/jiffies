@@ -1,4 +1,4 @@
-import { DEFAULT_LOGGER, Logger } from "../log.js";
+import { DEFAULT_LOGGER, Logger } from "../log.js"
 
 export interface FullSubscriber<T, E> {
   // (t: T): void | Promise<undefined>;
