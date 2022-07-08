@@ -8,4 +8,4 @@ export {
   cleanState,
   describe,
   it,
-} from "./describe";
+} from "./describe.js";
