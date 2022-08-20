@@ -1,8 +1,17 @@
 // Treat localstorage as a file system
 export type PathLike = string;
+
+// Compatible with Node's fs.Dirent
 export interface Stats {
   isDirectory(): boolean;
   isFile(): boolean;
+  name: string;
+}
+
+export function basename(filename: PathLike) {
+  const end = filename.lastIndexOf("/");
+  const basename = filename.substring(end === -1 ? 0 : end);
+  return basename;
 }
 
 function join(...paths: string[]): string {
@@ -27,6 +36,7 @@ function join(...paths: string[]): string {
 interface FileSystemAdapter {
   stat(path: PathLike): Promise<Stats>;
   readdir(path: PathLike): Promise<string[]>;
+  scandir(path: PathLike): Promise<Stats[]>;
   copyFile(from: PathLike, to: PathLike): Promise<void>;
   readFile(path: PathLike): Promise<string>;
   writeFile(path: PathLike, contents: string): Promise<void>;
@@ -37,7 +47,7 @@ export class FileSystem implements FileSystemAdapter {
   protected wd = "/";
   protected stack: string[] = [];
 
-  constructor(protected adapter = new ObjectFileSystemAdapter()) {}
+  constructor(protected adapter = new RecordFileSystemAdapter()) {}
 
   cwd(): string {
     return this.wd;
@@ -62,8 +72,12 @@ export class FileSystem implements FileSystemAdapter {
     return this.adapter.stat(join(this.cwd(), path));
   }
 
+  scandir(path: PathLike): Promise<Stats[]> {
+    return this.adapter.scandir(this.cwd());
+  }
+
   readdir(path: PathLike): Promise<string[]> {
-    return this.adapter.readdir(this.p(path) + "/");
+    return this.adapter.readdir(path);
   }
 
   copyFile(from: PathLike, to: PathLike): Promise<void> {
@@ -87,13 +101,14 @@ export class FileSystem implements FileSystemAdapter {
   }
 }
 
-export class ObjectFileSystemAdapter implements FileSystemAdapter {
+export class RecordFileSystemAdapter implements FileSystemAdapter {
   constructor(private fs: Record<string, string> = {}) {}
 
   stat(path: PathLike): Promise<Stats> {
     return new Promise((resolve, reject) => {
       if (this.fs[path] != null) {
         resolve({
+          name: basename(path),
           isDirectory() {
             return false;
           },
@@ -107,9 +122,25 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
     });
   }
 
+  async scandir(path: PathLike): Promise<Stats[]> {
+    return (await this.readdir(path)).map<Stats>((name) => {
+      let isFile = this.fs[join(path, name)] !== undefined;
+      return {
+        name,
+        isDirectory() {
+          return !isFile;
+        },
+        isFile() {
+          return isFile;
+        },
+      };
+    });
+  }
+
   readdir(path: PathLike): Promise<string[]> {
+    if (!path.endsWith("/")) path += "/";
     return new Promise((resolve) => {
-      let dir: string[] = [];
+      let dir = new Set<string>();
       for (const filename of Object.keys(this.fs)) {
         if (filename.startsWith(path)) {
           const end = filename.indexOf("/", path.length + 1);
@@ -117,10 +148,10 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
             path.length,
             end === -1 ? undefined : end
           );
-          dir.push(basename);
+          dir.add(basename);
         }
       }
-      return resolve(dir);
+      return resolve([...dir].sort());
     });
   }
 
@@ -158,11 +189,13 @@ export class ObjectFileSystemAdapter implements FileSystemAdapter {
   }
 }
 
-export class LocalStorageFileSystemAdapter extends ObjectFileSystemAdapter {
+export class LocalStorageFileSystemAdapter extends RecordFileSystemAdapter {
   constructor() {
     super(window.localStorage);
   }
 }
+
+export class ObjectFileSystemAdapter extends RecordFileSystemAdapter {}
 
 export interface Tree {
   [k: string]: string | Tree;
