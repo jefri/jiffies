@@ -1,0 +1,30 @@
+body > header:has(> nav),
+body > #root > header:has(> nav) {
+  padding: 0;
+}
+
+nav,
+nav > ul {
+  display: flex;
+}
+
+nav {
+  justify-content: space-between;
+}
+
+nav > ul {
+  align-items: center;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav > ul li {
+  display: inline-block;
+  margin: 0;
+  padding: var(--spacing-nav-item-vertical) var(--spacing-nav-item-horizontal);
+}
+
+nav > ul li a {
+  padding: var(--spacing-nav-link-vertical) var(--spacing-nav-link-horizontal);
+}

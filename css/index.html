@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jiffies CSS</title>
+    <meta name="description" content="Jiffies CSS Test Page" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <header class="fluid">
+      <nav>
+        <ul>
+          <li>
+            <a href="https://github.com/jefri/jiffies"><img src="" /></a>
+          </li>
+          <li><a href="https://github.com/jefri/jiffies">Jiffies</a></li>
+        </ul>
+        <ul>
+          <li>
+            <a href="https://csstools.github.io/sanitize.css/">sanitize.css</a>
+          </li>
+          <li><a href="https://picocss.com">Pico CSS</a></li>
+          <li>
+            <a href="https://taniarascia.github.io/primitive/">Primitive</a>
+          </li>
+          <li><a href="http://getskeleton.com/">Skeleton</a></li>
+        </ul>
+      </nav>
+    </header>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="#top">Top</a></li>
+          <li><a href="#bottom">Bottom</a></li>
+        </ul>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#formatting">Formatting</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <!--
+Containers body (> #root) > { main, header, footer, aside }(.fluid)
+Overflow scrolling figure .scroll-{x,y}
+    -->
+      <article id="overview">
+        <header>
+          <h1>Headings</h1>
+          <p>Headings are built using &lt;h1&gt; etc tags.</p>
+        </header>
+        <main>
+          <hgroup>
+            <h1>Heading 1</h1>
+            <h2>Heading 2</h2>
+            <h3>Heading 3</h3>
+            <h4>Heading 4</h4>
+            <h5>Heading 5</h5>
+            <h6>Heading 6</h6>
+            <h3>hgroup :last-child</h3>
+          </hgroup>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim id est laborum
+          </p>
+        </main>
+      </article>
+      <!--
+Block Typography html, hgroup, h*, p, ul, ol, blockquote, textarea
+Inline Typography a[.secondary,.contrast] abbr strong b em i cite del ins kbd mark s small sub sub u
+    -->
+      <article id="formatting">
+        <header>
+          <h1>Formatting</h1>
+          <p>
+            Formatting uses the appropriate <code>&lt;b&gt;</code> etc inline
+            text tags.
+          </p>
+        </header>
+
+        <main>
+          <p>
+            This sentence is <b>bold</b>. If you like semantics, you might go
+            with <strong>strong</strong> or <em>emphasized</em> text. If not,
+            <i>italic</i> is still around. <small>Small</small> text is for fine
+            print. Your copy can also be <sub>subscripted</sub> and
+            <sup>superscripted</sup>, <ins>inserted</ins>, <del>deleted</del>,
+            or <mark>highlighted</mark>. You would use a
+            <a href="#!">hyperlink</a> to go to a new page.
+          </p>
+          <p>
+            If you like to write about there are plenty of semantic tags for
+            you. There's the generic
+            <code>code</code>, as well as <kbd>keyboard input</kbd>,
+            <samp>computer output</samp>, and <var>variables</var>.
+          </p>
+          <p>
+            You might have need of a <cite>citation</cite>,
+            <q>short quotation</q>, <abbr title="abbreviation">abbr</abbr>, or
+            <dfn>definition</dfn>. It might be <time>10:00pm</time>.
+          </p>
+          <address>
+            <p>
+              123 Fake Street<br />
+              Springfield, USA
+            </p>
+          </address>
+
+          <h2>Blockquote</h2>
+
+          <blockquote>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam
+            molestiae et assumenda molestias alias ut saepe doloribus, porro,
+            deleniti neque, harum minus, commodi laudantium quod excepturi nam
+            corrupti odit provident.
+            <cite>- Blockquote Citation</cite>
+          </blockquote>
+
+          <h2>Preformatted Text</h2>
+          <pre>
+class Voila {
+public:
+  // Voila
+  static const string VOILA = "Voila";
+}</pre
+          >
+          <h2>Horizontal Line</h2>
+          <hr />
+        </main>
+      </article>
+
+      <article>
+        <header>
+          <h1>Headings</h1>
+        </header>
+
+        <main>
+          <h1>First Heading h1</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ea
+            delectus cupiditate minima, magni possimus commodi, eveniet? Rem,
+            adipisci architecto pariatur libero aliquid culpa sunt accusantium.
+            Ipsa error aliquid et! Animi.
+          </p>
+          <h2>Second Heading h2</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia
+            molestias ullam quasi est a nemo, accusamus voluptatum autem. Eius
+            explicabo est assumenda voluptatem id, hic maxime mollitia facere
+            debitis quos.
+          </p>
+          <h3>Third Heading h3</h3>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nemo
+            deleniti, repudiandae rerum nam laborum eligendi aperiam. Autem id,
+            ad necessitatibus accusantium, facilis, quae ullam est, voluptates
+            debitis fugiat quos inventore!
+          </p>
+          <h4>Fourth Heading h4</h4>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Neque cum
+            eum eligendi voluptatum quasi nisi doloremque ipsam unde, laboriosam
+            nihil voluptatem consequatur quam non similique vero ratione animi
+            sit veritatis.
+          </p>
+          <h5>Fifth Heading h5</h5>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odit
+            voluptatem necessitatibus eos iusto nam deserunt, dicta possimus
+            error qui reiciendis, aut dolore magnam eligendi maiores expedita
+            commodi perferendis non blanditiis.
+          </p>
+        </main>
+      </article>
+
+      <article>
+        <header>
+          <h1>Lists</h1>
+        </header>
+        <main>
+          <h2>Unordered list</h2>
+
+          <ul>
+            <li>
+              List item one
+              <ul>
+                <li>Nested list item</li>
+              </ul>
+            </li>
+            <li>List item two</li>
+            <li>List item three</li>
+          </ul>
+
+          <h2>Ordered list</h2>
+
+          <ol>
+            <li>
+              List item one
+              <ol>
+                <li>Nested list item</li>
+              </ol>
+            </li>
+            <li>List item two</li>
+            <li>List item three</li>
+          </ol>
+          <h2>Definition List</h2>
+
+      <!--
+Property Sheet dl, dt, dd
+    -->
+          <dl>
+            <dt>Definition Title One</dt>
+            <dd>First definition description</dd>
+            <dt>Definition Title Two</dt>
+            <dd>Second definition description</dd>
+          </dl>
+        </main>
+      </article>
+
+      <!--
+Table table thead tbody tfoot tr th td
+    -->
+      <article>
+        <h1>Tables</h1>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Head 1</th>
+              <th>Head 2</th>
+              <th>Head 3</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>Footer 1</th>
+              <th>Footer 2</th>
+              <th>Footer 3</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr>
+              <td>Description 1</td>
+              <td>Description 2</td>
+              <td>Description 3</td>
+            </tr>
+            <tr>
+              <td>Description 1</td>
+              <td>Description 2</td>
+              <td>Description 3</td>
+            </tr>
+            <tr>
+              <td>Description 1</td>
+              <td>Description 2</td>
+              <td>Description 3</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <!--
+Modal dialog
+    -->
+      <!--
+Accordion details, summary
+    -->
+      <article>
+        <header>
+          <h1>Accordian</h1>
+          <p>
+            Styling for <code>&lt;details&gt;</code> and
+            <code>&lt;summary&gt;</code>.
+          </p>
+        </header>
+        <main>
+          <details>
+            <summary>Accordion 1</summary>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Pellentesque urna diam, tincidunt nec porta sed, auctor id velit.
+              Etiam venenatis nisl ut orci consequat, vitae tempus quam commodo.
+              Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla convallis
+              lectus rutrum quam hendrerit, in facilisis elit sollicitudin.
+              Mauris pulvinar pulvinar mi, dictum tristique elit auctor quis.
+              Maecenas ac ipsum ultrices, porta turpis sit amet, congue turpis.
+            </p>
+          </details>
+          <details open="">
+            <summary>Accordion 2</summary>
+            <ul>
+              <li>Vestibulum id elit quis massa interdum sodales.</li>
+              <li>Nunc quis eros vel odio pretium tincidunt nec quis neque.</li>
+              <li>Quisque sed eros non eros ornare elementum.</li>
+              <li>Cras sed libero aliquet, porta dolor quis, dapibus ipsum.</li>
+            </ul>
+          </details>
+        </main>
+      </article>
+
+      <!-- Tabs -->
+      <article>
+        <header>
+          <h1 id="tab-sample-header">Tabs</h1>
+          <p>Styling for <code>&lt;section role="tablist"&gt;</code>.</p>
+        </header>
+        <main>
+          <section role="tablist" aria-labelledby="tab-sample-header">
+            <div role="tab" id="tab-1" aria-controls="tabpanel-1">
+              <label>Tab 1 <input type="radio" name="tablist-1" aria-controls="tabpanel-1" /></label>
+            </div>
+            <div role="tabpanel" id="tabpanel-1" aria-labelledby="tab-1">
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Pellentesque urna diam, tincidunt nec porta sed, auctor id
+                velit. Etiam venenatis nisl ut orci consequat, vitae tempus quam
+                commodo. Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla
+                convallis lectus rutrum quam hendrerit, in facilisis elit
+                sollicitudin. Mauris pulvinar pulvinar mi, dictum tristique elit
+                auctor quis. Maecenas ac ipsum ultrices, porta turpis sit amet,
+                congue turpis.
+              </p>
+            </div>
+            <div role="tab" id="tab-2" aria-controls="tabpanel-2">
+              <label>Tab 2 <input type="radio" name="tablist-1" checked="" /></label>
+            </div>
+            <div role="tabpanel" id="tabpanel-2" aria-labelledby="tab-2">
+              <ul>
+                <li>Vestibulum id elit quis massa interdum sodales.</li>
+                <li>
+                  Nunc quis eros vel odio pretium tincidunt nec quis neque.
+                </li>
+                <li>Quisque sed eros non eros ornare elementum.</li>
+                <li>
+                  Cras sed libero aliquet, porta dolor quis, dapibus ipsum.
+                </li>
+              </ul>
+            </div>
+          </section>
+        </main>
+      </article>
+
+      <!-- Button button a[role=button] input[type={button,submit,reset] -->
+      <article id="buttons">
+        <header>
+          <h2>Buttons</h2>
+          <p>
+            Button elements, links with <code>role="button"</code>, and input
+            elements should all render exactly the same.
+          </p>
+        </header>
+        <main>
+          <section>
+            <button>Button</button>
+            <input type="submit" value="Submit" />
+            <input type="button" value="Input" />
+            <a role="button">Link</a>
+          </section>
+
+          <section>
+            <h3>Secondary Buttons</h3>
+            <p>
+              Adding a <code>secondary</code> class will display a secondary
+              color.
+            </p>
+            <button class="secondary">Button</button>
+            <input type="submit" value="Submit" class="secondary" />
+            <input type="button" value="Input" class="secondary" />
+            <input type="reset" value="Reset" />
+            <a role="button" class="secondary">Link</a>
+          </section>
+
+          <section>
+            <h3>contrast</h3>
+            <p>
+              Adding a <code>contrast</code> class will create ghost/outline
+              buttons.
+            </p>
+            <button class="contrast">Button</button>
+            <input type="submit" value="Submit" class="contrast" />
+            <input type="button" value="Input" class="contrast" />
+            <a role="button" class="contrast">Link</a>
+          </section>
+
+          <section>
+            <h3>Outline</h3>
+            <p>
+              Adding an <code>outline</code> class will create outlined buttons
+              with no background.
+            </p>
+            <button class="outline">Button</button>
+            <input type="reset" value="Reset" class="outline" />
+            <input type="submit" value="Submit" class="contrast outline" />
+          </section>
+        </main>
+      </article>
+
+      <!--
+Form label input select textarea label fieldset legend
+[aria-invalid] [disabled] [readonly]
+Toggle input[type={checkbox,radio}][role=switch]
+Extended Form input[type={color,date,file,search}
+    -->
+      <article>
+        <header>
+          <h1>Forms</h1>
+        </header>
+
+        <main>
+          <form>
+            <label>
+              Text Input <input type="text" placeholder="Text Input" />
+            </label>
+            <label
+              >Password <input type="password" placeholder="Password" />
+            </label>
+            <label
+              >URL <input type="url" placeholder="http://www.example.com" />
+            </label>
+            <label
+              >Email Address
+              <input type="email" placeholder="email@example.com" />
+            </label>
+            <label
+              >Phone Number <input type="tel" placeholder="123-123-1234" />
+            </label>
+            <label>Search <input type="search" placeholder="Search" /> </label>
+            <label>Number <input type="number" placeholder="Number" /> </label>
+            <label
+              >Select
+              <select>
+                <option>Option One</option>
+                <option>Option Two</option>
+                <option>Option Three</option>
+              </select>
+            </label>
+            <label>
+              <input name="checkboxA" type="checkbox" checked="checked" />
+              Choice A</label
+            >
+            <label> <input name="checkboxB" type="checkbox" /> Choice B </label>
+            <label>
+              <input
+                name="radio"
+                type="radio"
+                class="radio"
+                checked="checked"
+              /> Option 1</label
+            >
+            <label
+              ><input name="radio" type="radio" class="radio" /> Option 2</label
+            >
+            <label for="textarea">Textarea</label>
+            <textarea rows="5" cols="30" placeholder="Message" id="textarea"></textarea>
+            <input type="button" value="Button" />
+            <input type="submit" value="Submit" />
+            <input type="reset" value="Reset" />
+            <button>Button element</button>
+          </form>
+
+          <h2>Fieldset and Legend</h2>
+
+          <form>
+            <fieldset>
+              <legend>Legend</legend>
+              <label>Text Input
+              <input type="text" placeholder="Text Input" />
+              </label>
+              <input type="submit" value="Submit" />
+            </fieldset>
+          </form>
+
+          <!--
+Form group fieldset[role=group]
+    -->
+          <h2>Valid, Invalid, Readonly, and Disabled</h2>
+
+          <form>
+            <input type="text" placeholder="Valid" aria-invalid="false" />
+            <input type="text" placeholder="Invalid" aria-invalid="true" />
+            <input type="text" placeholder="Disabled" disabled />
+            <input type="text" value="Readonly" readonly />
+          </form>
+
+          <!--
+Progress progress
+    -->
+        </main>
+      </article>
+      <!--
+Loading [aria-busy=true]
+Tooltip [data-tooltip][data-direction]
+    -->
+
+      <!--
+Flex .flex .row .inline .flex-{0-4} .justify-{around, between, center} .align-{baseline, center, stretch, end}
+Grid
+    -->
+    <!-- Color swatches -->
+    </main>
+  </body>
+</html>

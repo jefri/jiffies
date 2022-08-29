@@ -1,0 +1,95 @@
+
+/* Inline Typography a[.secondary,.contrast] abbr strong b em i cite del ins kbd mark s small sub sub u */
+a,
+[role="link"] {
+  --color: var(--color-primary);
+  --background-color: transparent;
+  outline: none;
+  background-color: var(--color-background);
+  color: var(--color);
+  text-decoration: var(--text-decoration);
+  transition: background-color var(--transition),
+      color var(--transition),
+      text-decoration var(--transition),
+      box-shadow var(--transition);
+}
+
+a:is([aria-current], :hover, :active, :focus), 
+[role="link"]:is([aria-current], :hover, :active, :focus) {
+  --color: var(--color-primary-hover);
+}
+a:is(:focus), 
+[role="link"]:is(:focus) {
+  --background-color: var(--color-primary-focus);
+}
+
+a.secondary,
+[role="link"].secondary {
+  --color: var(--color-secondary);
+}
+
+a.secondary:is([aria-current], :hover, :active, :focus), 
+[role="link"].secondary:is([aria-current], :hover, :active, :focus) {
+  --color: var(--color-secondary-hover);
+}
+a.secondary:is(:focus), 
+[role="link"].secondary:is(:focus) {
+  --background-color: var(--color-secondary-focus);
+}
+
+a.contrast,
+[role="link"].contrast {
+  --color: var(--color-contrast);
+}
+
+a.contrast:is([aria-current], :hover, :active, :focus), 
+[role="link"].contrast:is([aria-current], :hover, :active, :focus) {
+  --color: var(--color-contrast-hover);
+}
+a.contrast:is(:focus), 
+[role="link"].contrast:is(:focus) {
+  --background-color: var(--color-contrast-focus);
+}
+
+mark {
+  padding: 0.125rem 0.25rem;
+  background-color: var(--color-mark-background);
+  color: var(--color-mark);
+  vertical-align: baseline;
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+  text-decoration: none;
+  cursor: help;
+}
+
+ins {
+  color: var(--color-del);
+  text-decoration: none;
+}
+
+del {
+  color: var(--color-ins);
+  text-decoration: none;
+}
+
+q::before {
+  content: "“";
+}
+
+q::after {
+  content: "”";
+}
+
+time {
+  font-family: var(--font-family-monospace);
+}
+
+small {
+  font-size: var(--font-size-small);
+}
+
+::selection {
+  background-color: var(--color-primary-focus);
+}

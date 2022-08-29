@@ -1,0 +1,77 @@
+[role=tablist] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+[role=tablist]::after, 
+[role=tablist]::before {
+  content: '';
+  display: block;
+  border-bottom: var(--border);
+  min-width: calc(var(--spacing-block-horizontal) / 2);
+}
+
+[role=tablist]::before {
+  order: -1;
+}
+
+[role=tablist]::after {
+  order: 1;
+  flex: 1;
+}
+
+[role=tab] {
+  border: var(--border-empty);
+  border-bottom: var(--border);
+  order: 0;
+}
+
+label[role=tab], [role=tab] label {
+  /* Ensure the padding is on the label, so the entire area is clickable */
+  padding-top: var(--spacing-form-element-vertical);
+  padding-bottom:  calc(var(--spacing-form-element-vertical) / 2);
+  padding-left: var(--spacing-form-element-horizontal) ;
+  padding-right: var(--spacing-form-element-horizontal) ;
+}
+
+[role=tab]:hover {
+  --border-color: var(--color-secondary);
+  border: var(--border);
+}
+
+[role=tabe]:has(:focus) {
+  --border-style: dotted;
+}
+
+[role=tabe]:has(:active) {
+  --border-style: dotted;
+}
+
+[role=tab] [type=radio] {
+  /* Leave the radio button focusable, but not visible. Copied from .screen-reader-text */
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+
+[role=tab]:has(:checked),
+[role=tab][aria-selected=true] {
+  border-top: var(--border);
+  border-left: var(--border);
+  border-right: var(--border);
+  border-bottom: var(--border-empty);
+}
+
+[role=tabpanel] {
+  display: none;
+  order: 2;
+}
+
+[role=tab][aria-selected=true] + [role=tabpanel],
+[role=tab]:has(:checked) + [role=tabpanel] {
+  display: block;
+  flex-basis: 100%;
+}

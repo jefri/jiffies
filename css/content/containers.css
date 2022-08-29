@@ -1,0 +1,96 @@
+/* Containers body (> #root) > { main, header, footer, aside }(.fluid) */
+body {
+  width: 100%;
+}
+
+body > main.fluid,
+body > header.fluid,
+body > footer.fluid,
+body > #root > main.fluid,
+body > #root > header.fluid,
+body > #root > footer.fluid {
+  width: 100%;
+  max-width: 100%;
+}
+
+body > main,
+body > header,
+body > footer,
+body > #root > main,
+body > #root > header,
+body > #root > footer {
+  margin: 0 auto;
+  padding: 0 var(--spacing);
+}
+
+@media (min-width: 0px) {
+  body > main,
+  body > header,
+  body > footer,
+  body > #root > main,
+  body > #root > header,
+  body > #root > footer {
+    padding: 0;
+  }
+}
+
+@media (min-width: 425px) {
+  body > main,
+  body > header,
+  body > footer,
+  body > #root > main,
+  body > #root > header,
+  body > #root > footer {
+    max-width: 425px;
+    padding: 0 var(--spacing);
+  }
+}
+
+@media (min-width: 768px) {
+  body > main,
+  body > header,
+  body > footer,
+  body > #root > main,
+  body > #root > header,
+  body > #root > footer {
+    max-width: 596.5px;
+  }
+}
+
+@media (min-width: 1024px) {
+  body > main,
+  body > header,
+  body > footer,
+  body > #root > main,
+  body > #root > header,
+  body > #root > footer {
+    max-width: 896px;
+  }
+}
+
+@media (min-width: 1440px) {
+  body > main,
+  body > header,
+  body > footer,
+  body > #root > main,
+  body > #root > header,
+  body > #root > footer {
+    max-width: 1232px;
+  }
+}
+
+/*
+$breakpoints: (
+  xs: 0,
+  sm: 425px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1440px,
+
+$viewports: (
+  // 'null' disable the viewport on a breakpoint
+  sm: 510px,
+  md: 700px,
+  lg: 920px,
+  xl: 1130px
+*/

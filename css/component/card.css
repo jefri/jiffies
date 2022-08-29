@@ -1,0 +1,6 @@
+main > article {
+  margin: var(--spacing-block-vertical) auto;
+  padding: var(--spacing-block-vertical) var(--spacing-block-horizontal);
+  box-shadow: var(--card-box-shadow);
+  border-radius: var(--sizing-border-radius);
+}

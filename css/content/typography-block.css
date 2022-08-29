@@ -1,0 +1,103 @@
+address,
+blockquote,
+dl,
+figure,
+form,
+ol,
+p,
+pre,
+table,
+ul {
+  margin-top: 0;
+  margin-bottom: var(--spacing-typography-vertical);
+  color: var(--color);
+  font-style: normal;
+  font-weight: var(--font-weight);
+  font-size: var(--font-size);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  --font-weight: 700;
+  margin-top: 0;
+  margin-bottom: var(--spacing-typography-vertical);
+  color: var(--color);
+  font-weight: var(--font-weight);
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+}
+
+h1 {
+  --font-size: 2rem;
+  --color: var(--color-h1);
+}
+h2 {
+  --font-size: 1.75rem;
+  --color: var(--color-h2);
+}
+h3 {
+  --font-size: 1.5rem;
+  --color: var(--color-h3);
+}
+h4 {
+  --font-size: 1.25rem;
+  --color: var(--color-h4);
+}
+h5 {
+  --font-size: 1.125rem;
+  --color: var(--color-h5);
+}
+h6 {
+  --font-size: 1rem;
+  --color: var(--color-h6);
+}
+
+:where(address, blockquote, dl, figure, form, ol, p, pre, table, ul) 
+~ :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: var(--spacing-typography-vertical);
+}
+
+hgroup {
+  margin-bottom: var(--spacing-typography-vertical);
+}
+hgroup > * {
+  margin-bottom: 0;
+}
+hgroup > *:last-child {
+  --color: var(--color-muted);
+  --font-weight: unset;
+  font-size: 1rem;
+  font-family: unset;
+}
+
+p {
+  margin-bottom: var(--spacing-typography-vertical);
+}
+
+:where(dl, ol, ul) :is(dl, ol, ul) {
+    margin: 0;
+    margin-top: calc(var(--spacing-typography-vertical) * 0.25);
+}
+
+ul li {
+  list-style: circle;
+}
+
+blockquote {
+  display: block;
+  margin: var(--spacing-typography-vertical) 0;
+  padding: var(--spacing);
+  border-right: none;
+  border-left: var(--sizing-block-border-width) solid var(--color-blockquote-border);
+  border-inline-start: var(--sizing-block-border-width) solid var(--color-blockquote-border);
+  border-inline-end: none;
+}
+
+blockquote > footer {
+  margin-top: calc(var(--spacing-typography-vertical) * 0.5);
+  color: var(--color-blockquote-footer);
+}
