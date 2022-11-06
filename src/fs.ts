@@ -33,7 +33,7 @@ function join(...paths: string[]): string {
   return "/" + pathParts.join("/");
 }
 
-interface FileSystemAdapter {
+export interface FileSystemAdapter {
   stat(path: PathLike): Promise<Stats>;
   readdir(path: PathLike): Promise<string[]>;
   scandir(path: PathLike): Promise<Stats[]>;
@@ -47,7 +47,9 @@ export class FileSystem implements FileSystemAdapter {
   protected wd = "/";
   protected stack: string[] = [];
 
-  constructor(protected adapter = new RecordFileSystemAdapter()) {}
+  constructor(
+    protected adapter: FileSystemAdapter = new RecordFileSystemAdapter()
+  ) {}
 
   cwd(): string {
     return this.wd;
