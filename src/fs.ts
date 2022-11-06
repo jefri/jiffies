@@ -71,15 +71,15 @@ export class FileSystem implements FileSystemAdapter {
   }
 
   stat(path: PathLike): Promise<Stats> {
-    return this.adapter.stat(join(this.cwd(), path));
+    return this.adapter.stat(this.p(path));
   }
 
   scandir(path: PathLike): Promise<Stats[]> {
-    return this.adapter.scandir(this.cwd());
+    return this.adapter.scandir(this.p(path));
   }
 
   readdir(path: PathLike): Promise<string[]> {
-    return this.adapter.readdir(path);
+    return this.adapter.readdir(this.p(path));
   }
 
   copyFile(from: PathLike, to: PathLike): Promise<void> {
