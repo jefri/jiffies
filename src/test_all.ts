@@ -22,11 +22,10 @@ import "./lock.test.js";
 import "./result.test.js";
 import "./observable/observable.test.js";
 
-import * as components from "./components/test.js";
-import * as dom from "./dom/test.js";
-
 if (process?.env.CI?.toLowerCase() !== "true") {
   (async () => {
+    const components = await import("./components/test.js");
+    const dom = await import("./dom/test.js");
     await components.loadTests();
     await dom.loadTests();
   })();

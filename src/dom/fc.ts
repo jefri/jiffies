@@ -4,7 +4,7 @@ import {
   DomAttrs,
   normalizeArguments,
   update,
-} from "./dom.js"
+} from "./dom.js";
 
 export type Attrs<S> = S & Partial<DomAttrs>;
 
