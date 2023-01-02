@@ -5,7 +5,7 @@ import { transpile } from "./transpile.mjs";
 
 const baseURL = pathToFileURL(`${cwd()}/`).href;
 
-/** @returns {Promise<{url: string}>} */
+/** @returns {Promise<{url: string, shortCircuit?: boolean}>} */
 export async function resolve(
   /** @type string */ specifier,
   /** @type {{parentURL?: string}} */ context,
@@ -19,7 +19,8 @@ export async function resolve(
   try {
     const stats = await stat(fileURLToPath(tsURL));
     if (stats.isFile()) {
-      return { url: tsSpecifier };
+      // return { url: tsSpecifier, shortCircuit: true };
+      return defaultResolve(tsSpecifier, context, defaultResolve);
     }
   } catch (e) {
     // Do nothing

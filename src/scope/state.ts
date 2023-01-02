@@ -1,10 +1,13 @@
+import { Awaitable } from "../awaitable";
+
 export function cleanState<State extends {}>(
-  init: () => State,
-  runner: (action: () => void) => void
+  init: () => Awaitable<State>,
+  runner: (action: () => Promise<void>) => void
 ): State {
   const state = {};
-  runner(() => {
-    Object.assign(state, init());
+  runner(async () => {
+    const freshState = await init();
+    Object.assign(state, freshState);
   });
   return state as State;
 }
