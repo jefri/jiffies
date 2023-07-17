@@ -1,14 +1,20 @@
 type AssertMessage = string | (() => string);
 
+export class AssertionError extends Error {
+  constructor(message = "Assertion failed") {
+    super(message);
+  }
+}
+
 /**
  * Throw an error when a condition is not met.
  */
-export function assert(
+export function assert<_T extends true>(
   condition: boolean,
-  message: AssertMessage = "Assertion failed"
+  message?: AssertMessage
 ): void | never {
   if (!condition) {
-    throw new Error(message instanceof Function ? message() : message);
+    throw new AssertionError(message instanceof Function ? message() : message);
   }
 }
 
