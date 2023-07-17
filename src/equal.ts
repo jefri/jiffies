@@ -10,7 +10,7 @@ export const equalArrays = compareArrays(Object.is);
 export const matchArrays: <A>(a: A[], b: A[], partial?: boolean) => boolean =
   compareArrays(equals);
 
-function asArray(a: Record<string, unknown>): [string, unknown][] {
+export function asArray<T = unknown>(a: Record<string, T>): [string, T][] {
   return Object.entries(a).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
@@ -25,6 +25,8 @@ export const matchObjects = (a: {}, b: {}, partial = true) => {
 
 export function equals<A>(a: A | A[], b: A | A[], partial = false): boolean {
   // runtime type checking
+  if (a === null && a === b) return true;
+  if (a === undefined && a === b) return true;
   switch (typeof a) {
     case "object":
       if (b === undefined) {
@@ -41,3 +43,11 @@ export function equals<A>(a: A | A[], b: A | A[], partial = false): boolean {
       return Object.is(a, b);
   }
 }
+
+// prettier-ignore
+export type Equals<T1, T2> =
+  (<T>() => (T extends T2 ? true : false)) extends
+  (<T>() => (T extends T1 ? true : false))
+      ? true : false;
+
+export type Not<B extends boolean> = B extends true ? false : true;
