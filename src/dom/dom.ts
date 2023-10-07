@@ -1,4 +1,4 @@
-import { Properties } from "./types/css.js"
+import { Properties } from "./types/css.js";
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");
@@ -6,9 +6,7 @@ export const CLEAR = Symbol("Clear children");
 export type EventHandler = EventListenerOrEventListenerObject;
 export type DenormChildren = Node | string | typeof CLEAR;
 
-export type DOMElement = Element &
-  DocumentAndElementEventHandlers &
-  ElementCSSInlineStyle;
+export type DOMElement = Element & ElementCSSInlineStyle;
 
 export type DomAttrs = {
   class: string | string[];
@@ -140,7 +138,7 @@ export function update(
       } else if (v === true) {
         element.setAttributeNS(element.namespaceURI, k, k);
       } else {
-        element.setAttributeNS(element.namespaceURI, k, v);
+        element.setAttributeNS(element.namespaceURI, k, v as string);
       }
     } else {
       if (remove) {
@@ -148,7 +146,7 @@ export function update(
       } else if (v === true) {
         element.setAttribute(k, k);
       } else {
-        element.setAttribute(k, v);
+        element.setAttribute(k, v as string);
       }
     }
   });
