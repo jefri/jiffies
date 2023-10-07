@@ -14,7 +14,7 @@ export async function transpile(
   /** @type string */ url,
   /** @type {() => Promise<{toString(): string}>} */ get
 ) {
-  if (!tsmap.has(url) || true) {
+  if (!tsmap.has(url)) {
     const source = ts.transpile(
       (await get()).toString(),
       compilerOptions,
