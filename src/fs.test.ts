@@ -1,5 +1,10 @@
-import { FileSystem, RecordFileSystemAdapter } from "./fs.js";
-import { describe, it, expect } from "./scope/index.js";
+import {
+  FileSystem,
+  ObjectFileSystemAdapter,
+  RecordFileSystemAdapter,
+} from "./fs.js";
+import { describe, it, expect, beforeEach } from "./scope/index.js";
+import { cleanState } from "./scope/state.js";
 
 describe("FileSystem", () => {
   describe("Writing", () => {
@@ -48,6 +53,50 @@ describe("FileSystem", () => {
 
       const dir = await fs.readdir("deep");
       expect(dir.sort()).toEqual(["bonjour", "hello"]);
+    });
+  });
+
+  describe("stat", () => {
+    const state = cleanState(() => {
+      const fsObj = {
+        "/deep/hello": "world",
+        "/deep/bonjour": "monde",
+        "/other/file": "text",
+      };
+      return { fs: new FileSystem(new RecordFileSystemAdapter(fsObj)) };
+    }, beforeEach);
+
+    it("stats a directory", async () => {
+      const deep = await state.fs.stat("/deep");
+      expect(deep.isDirectory()).toBe(true);
+      expect(deep.isFile()).toBe(false);
+    });
+
+    it("stats a file", async () => {
+      const deep = await state.fs.stat("/deep/hello");
+      expect(deep.isDirectory()).toBe(false);
+      expect(deep.isFile()).toBe(true);
+    });
+  });
+
+  describe("ObjectFileSystem", () => {
+    it("treats object keys as directories and final values as strings", async () => {
+      let fs = new FileSystem(
+        new ObjectFileSystemAdapter({
+          deep: {
+            hello: "world",
+            bonjour: "monde",
+          },
+          other_file: "text",
+        })
+      );
+
+      const deep = await fs.stat("/deep");
+      expect(deep.isDirectory()).toBe(true);
+      expect(deep.isFile()).toBe(false);
+
+      const deep_bonjour = await fs.readFile("/deep/bonjour");
+      expect(deep_bonjour).toBe("monde");
     });
   });
 });

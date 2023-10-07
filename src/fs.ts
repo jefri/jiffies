@@ -8,9 +8,11 @@ export interface Stats {
   name: string;
 }
 
-export function basename(filename: PathLike) {
-  const end = filename.lastIndexOf("/");
-  const basename = filename.substring(end === -1 ? 0 : end);
+export function basename(filename: PathLike): string {
+  if (filename.endsWith("/")) {
+    filename = filename.substring(0, filename.length - 1);
+  }
+  const basename = filename.split("/").at(-1) ?? "";
   return basename;
 }
 
@@ -108,8 +110,8 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
 
   stat(path: PathLike): Promise<Stats> {
     return new Promise((resolve, reject) => {
-      if (this.fs[path] != null) {
-        resolve({
+      if (this.fs[path]) {
+        return resolve({
           name: basename(path),
           isDirectory() {
             return false;
@@ -118,9 +120,24 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
             return true;
           },
         });
-      } else {
-        reject();
       }
+
+      if (!path.endsWith("/")) path += "/";
+      for (let filename of Object.keys(this.fs)) {
+        if (filename.startsWith(path)) {
+          return resolve({
+            name: basename(path),
+            isDirectory() {
+              return true;
+            },
+            isFile() {
+              return false;
+            },
+          });
+        }
+      }
+
+      reject();
     });
   }
 
@@ -197,7 +214,30 @@ export class LocalStorageFileSystemAdapter extends RecordFileSystemAdapter {
   }
 }
 
-export class ObjectFileSystemAdapter extends RecordFileSystemAdapter {}
+export type ObjectFileSystem = { [k: string]: string | ObjectFileSystem };
+export class ObjectFileSystemAdapter extends RecordFileSystemAdapter {
+  constructor(object: ObjectFileSystem) {
+    super(reduceObjectFileSystem(object));
+  }
+}
+
+function reduceObjectFileSystem(
+  object: ObjectFileSystem
+): Record<string, string> {
+  let level: Record<string, string> = {};
+
+  for (let [k, v] of Object.entries(object)) {
+    if (typeof v == "string") {
+      level[`/${k}`] = v;
+    } else {
+      for (let [k2, v2] of Object.entries(reduceObjectFileSystem(v))) {
+        level[`/${k}/${k2}`] = v2;
+      }
+    }
+  }
+
+  return level;
+}
 
 export interface Tree {
   [k: string]: string | Tree;
