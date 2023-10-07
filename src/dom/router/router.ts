@@ -14,6 +14,9 @@ const normalizeHref = () => {
 
 let globalRouter: Router;
 export const Router = {
+  local(links: Link[], index: string): Router {
+    return Router.for(links, index, false);
+  },
   for(links: Link[], index: string, setGlobalRouter = true): Router {
     let target: Element;
     const partialRouter: Partial<Router> = (t: Element) => {
