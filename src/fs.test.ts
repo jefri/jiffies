@@ -81,15 +81,19 @@ describe("FileSystem", () => {
 
   describe("ObjectFileSystem", () => {
     it("treats object keys as directories and final values as strings", async () => {
-      let fs = new FileSystem(
-        new ObjectFileSystemAdapter({
-          deep: {
-            hello: "world",
-            bonjour: "monde",
-          },
-          other_file: "text",
-        })
-      );
+      const fsAdapter = new ObjectFileSystemAdapter({
+        deep: {
+          hello: "world",
+          bonjour: "monde",
+        },
+        other_file: "text",
+      });
+      expect([
+        ...Object.keys(
+          (fsAdapter as unknown as { fs: Record<string, string> }).fs
+        ),
+      ]).toEqual(["/deep/hello", "/deep/bonjour", "/other_file"]);
+      let fs = new FileSystem(fsAdapter);
 
       const deep = await fs.stat("/deep");
       expect(deep.isDirectory()).toBe(true);

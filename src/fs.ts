@@ -231,7 +231,7 @@ function reduceObjectFileSystem(
       level[`/${k}`] = v;
     } else {
       for (let [k2, v2] of Object.entries(reduceObjectFileSystem(v))) {
-        level[`/${k}/${k2}`] = v2;
+        level[`/${k}${k2}`] = v2;
       }
     }
   }
