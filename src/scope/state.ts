@@ -1,4 +1,4 @@
-import { Awaitable } from "../awaitable";
+import { Awaitable } from "../awaitable.js";
 
 export function cleanState<State extends {}>(
   init: () => Awaitable<State>,

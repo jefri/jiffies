@@ -1,4 +1,4 @@
-import { FileSystem, FileSystemAdapter, Stats } from "./fs";
+import { FileSystem, FileSystemAdapter, Stats } from "./fs.js";
 import { copyFile, readdir, readFile, rm, stat, writeFile } from "fs/promises";
 import { basename, join } from "path";
 
