@@ -39,6 +39,7 @@ export interface FileSystemAdapter {
   stat(path: PathLike): Promise<Stats>;
   readdir(path: PathLike): Promise<string[]>;
   scandir(path: PathLike): Promise<Stats[]>;
+  mkdir(path: PathLike): Promise<void>;
   copyFile(from: PathLike, to: PathLike): Promise<void>;
   readFile(path: PathLike): Promise<string>;
   writeFile(path: PathLike, contents: string): Promise<void>;
@@ -82,6 +83,10 @@ export class FileSystem implements FileSystemAdapter {
 
   readdir(path: PathLike): Promise<string[]> {
     return this.adapter.readdir(this.p(path));
+  }
+
+  mkdir(path: string): Promise<void> {
+    return this.adapter.mkdir(this.p(path));
   }
 
   copyFile(from: PathLike, to: PathLike): Promise<void> {
@@ -172,6 +177,10 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
       }
       return resolve([...dir].sort());
     });
+  }
+
+  mkdir(path: string): Promise<void> {
+    return Promise.resolve();
   }
 
   copyFile(from: PathLike, to: PathLike): Promise<void> {

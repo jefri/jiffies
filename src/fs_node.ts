@@ -1,5 +1,13 @@
 import { FileSystem, FileSystemAdapter, Stats } from "./fs.js";
-import { copyFile, readdir, readFile, rm, stat, writeFile } from "fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "fs/promises";
 import { basename, join } from "path";
 
 export class NodeFileSystem extends FileSystem {
@@ -26,6 +34,9 @@ export class NodeFileSystemAdapter implements FileSystemAdapter {
   readdir(path: string): Promise<string[]> {
     return readdir(path);
   }
+  mkdir(path: string): Promise<void> {
+    return mkdir(path);
+  }
   async scandir(path: string): Promise<Stats[]> {
     return Promise.all(
       (await this.readdir(path)).map((name) => this.stat(join(path, name)))
@@ -41,6 +52,6 @@ export class NodeFileSystemAdapter implements FileSystemAdapter {
     return writeFile(path, contents, "utf-8");
   }
   rm(path: string): Promise<void> {
-    return rm(path);
+    return rm(path, { force: true, recursive: true });
   }
 }
