@@ -22,17 +22,17 @@ export function Some(t: any): any {
 }
 
 export const isOk = <T, E>(t: Result<T, E>): t is Ok<T> =>
-  (t as Ok<T>).ok !== undefined;
+  Object.prototype.hasOwnProperty.call(t ?? {}, "ok");
 export const isErr = <T, E>(e: Result<T, E>): e is Err<E> =>
-  (e as Err<E>).err !== undefined;
+  Object.prototype.hasOwnProperty.call(e, "err");
 export const isResult = <T, E>(t: Result<T, E>): t is Result<T, E> =>
   isOk(t) || isErr(t);
 
 // Beware: Order matters for correct inference.
 export function Ok<T>(ok: Ok<T>): T;
-export function Ok<T>(t: T): Ok<T>;
+export function Ok<T>(t?: T): Ok<T>;
 export function Ok<T, E>(t: any): any {
-  return t.ok
+  return isOk(t)
     ? t.ok
     : {
         ok: t,

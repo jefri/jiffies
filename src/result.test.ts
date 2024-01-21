@@ -93,6 +93,12 @@ describe("Result", () => {
     expect(unwrapOrElse(d, () => "z")).toBe("z");
     expect(unwrapOrElse(e, () => "z")).toBe("else");
   });
+
+  it("allows Result<void> with Ok()", () => {
+    let a: Result<void>;
+    a = Ok();
+    expect(unwrap(a)).toBe(undefined);
+  });
 });
 
 export {};
