@@ -1,6 +1,6 @@
-import { assert } from "../assert.js"
-import { display } from "../display.js"
-import { equals } from "../equal.js"
+import { assert } from "../assert.js";
+import { display } from "../display.js";
+import { equals } from "../equal.js";
 
 export class Matcher<T> {
   actual: T;
@@ -76,7 +76,6 @@ export class Matcher<T> {
       result = this.actual();
     } catch ({ message: e }) {
       assert(
-        // @ts-expect-error
         (e ?? "").match(message),
         () => `Expected thrown message to match ${message}, got ${e}`
       );
@@ -155,7 +154,6 @@ export class NotMatcher<T> {
       result = this.actual();
     } catch ({ message: e }) {
       assert(
-        // @ts-expect-error
         (e ?? "").match(message),
         () => `Expected thrown message to match ${message}, got ${e}`
       );
