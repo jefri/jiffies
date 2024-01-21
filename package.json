@@ -14,10 +14,10 @@
     "node": ">=20.0.9"
   },
   "scripts": {
-    "node": "node --experimental-loader ./src/loader.mjs",
+    "node": "node --import ./src/loader-register.js",
     "start": "npm run node ./src/server/main.js",
     "test": "npm run node ./src/test.mjs",
-    "ci": "node --experimental-loader ./src/loader.mjs ./src/test.mjs --mode=junit",
+    "ci": "npm run node ./src/test.mjs --mode=junit",
     "lint": "prettier . --check",
     "check": "tsc --noEmit",
     "format": "prettier . --write",
