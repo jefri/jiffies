@@ -74,9 +74,9 @@ export class Matcher<T> {
     try {
       // @ts-expect-error
       result = this.actual();
-    } catch ({ message: e }) {
+    } catch (e) {
       assert(
-        (e ?? "").match(message),
+        ((e as { message?: string }).message ?? "").match(message) !== null,
         () => `Expected thrown message to match ${message}, got ${e}`
       );
       didThrow = true;
@@ -152,9 +152,9 @@ export class NotMatcher<T> {
     try {
       // @ts-expect-error
       result = this.actual();
-    } catch ({ message: e }) {
+    } catch (e) {
       assert(
-        (e ?? "").match(message),
+        ((e as { message?: string }).message ?? "").match(message) !== null,
         () => `Expected thrown message to match ${message}, got ${e}`
       );
       didThrow = true;

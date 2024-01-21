@@ -1,6 +1,6 @@
 {
   "name": "@davidsouther/jiffies",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
@@ -14,7 +14,7 @@
     "node": ">=20.0.9"
   },
   "scripts": {
-    "node": "node --import ./src/loader-register.js",
+    "node": "node --import ./src/loader-register.mjs",
     "start": "npm run node ./src/server/main.js",
     "test": "npm run node ./src/test.mjs",
     "ci": "npm run node ./src/test.mjs --mode=junit",
