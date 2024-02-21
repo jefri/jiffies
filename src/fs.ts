@@ -1,6 +1,32 @@
 // Treat localstorage as a file system
 export type PathLike = string;
 
+interface PlatformParts {
+  SEP: string;
+  WD: string;
+  isAbsolute(path: PathLike): boolean;
+}
+
+const PLATFORM_PARTS: PlatformParts = (() => {
+  if (process?.platform == "win32") {
+    return {
+      SEP: "\\",
+      WD: "C:\\\\",
+      isAbsolute: (path) => Boolean(path.match(new RegExp("^[a-zA-Z]:\\\\"))),
+    };
+  } else {
+    return {
+      SEP: "/",
+      WD: "/",
+      isAbsolute: (path) => path[0] == "/",
+    };
+  }
+})();
+
+const SEP = PLATFORM_PARTS.SEP;
+const WD = PLATFORM_PARTS.WD;
+const isAbsolute = PLATFORM_PARTS.isAbsolute;
+
 // Compatible with Node's fs.Dirent
 export interface Stats {
   isDirectory(): boolean;
@@ -9,17 +35,17 @@ export interface Stats {
 }
 
 export function basename(filename: PathLike): string {
-  if (filename.endsWith("/")) {
+  if (filename.endsWith(SEP)) {
     filename = filename.substring(0, filename.length - 1);
   }
-  const basename = filename.split("/").at(-1) ?? "";
+  const basename = filename.split(SEP).at(-1) ?? "";
   return basename;
 }
 
 function join(...paths: string[]): string {
   const pathParts: string[] = [];
   for (const path of paths) {
-    for (const part of path.split("/")) {
+    for (const part of path.split(SEP)) {
       switch (part) {
         case "":
         case ".":
@@ -32,7 +58,7 @@ function join(...paths: string[]): string {
       }
     }
   }
-  return "/" + pathParts.join("/");
+  return SEP + pathParts.join(SEP);
 }
 
 export interface FileSystemAdapter {
@@ -47,7 +73,7 @@ export interface FileSystemAdapter {
 }
 
 export class FileSystem implements FileSystemAdapter {
-  protected wd = "/";
+  protected wd = WD;
   protected stack: string[] = [];
 
   constructor(
@@ -106,7 +132,7 @@ export class FileSystem implements FileSystemAdapter {
   }
 
   private p(path: PathLike): string {
-    return path[0] === "/" ? path : join(this.cwd(), path);
+    return isAbsolute(path) ? path : join(this.cwd(), path);
   }
 }
 
@@ -127,7 +153,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
         });
       }
 
-      if (!path.endsWith("/")) path += "/";
+      if (!path.endsWith(SEP)) path += SEP;
       for (let filename of Object.keys(this.fs)) {
         if (filename.startsWith(path)) {
           return resolve({
@@ -162,12 +188,12 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
   }
 
   readdir(path: PathLike): Promise<string[]> {
-    if (!path.endsWith("/")) path += "/";
+    if (!path.endsWith(SEP)) path += SEP;
     return new Promise((resolve) => {
       let dir = new Set<string>();
       for (const filename of Object.keys(this.fs)) {
         if (filename.startsWith(path)) {
-          const end = filename.indexOf("/", path.length + 1);
+          const end = filename.indexOf(SEP, path.length + 1);
           const basename = filename.substring(
             path.length,
             end === -1 ? undefined : end
