@@ -1,32 +1,32 @@
 // Treat localstorage as a file system
 export type PathLike = string;
 
-interface PlatformParts {
+export interface PlatformParts {
   SEP: string;
   WD: string;
   isAbsolute(path: PathLike): boolean;
 }
 
-const PLATFORM_PARTS_WIN: PlatformParts = {
+export const PLATFORM_PARTS_WIN: PlatformParts = {
   SEP: "\\",
   WD: "C:\\\\",
   isAbsolute: (path) => Boolean(path.match(new RegExp("^[a-zA-Z]:\\\\"))),
 };
 
-const PLATFORM_PARTS_UNIX: PlatformParts = {
+export const PLATFORM_PARTS_UNIX: PlatformParts = {
   SEP: "/",
   WD: "/",
   isAbsolute: (path) => path[0] == "/",
 };
 
-const PLATFORM_PARTS: PlatformParts =
-  (typeof process !== "undefined" && process.platform == "win32")
-  ? PLATFORM_PARTS_WIN
-  : PLATFORM_PARTS_UNIX;
+export const PLATFORM_PARTS: PlatformParts =
+  typeof process !== "undefined" && process.platform == "win32"
+    ? PLATFORM_PARTS_WIN
+    : PLATFORM_PARTS_UNIX;
 
-const SEP = PLATFORM_PARTS.SEP;
-const WD = PLATFORM_PARTS.WD;
-const isAbsolute = PLATFORM_PARTS.isAbsolute;
+export const SEP = PLATFORM_PARTS.SEP;
+export const WD = PLATFORM_PARTS.WD;
+export const isAbsolute = PLATFORM_PARTS.isAbsolute;
 
 // Compatible with Node's fs.Dirent
 export interface Stats {
@@ -59,7 +59,9 @@ function join(...paths: string[]): string {
       }
     }
   }
-  return (PLATFORM_PARTS == PLATFORM_PARTS_UNIX ? SEP : "") + pathParts.join(SEP);
+  return (
+    (PLATFORM_PARTS == PLATFORM_PARTS_UNIX ? SEP : "") + pathParts.join(SEP)
+  );
 }
 
 export interface FileSystemAdapter {
@@ -79,7 +81,7 @@ export class FileSystem implements FileSystemAdapter {
 
   constructor(
     protected adapter: FileSystemAdapter = new RecordFileSystemAdapter()
-  ) { }
+  ) {}
 
   cwd(): string {
     return this.wd;
@@ -138,7 +140,7 @@ export class FileSystem implements FileSystemAdapter {
 }
 
 export class RecordFileSystemAdapter implements FileSystemAdapter {
-  constructor(private fs: Record<string, string> = {}) { }
+  constructor(private fs: Record<string, string> = {}) {}
 
   stat(path: PathLike): Promise<Stats> {
     return new Promise((resolve, reject) => {
