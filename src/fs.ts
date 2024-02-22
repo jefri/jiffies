@@ -8,7 +8,7 @@ interface PlatformParts {
 }
 
 const PLATFORM_PARTS: PlatformParts = (() => {
-  if (process?.platform == "win32") {
+  if (typeof process !== "undefined" && process.platform == "win32") {
     return {
       SEP: "\\",
       WD: "C:\\\\",
