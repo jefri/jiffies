@@ -1,6 +1,6 @@
-import { display, Display } from "../display"
-import { div, span, ul, li, pre, code } from "../dom/html"
-import { LEVEL, Logger } from "../log"
+import { display, Display } from "../display.js";
+import { div, span, ul, li, pre, code } from "../dom/html.js";
+import { LEVEL, Logger } from "../log.js";
 
 export interface HTMLLogger extends Logger {
   root: Element;

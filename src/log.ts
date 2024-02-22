@@ -5,7 +5,7 @@ export interface Log {
 }
 
 export interface Logger {
-  level: Number;
+  level: number;
   debug: Log;
   info: Log;
   warn: Log;

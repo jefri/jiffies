@@ -1,6 +1,6 @@
-import { width } from "../dom/css/sizing"
-import { FC, State } from "../dom/fc"
-import { input, span } from "../dom/html"
+import { width } from "../dom/css/sizing.js";
+import { FC, State } from "../dom/fc.js";
+import { input, span } from "../dom/html.js";
 
 const Mode = { VIEW: 0, EDIT: 1 };
 
