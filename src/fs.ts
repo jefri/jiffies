@@ -7,21 +7,22 @@ interface PlatformParts {
   isAbsolute(path: PathLike): boolean;
 }
 
-const PLATFORM_PARTS: PlatformParts = (() => {
-  if (typeof process !== "undefined" && process.platform == "win32") {
-    return {
-      SEP: "\\",
-      WD: "C:\\\\",
-      isAbsolute: (path) => Boolean(path.match(new RegExp("^[a-zA-Z]:\\\\"))),
-    };
-  } else {
-    return {
-      SEP: "/",
-      WD: "/",
-      isAbsolute: (path) => path[0] == "/",
-    };
-  }
-})();
+const PLATFORM_PARTS_WIN: PlatformParts = {
+  SEP: "\\",
+  WD: "C:\\\\",
+  isAbsolute: (path) => Boolean(path.match(new RegExp("^[a-zA-Z]:\\\\"))),
+};
+
+const PLATFORM_PARTS_UNIX: PlatformParts = {
+  SEP: "/",
+  WD: "/",
+  isAbsolute: (path) => path[0] == "/",
+};
+
+const PLATFORM_PARTS: PlatformParts =
+  (typeof process !== "undefined" && process.platform == "win32")
+  ? PLATFORM_PARTS_WIN
+  : PLATFORM_PARTS_UNIX;
 
 const SEP = PLATFORM_PARTS.SEP;
 const WD = PLATFORM_PARTS.WD;
@@ -58,7 +59,7 @@ function join(...paths: string[]): string {
       }
     }
   }
-  return SEP + pathParts.join(SEP);
+  return (PLATFORM_PARTS == PLATFORM_PARTS_UNIX ? SEP : "") + pathParts.join(SEP);
 }
 
 export interface FileSystemAdapter {
@@ -78,7 +79,7 @@ export class FileSystem implements FileSystemAdapter {
 
   constructor(
     protected adapter: FileSystemAdapter = new RecordFileSystemAdapter()
-  ) {}
+  ) { }
 
   cwd(): string {
     return this.wd;
@@ -137,7 +138,7 @@ export class FileSystem implements FileSystemAdapter {
 }
 
 export class RecordFileSystemAdapter implements FileSystemAdapter {
-  constructor(private fs: Record<string, string> = {}) {}
+  constructor(private fs: Record<string, string> = {}) { }
 
   stat(path: PathLike): Promise<Stats> {
     return new Promise((resolve, reject) => {
