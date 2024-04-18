@@ -6,6 +6,17 @@ export interface Log {
 
 export interface Logger {
   level: number;
+  format: <
+    D extends {
+      name: string;
+      prefix: string;
+      level: number;
+      message: string;
+      source: string;
+    }
+  >(
+    data: D
+  ) => string;
   debug: Log;
   info: Log;
   warn: Log;
@@ -22,22 +33,54 @@ export const LEVEL = {
   ERROR: 4,
 };
 
-export function getLogger(name: string): Logger {
-  const logger: Partial<Logger> = { level: LEVEL.INFO };
+function findSource() {
+  const err = new Error();
+  // Stack will be:
+  // findSource
+  // logAt
+  // {source}
+  return err.stack?.split("\n")[3].split("(", 2)[1].slice(0, -1) ?? "(unknown)";
+}
+
+export function getLogger(
+  name: string,
+  format: <
+    D extends {
+      name: string;
+      prefix: string;
+      level: number;
+      message: string;
+      source: string;
+    }
+  >(
+    data: D
+  ) => string = JSON.stringify
+): Logger {
+  const logger: Partial<Logger> = { level: LEVEL.INFO, format };
   const logAt =
     (
       level: number,
+      prefix: string,
       fn: (message: Display, data?: {}) => void
-    ): ((message: Display) => void) =>
+    ) =>
     (message: Display, data?: {}) =>
       level >= (logger.level ?? LEVEL.SILENT)
-        ? fn(display(message), data)
+        ? fn(
+            format({
+              name,
+              prefix,
+              level,
+              message: display(message),
+              ...data,
+              source: findSource(),
+            })
+          )
         : undefined;
 
-  logger.debug = logAt(LEVEL.VERBOSE, console.debug.bind(console));
-  logger.info = logAt(LEVEL.INFO, console.info.bind(console));
-  logger.warn = logAt(LEVEL.WARN, console.warn.bind(console));
-  logger.error = logAt(LEVEL.ERROR, console.error.bind(console));
+  logger.debug = logAt(LEVEL.DEBUG, "DEBUG", console.debug.bind(console));
+  logger.info = logAt(LEVEL.INFO, "INFO", console.info.bind(console));
+  logger.warn = logAt(LEVEL.WARN, "WARN", console.warn.bind(console));
+  logger.error = logAt(LEVEL.ERROR, "ERR", console.error.bind(console));
 
   return logger as Logger;
 }
