@@ -44,9 +44,9 @@ export const LEVELS: Record<string, number> = {
 };
 
 export function getLogLevel(level = ""): number {
-  return LEVELS[level.toLowerCase()] ?? !isNaN(+level)
-    ? Number(level)
-    : LEVEL.INFO;
+  return (
+    LEVELS[level.toLowerCase()] ?? (!isNaN(+level) ? Number(level) : LEVEL.INFO)
+  );
 }
 
 export function basicLogFormatter(data: {
