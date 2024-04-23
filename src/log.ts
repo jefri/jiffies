@@ -24,14 +24,40 @@ export interface Logger {
 }
 
 export const LEVEL = {
-  UNKNOWN: 0,
-  SILENT: 0,
+  UNKNOWN: 2,
   DEBUG: 1,
   VERBOSE: 1,
   INFO: 2,
   WARN: 3,
   ERROR: 4,
+  SILENT: 5,
 };
+
+export const LEVELS: Record<string, number> = {
+  unknown: LEVEL.UNKNOWN,
+  debug: LEVEL.DEBUG,
+  verbose: LEVEL.VERBOSE,
+  info: LEVEL.INFO,
+  warn: LEVEL.WARN,
+  error: LEVEL.ERROR,
+  silent: LEVEL.SILENT,
+};
+
+export function getLogLevel(level = ""): number {
+  return LEVELS[level.toLowerCase()] ?? !isNaN(+level)
+    ? Number(level)
+    : LEVEL.INFO;
+}
+
+export function basicLogFormatter(data: {
+  name: string;
+  prefix: string;
+  level: number;
+  message: string;
+  source: string;
+}): string {
+  return `${data.prefix}: ${data.message}`;
+}
 
 function findSource() {
   const err = new Error();
