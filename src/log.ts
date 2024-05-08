@@ -17,6 +17,7 @@ export interface Logger {
   >(
     data: D
   ) => string;
+  console: Console;
   debug: Log;
   info: Log;
   warn: Log;
@@ -68,31 +69,34 @@ function findSource() {
   return err.stack?.split("\n")[3].split("(", 2)[1].slice(0, -1) ?? "(unknown)";
 }
 
+type LoggerFormatFn = <
+  D extends {
+    name: string;
+    prefix: string;
+    level: number;
+    message: string;
+    source: string;
+  }
+>(
+  data: D
+) => string;
+
 export function getLogger(
   name: string,
-  format: <
-    D extends {
-      name: string;
-      prefix: string;
-      level: number;
-      message: string;
-      source: string;
-    }
-  >(
-    data: D
-  ) => string = JSON.stringify
+  args: LoggerFormatFn | { format?: LoggerFormatFn; console?: Console } = {
+    format: JSON.stringify,
+    console,
+  }
 ): Logger {
-  const logger: Partial<Logger> = { level: LEVEL.INFO, format };
+  if (args instanceof Function) {
+    args = { format: args };
+  }
   const logAt =
-    (
-      level: number,
-      prefix: string,
-      fn: (message: Display, data?: {}) => void
-    ) =>
+    (level: number, prefix: string, fn: (logLine: string) => void) =>
     (message: Display, data?: {}) =>
       level >= (logger.level ?? LEVEL.SILENT)
         ? fn(
-            format({
+            logger.format!({
               name,
               prefix,
               level,
@@ -103,10 +107,15 @@ export function getLogger(
           )
         : undefined;
 
-  logger.debug = logAt(LEVEL.DEBUG, "DEBUG", console.debug.bind(console));
-  logger.info = logAt(LEVEL.INFO, "INFO", console.info.bind(console));
-  logger.warn = logAt(LEVEL.WARN, "WARN", console.warn.bind(console));
-  logger.error = logAt(LEVEL.ERROR, "ERR", console.error.bind(console));
+  const logger: Logger = {
+    level: LEVEL.INFO,
+    format: args.format ?? JSON.stringify,
+    console: args.console ?? global.console,
+    debug: logAt(LEVEL.DEBUG, "DEBUG", (l) => logger.console.debug(l)),
+    info: logAt(LEVEL.INFO, "INFO", (l) => logger.console.info(l)),
+    warn: logAt(LEVEL.WARN, "WARN", (l) => logger.console.warn(l)),
+    error: logAt(LEVEL.ERROR, "ERR", (l) => logger.console.error(l)),
+  };
 
   return logger as Logger;
 }
