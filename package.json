@@ -22,8 +22,11 @@
     "check": "tsc --noEmit",
     "format": "prettier . --write",
     "build": "npm run build:esm & npm run build:cjs & npm run build:css",
+    "postbuild": "npm run fixup",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir lib/cjs",
+    "fixup:cjs": "echo '{\"module\":\"commonjs\"}' > lib/cjs/package.json",
+    "fixup": "npm run fixup:cjs",
     "build:css": "sass ./src/pico/pico.scss ./build/pico.css",
     "watch": "npx tsc --watch",
     "all": "npm run lint && npm run test && npm run build"
