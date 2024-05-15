@@ -66,7 +66,9 @@ function findSource() {
   // findSource
   // logAt
   // {source}
-  return err.stack?.split("\n")[3].split("(", 2)[1].slice(0, -1) ?? "(unknown)";
+  const lines = err.stack?.split("\n") ?? [];
+  const atLines = lines.filter((line) => line.match(/^\s*at/));
+  return atLines[2]?.trim().slice("at ".length) ?? "(unknown)";
 }
 
 type LoggerFormatFn = <
