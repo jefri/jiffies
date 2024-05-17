@@ -5,6 +5,7 @@ export interface Log {
 }
 
 export interface Logger {
+  logAt: (level: number, prefix: string, fn?: (logLine: string) => void) => Log;
   level: number;
   format: <
     D extends {
@@ -18,6 +19,7 @@ export interface Logger {
     data: D
   ) => string;
   console: Console;
+  default: (logLine: string) => void;
   debug: Log;
   info: Log;
   warn: Log;
@@ -93,8 +95,15 @@ export function getLogger(
   if (args instanceof Function) {
     args = { format: args };
   }
+  const defaultLog = (logLine: string): void => {
+    logger.console.info(logLine);
+  };
   const logAt =
-    (level: number, prefix: string, fn: (logLine: string) => void) =>
+    (
+      level: number,
+      prefix: string,
+      fn: (logLine: string) => void = defaultLog
+    ): Log =>
     (message: Display, data?: {}) =>
       level >= (logger.level ?? LEVEL.SILENT)
         ? fn(
@@ -110,6 +119,8 @@ export function getLogger(
         : undefined;
 
   const logger: Logger = {
+    logAt,
+    default: defaultLog,
     level: LEVEL.INFO,
     format: args.format ?? JSON.stringify,
     console: args.console ?? global.console,
