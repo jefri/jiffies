@@ -1,6 +1,6 @@
 export interface TestCase {
-  [k: string]: Function | TestCase;
-  [k: symbol]: Function;
+  [k: string]: CallableFunction | TestCase;
+  [k: symbol]: CallableFunction;
 }
 
 export interface TestResult {

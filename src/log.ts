@@ -1,8 +1,6 @@
-import { display, Display } from "./display.js";
+import { type Display, display } from "./display.js";
 
-export interface Log {
-  (message: Display, data?: {}): void;
-}
+export type Log = (message: Display, data?: object) => void;
 
 export interface Logger {
   logAt: (level: number, prefix: string, fn?: (logLine: string) => void) => Log;
@@ -14,9 +12,9 @@ export interface Logger {
       level: number;
       message: string;
       source: string;
-    }
+    },
   >(
-    data: D
+    data: D,
   ) => string;
   console: Console;
   default: (logLine: string) => void;
@@ -48,7 +46,8 @@ export const LEVELS: Record<string, number> = {
 
 export function getLogLevel(level = ""): number {
   return (
-    LEVELS[level.toLowerCase()] ?? (!isNaN(+level) ? Number(level) : LEVEL.INFO)
+    LEVELS[level.toLowerCase()] ??
+    (!Number.isNaN(+level) ? Number(level) : LEVEL.INFO)
   );
 }
 
@@ -80,9 +79,9 @@ type LoggerFormatFn = <
     level: number;
     message: string;
     source: string;
-  }
+  },
 >(
-  data: D
+  data: D,
 ) => string;
 
 export function getLogger(
@@ -90,7 +89,7 @@ export function getLogger(
   args: LoggerFormatFn | { format?: LoggerFormatFn; console?: Console } = {
     format: JSON.stringify,
     console,
-  }
+  },
 ): Logger {
   if (args instanceof Function) {
     args = { format: args };
@@ -102,19 +101,19 @@ export function getLogger(
     (
       level: number,
       prefix: string,
-      fn: (logLine: string) => void = defaultLog
+      fn: (logLine: string) => void = defaultLog,
     ): Log =>
-    (message: Display, data?: {}) =>
+    (message: Display, data?: object) =>
       level >= (logger.level ?? LEVEL.SILENT)
         ? fn(
-            logger.format!({
+            logger.format?.({
               name,
               prefix,
               level,
               message: display(message),
               ...data,
               source: findSource(),
-            })
+            }),
           )
         : undefined;
 
@@ -135,22 +134,22 @@ export function getLogger(
 
 export const DEFAULT_LOGGER = getLogger("default");
 
-export function debug(message: Display, data?: {}) {
+export function debug(message: Display, data?: object) {
   if (data) DEFAULT_LOGGER.debug(message, data);
   else DEFAULT_LOGGER.debug(message);
 }
 
-export function info(message: Display, data?: {}) {
+export function info(message: Display, data?: object) {
   if (data) DEFAULT_LOGGER.info(message, data);
   else DEFAULT_LOGGER.info(message);
 }
 
-export function warn(message: Display, data?: {}) {
+export function warn(message: Display, data?: object) {
   if (data) DEFAULT_LOGGER.warn(message, data);
   else DEFAULT_LOGGER.warn(message);
 }
 
-export function error(message: Display, data?: {}) {
+export function error(message: Display, data?: object) {
   if (data) DEFAULT_LOGGER.error(message, data);
   else DEFAULT_LOGGER.error(message);
 }

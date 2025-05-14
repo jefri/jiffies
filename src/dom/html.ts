@@ -1,4 +1,4 @@
-import { DenormAttrs, DenormChildren, up } from "./dom.js"
+import { type DenormAttrs, type DenormChildren, up } from "./dom.js";
 
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>
@@ -9,7 +9,7 @@ const makeHTMLElement =
     up(
       document.createElement(name),
       attrs,
-      ...children
+      ...children,
     ) as HTMLElementTagNameMap[K];
 
 export const a = makeHTMLElement("a");

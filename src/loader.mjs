@@ -9,11 +9,11 @@ const baseURL = pathToFileURL(`${cwd()}/`).href;
 export async function resolve(
   /** @type string */ specifier,
   /** @type {{parentURL?: string}} */ context,
-  /** @type {(specifier: string, context: {parentURL?: string}, defaultResolve: Function) => Promise<{url: string}>} */ defaultResolve
+  /** @type {(specifier: string, context: {parentURL?: string}, defaultResolve: CallableFunction) => Promise<{url: string}>} */ defaultResolve,
 ) {
   const tsURL = new URL(
     specifier.replace(/js$/, "ts"),
-    context.parentURL ?? baseURL
+    context.parentURL ?? baseURL,
   );
   const tsSpecifier = tsURL.href;
   try {
@@ -32,14 +32,14 @@ export async function resolve(
 export async function load(
   /** @type string */ url,
   /** @type {{format?: string}} */ context,
-  /** @type {(url: string, context: {format?: string}, defaultLoad?: Function) => Promise<{format: string, source: string}>} */ defaultLoad
+  /** @type {(url: string, context: {format?: string}, defaultLoad?: Function) => Promise<{format: string, source: string}>} */ defaultLoad,
 ) {
   return url.endsWith("ts")
     ? {
         format: "module",
         source: await transpile(
           url,
-          async () => (await defaultLoad(url, { format: "module" })).source
+          async () => (await defaultLoad(url, { format: "module" })).source,
         ),
       }
     : defaultLoad(url, context, defaultLoad);

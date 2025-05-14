@@ -1,14 +1,12 @@
-import { describe, it } from "../scope/describe.js"
-import { expect } from "../scope/expect.js"
-import { table, tbody, td, th, thead, tr, button } from "./html.js"
+import { describe, it } from "../scope/describe.js";
+import { expect } from "../scope/expect.js";
+import { button, table, tbody, td, th, thead, tr } from "./html.js";
 
 describe("html", () => {
   it("creates HTML Elements", () => {
-    let tableBody;
-    const myTable = table(
-      thead(tr(th("Col A"), th("Col B"))),
-      (tableBody = tbody())
-    );
+    const tableBody = tbody();
+    const tableHead = thead(tr(th("Col A"), th("Col B")));
+    const myTable = table(tableHead, tableBody);
     for (let x = 1; x <= 3; x++) {
       tableBody.appendChild(tr(td(`${x}`), td(`${x * 2}`)));
     }
@@ -59,13 +57,17 @@ describe("html", () => {
     const btn = button({
       class: "test-class",
       style: { flexDirection: "column" },
-      events: { click: () => (clicked = true) },
+      events: {
+        click: () => {
+          clicked = true;
+        },
+      },
     });
     btn.dispatchEvent(new Event("click"));
 
     expect(btn.classList.contains("test-class")).toBe(true);
     expect((btn as unknown as HTMLButtonElement).style.flexDirection).toBe(
-      "column"
+      "column",
     );
     expect(clicked).toBe(true);
   });

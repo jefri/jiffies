@@ -3,7 +3,7 @@ import { FC } from "../dom/fc.js";
 import { fieldset, input, label } from "../dom/html.js";
 
 let buttonBarId = 1;
-let nextId = () => buttonBarId++;
+const nextId = () => buttonBarId++;
 
 const ButtonBar = FC<{
   // T extends Display
@@ -17,28 +17,26 @@ const ButtonBar = FC<{
   const name = `button-bar-${nextId()}`;
   return fieldset(
     { class: "input-group" },
-    ...values
-      .map((option) => {
-        const opt = `${option}`.replace(/\s+/g, "_").toLowerCase();
-        const id = `${name}-${opt}`;
-        return [
-          label(
-            { role: "button", htmlFor: id },
-            input({
-              type: "radio",
-              id,
-              name,
-              value: option,
-              checked: option === value,
-              events: {
-                change: () => events.onSelect(option),
-              },
-            }),
-            display(option)
-          ),
-        ];
-      })
-      .flat()
+    ...values.flatMap((option) => {
+      const opt = `${option}`.replace(/\s+/g, "_").toLowerCase();
+      const id = `${name}-${opt}`;
+      return [
+        label(
+          { role: "button", htmlFor: id },
+          input({
+            type: "radio",
+            id,
+            name,
+            value: option,
+            checked: option === value,
+            events: {
+              change: () => events.onSelect(option),
+            },
+          }),
+          display(option),
+        ),
+      ];
+    }),
   );
 });
 export default ButtonBar;

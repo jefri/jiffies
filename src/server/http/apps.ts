@@ -1,6 +1,6 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { MiddlewareFactory } from "./index.js";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import type { MiddlewareFactory } from "./index.js";
 import { fileResponse } from "./response.js";
 
 /**

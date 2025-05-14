@@ -11,8 +11,8 @@ export class AssertionError extends Error {
  */
 export function assert<_T extends true>(
   condition: boolean,
-  message?: AssertMessage
-): void | never {
+  message?: AssertMessage,
+): undefined | never {
   if (!condition) {
     throw new AssertionError(message instanceof Function ? message() : message);
   }
@@ -27,7 +27,7 @@ export function assert<_T extends true>(
  */
 export function assertExists<T>(
   t: T,
-  message: AssertMessage = "Assertion failed: value does not exist"
+  message: AssertMessage = "Assertion failed: value does not exist",
 ): NonNullable<T> {
   assert(t != null, message);
   return t as NonNullable<T>;
@@ -39,7 +39,7 @@ export function assertExists<T>(
  */
 export function assertString(
   n: unknown,
-  message: AssertMessage = () => `Assertion failed: ${n} is not a string`
+  message: AssertMessage = () => `Assertion failed: ${n} is not a string`,
 ): string {
   assert(typeof n === "string", message);
   return n as string;
@@ -50,7 +50,7 @@ export function assertString(
  */
 export function checkExhaustive(
   value: never,
-  message: AssertMessage = `Unexpected value ${value}`
+  message: AssertMessage = `Unexpected value ${value}`,
 ): never {
   throw new Error(message instanceof Function ? message() : message);
 }

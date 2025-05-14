@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     // Assume browser environment & esm
-    "lib": ["es2021", "DOM", "DOM.Iterable"],
-    "target": "esnext",
-    "module": "esnext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
     "checkJs": true,
@@ -20,7 +20,9 @@
     // "noPropertyAccessFromIndexSignature": true,
     // "noUncheckedIndexedAccess": true,
     // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "exactOptionalPropertyTypes": true,
+    "erasableSyntaxOnly": true,
 
     "incremental": true,
     "outDir": "lib/esm",

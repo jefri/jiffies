@@ -1,7 +1,7 @@
 import {
   CLEAR,
-  DenormChildren,
-  DomAttrs,
+  type DenormChildren,
+  type DomAttrs,
   normalizeArguments,
   update,
 } from "./dom.js";
@@ -17,28 +17,22 @@ export interface FCComponent<P extends object, S extends object>
     ...children: DenormChildren[]
   ): this;
 }
-export interface RenderFn<P extends object, S extends object> {
-  (el: FCComponent<P, S>, attrs: Attrs<P>, children: DenormChildren[]):
-    | Element
-    | Element[];
-}
+export type RenderFn<P extends object, S extends object> = (
+  el: FCComponent<P, S>,
+  attrs: Attrs<P>,
+  children: DenormChildren[],
+) => Element | Element[];
 
-export interface FCComponentCtor<P extends object, S extends object> {
-  (
-    attrs?: Attrs<P> | DenormChildren,
-    ...children: DenormChildren[]
-  ): FCComponent<P, S>;
-}
+export type FCComponentCtor<P extends object, S extends object> = (
+  attrs?: Attrs<P> | DenormChildren,
+  ...children: DenormChildren[]
+) => FCComponent<P, S>;
 
-export function FC<P extends object, S extends object = {}>(
+export function FC<P extends object, S extends object = object>(
   name: string,
-  component: RenderFn<P, S>
+  component: RenderFn<P, S>,
 ): FCComponentCtor<P, S> {
   class FCImpl extends HTMLElement implements FCComponent<P, S> {
-    constructor() {
-      super();
-    }
-
     [State]: Partial<S> = {};
     #attrs: Attrs<P> = {} as Attrs<P>;
     #children: DenormChildren[] = [];
@@ -46,7 +40,7 @@ export function FC<P extends object, S extends object = {}>(
     update(attrs?: Attrs<P> | DenormChildren, ...children: DenormChildren[]) {
       [attrs, children] = normalizeArguments(attrs, children) as [
         Attrs<P>,
-        DenormChildren[]
+        DenormChildren[],
       ];
       if (children[0] === CLEAR) {
         this.#children = [];

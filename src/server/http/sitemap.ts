@@ -1,7 +1,7 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { info } from "../../log.js";
-import { MiddlewareFactory } from "./index.js";
+import type { MiddlewareFactory } from "./index.js";
 import { contentResponse } from "./response.js";
 
 const findSiteMap = async (root: string, prefix = root) => {
@@ -16,8 +16,8 @@ const findSiteMap = async (root: string, prefix = root) => {
         .replaceAll(path.sep, "/");
       if (entry.isFile()) {
         if (entry.name === "index.html") {
-          let index = next.replace(prefix, "");
-          info(`Adding to sitemap`, { index });
+          const index = next.replace(prefix, "");
+          info("Adding to sitemap", { index });
           return [index];
         }
       } else if (entry.isDirectory()) {
@@ -30,7 +30,7 @@ const findSiteMap = async (root: string, prefix = root) => {
         return flattened;
       }
       return [];
-    }
+    },
   );
   return children;
 };

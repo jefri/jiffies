@@ -1,8 +1,8 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { contentResponse } from "./response.js";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { transpile } from "../../transpile.mjs";
-import { MiddlewareFactory } from "./index.js";
+import type { MiddlewareFactory } from "./index.js";
+import { contentResponse } from "./response.js";
 
 function render(source: string) {
   // Replace `from "@scope` with `from "/@scope`, for browsers
@@ -19,11 +19,11 @@ export const tsFileServer: MiddlewareFactory =
   async ({ root, scopes = {} }) =>
   async (req) => {
     if (req.url?.endsWith(".js")) {
-      let scope = Object.entries(scopes).find(([s]) =>
-        req.url?.startsWith(`/${s}`)
+      const scope = Object.entries(scopes).find(([s]) =>
+        req.url?.startsWith(`/${s}`),
       );
       // Expand url with found scope
-      let url = scope ? req.url.replace(scope[0], scope[1]) : req.url;
+      const url = scope ? req.url.replace(scope[0], scope[1]) : req.url;
       let filename = path.join(root, url);
       try {
         const stat = await fs.stat(filename);

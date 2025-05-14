@@ -1,5 +1,5 @@
-import { describe, it, expect } from "./scope/index.js";
 import { equalArrays, equals, matchArrays } from "./equal.js";
+import { describe, expect, it } from "./scope/index.js";
 
 describe("Equality", () => {
   it("compares objects", () => {
@@ -11,7 +11,7 @@ describe("Equality", () => {
     expect(equals(1, 1)).toBe(true);
     expect(equals(1, -1)).toBe(false);
     expect(equals(0, -0)).toBe(false);
-    expect(equals(NaN, NaN)).toBe(true);
+    expect(equals(Number.NaN, Number.NaN)).toBe(true);
   });
 
   it("compares arrays", () => {

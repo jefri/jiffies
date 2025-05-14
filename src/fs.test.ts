@@ -3,7 +3,7 @@ import {
   ObjectFileSystemAdapter,
   RecordFileSystemAdapter,
 } from "./fs.js";
-import { describe, it, expect, beforeEach } from "./scope/index.js";
+import { beforeEach, describe, expect, it } from "./scope/index.js";
 import { cleanState } from "./scope/state.js";
 
 describe("FileSystem", () => {
@@ -90,10 +90,10 @@ describe("FileSystem", () => {
       });
       expect([
         ...Object.keys(
-          (fsAdapter as unknown as { fs: Record<string, string> }).fs
+          (fsAdapter as unknown as { fs: Record<string, string> }).fs,
         ),
       ]).toEqual(["/deep/hello", "/deep/bonjour", "/other_file"]);
-      let fs = new FileSystem(fsAdapter);
+      const fs = new FileSystem(fsAdapter);
 
       const deep = await fs.stat("/deep");
       expect(deep.isDirectory()).toBe(true);

@@ -1,4 +1,5 @@
-import { Properties } from "./types/css.js";
+import { assertExists } from "../assert.js";
+import type { Properties } from "./types/css.js";
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");
@@ -17,11 +18,11 @@ export type DomAttrs = {
   }>;
 };
 
-export type Attrs<E extends Omit<Element, "update">, S = {}> = Partial<
+export type Attrs<E extends Omit<Element, "update">, S = object> = Partial<
   Omit<E, "style"> & S & DomAttrs
 >;
 
-export type DenormAttrs<E extends Omit<Element, "update">, S = {}> =
+export type DenormAttrs<E extends Omit<Element, "update">, S = object> =
   | Attrs<E, S>
   | DenormChildren;
 
@@ -37,7 +38,7 @@ export type DOMUpdates<E extends Element = Element> =
   | DenormChildren[];
 
 function isAttrs<E extends Element>(
-  attrs: DenormAttrs<E> | undefined
+  attrs: DenormAttrs<E> | undefined,
 ): attrs is Attrs<E> {
   if (!attrs) {
     return false;
@@ -51,7 +52,7 @@ function isAttrs<E extends Element>(
 export function normalizeArguments<E extends Element>(
   attrs?: DenormAttrs<E>,
   children: DenormChildren[] = [],
-  defaultAttrs: Attrs<E> = {}
+  defaultAttrs: Attrs<E> = {},
 ): [Attrs<E>, DenormChildren[]] {
   let attributes: Attrs<E>;
   if (isAttrs(attrs)) {
@@ -76,60 +77,58 @@ export function up<E extends Element>(
 export function update(
   element: Omit<Element, "update">,
   attrs: Attrs<Element>,
-  children: DenormChildren[]
+  children: DenormChildren[],
 ): Element {
   // Track events, to remove later
-  const $events = (element[Events] ??= new Map<string, EventHandler>());
+  element[Events] ??= new Map<string, EventHandler>();
+  const $events = element[Events];
   const { style = {}, events = {}, ...rest } = attrs;
 
-  Object.entries(events as NonNullable<typeof attrs.events>).forEach(
-    ([k, v]) => {
-      if (v === null) {
-        if ($events.has(k)) {
-          const listener = $events.get(k)!;
-          element.removeEventListener(k, listener);
-        }
-      } else if (v !== undefined) {
-        element.addEventListener(k as keyof ElementEventMap, v);
-        $events.set(k, v);
+  for (const [k, v] of Object.entries(
+    events as NonNullable<typeof attrs.events>,
+  )) {
+    if (v === null) {
+      if ($events.has(k)) {
+        const listener = assertExists($events.get(k));
+        element.removeEventListener(k, listener);
       }
+    } else if (v !== undefined) {
+      element.addEventListener(k as keyof ElementEventMap, v);
+      $events.set(k, v);
     }
-  );
+  }
 
   const _style = (element as { style?: Partial<CSSStyleDeclaration> }).style;
   if (_style) {
     if (typeof style === "string") {
       _style.cssText = style;
     } else {
-      Object.entries(style as Partial<CSSStyleDeclaration>).forEach(
-        ([k, v]) => {
-          // @ts-ignore Object.entries is unable to statically look into args
-          _style[k] = v;
-        }
-      );
+      for (const [k, v] of Object.entries(
+        style as Partial<CSSStyleDeclaration>,
+      )) {
+        // @ts-ignore Object.entries is unable to statically look into args
+        _style[k] = v;
+      }
     }
   }
 
-  Object.entries(rest).forEach(([k, v]) => {
+  for (let [k, v] of Object.entries(rest)) {
     if (k === "class") {
       v = Array.isArray(v)
         ? v
         : (typeof v === "string" ? v : `${v}`).split(/\s+/m);
-      (v as string[])
-        .filter((s) => s !== "")
-        .forEach((c) => {
-          if (c.startsWith("!")) {
-            element.classList.remove(c.substring(1));
-          } else {
-            element.classList.add(c);
-          }
-        });
-      return;
+      for (const c of (v as string[]).filter((s) => s !== "")) {
+        if (c.startsWith("!")) {
+          element.classList.remove(c.substring(1));
+        } else {
+          element.classList.add(c);
+        }
+      }
     }
 
     const useNamespace =
       element.namespaceURI &&
-      element.namespaceURI != "http://www.w3.org/1999/xhtml";
+      element.namespaceURI !== "http://www.w3.org/1999/xhtml";
     const remove = !v;
 
     if (useNamespace) {
@@ -149,11 +148,11 @@ export function update(
         element.setAttribute(k, v as string);
       }
     }
-  });
+  }
 
   if (children?.length > 0) {
     element.replaceChildren(
-      ...(children[0] === CLEAR ? [] : (children as (string | Node)[]))
+      ...(children[0] === CLEAR ? [] : (children as (string | Node)[])),
     );
   }
 

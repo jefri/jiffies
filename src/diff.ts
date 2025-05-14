@@ -1,5 +1,5 @@
 import { range } from "./range.js";
-import { isSome, None, Option, Some } from "./result.js";
+import { None, type Option, Some, isSome } from "./result.js";
 
 export const DiffA = Symbol("A");
 export const DiffB = Symbol("B");
@@ -27,22 +27,20 @@ function doDiff<T>(va: T, vb: T, k: DiffIndex): Option<DiffList | DiffEntry> {
     const d = diffObject(va, vb, k);
     if (d.children.length === 0) {
       return None();
-    } else {
-      return Some(d);
     }
+    return Some(d);
   }
   if (Object.is(va, vb)) {
     return None();
-  } else {
-    // @ts-ignore
-    return { key: k, left: va, right: vb };
   }
+  // @ts-ignore
+  return { key: k, left: va, right: vb };
 }
 
 function diffArray<T>(
   a: Partial<T>[],
   b: Partial<T>[],
-  key: DiffIndex
+  key: DiffIndex,
 ): Option<DiffList> {
   const indexes = Math.max(a.length, b.length);
   const children = range(0, indexes)
@@ -54,7 +52,7 @@ function diffArray<T>(
 function diffObject<T>(
   a: Partial<T>,
   b: Partial<T>,
-  key: DiffIndex = ""
+  key: DiffIndex = "",
 ): DiffList {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   const children = [...keys]
@@ -69,16 +67,16 @@ function diffObject<T>(
 
 export function diff<T>(
   a: Partial<T>,
-  b: Partial<T>
+  b: Partial<T>,
 ): (DiffEntry | DiffList)[] {
-  if (typeof a != "object" && !Object.is(a, b)) {
+  if (typeof a !== "object" && !Object.is(a, b)) {
     // @ts-ignore
     return [{ key: "", left: a, right: b }];
   }
   return (
     Array.isArray(a)
       ? // @ts-ignore
-        diffArray(a, b, "") ?? { children: [] }
+        (diffArray(a, b, "") ?? { children: [] })
       : diffObject(a, b, "")
   ).children;
 }

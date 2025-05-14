@@ -1,4 +1,4 @@
-import { EventHandler } from "../dom/dom.js";
+import type { EventHandler } from "../dom/dom.js";
 import { FC } from "../dom/fc.js";
 import { option, select } from "../dom/html.js";
 
@@ -16,7 +16,7 @@ export const Select = FC<{
     select(
       { name, events: { change }, disabled },
       ...options.map(([v, name]) =>
-        option({ value: v, selected: value === v }, `${name}`)
-      )
-    )
+        option({ value: v, selected: value === v }, `${name}`),
+      ),
+    ),
 );

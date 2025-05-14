@@ -1,5 +1,5 @@
-import { a } from "../html.js"
-import { Router } from "./router.js"
+import { a } from "../html.js";
+import { Router } from "./router.js";
 
 export interface Link {
   href: string;
@@ -10,5 +10,5 @@ export interface Link {
 export const link = ({ href, link }: Link) =>
   a(
     { href: Router.href(href), events: { click: Router.navigate(href) } },
-    link
+    link,
   );

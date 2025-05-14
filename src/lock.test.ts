@@ -1,10 +1,10 @@
-import { describe, it, expect } from "./scope/index.js";
 import { lock } from "./lock.js";
+import { describe, expect, it } from "./scope/index.js";
 
 describe("Lock", () => {
-  it("prevents reentry", function () {
+  it("prevents reentry", () => {
     let count = 0;
-    const inc = lock(function () {
+    const inc = lock(() => {
       if (count > 4) {
         return;
       }

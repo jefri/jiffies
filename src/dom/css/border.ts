@@ -1,6 +1,6 @@
-import { Properties } from "../types/css.js"
-import { Side, Size } from "./constants.js"
-import { isSide, getSize, getSide } from "./core.js"
+import type { Properties } from "../types/css.js";
+import type { Side, Size } from "./constants.js";
+import { getSide, getSize, isSide } from "./core.js";
 
 export function rounded(size: Size = "", side: Side = "") {
   if (isSide(size)) {
@@ -37,8 +37,8 @@ export function border({
 
 export function inset(
   width: 0 | 1 | 2 | 4 | 8,
-  color1: string = "gray",
-  color2: string = "lightgray"
+  color1 = "gray",
+  color2 = "lightgray",
 ) {
   return {
     ...border({ side: "tl", width, color: color1, radius: "none" }),

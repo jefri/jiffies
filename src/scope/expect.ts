@@ -21,27 +21,27 @@ export class Matcher<T> {
       equals(this.actual, expected, partial),
       () =>
         `Objects are not equivalent: ${display(this.actual)}, ${display(
-          expected
-        )}`
+          expected,
+        )}`,
     );
   }
 
   toMatch(expected: RegExp | string) {
     assert(
       typeof this.actual === "string",
-      () => "Must have string for regexp match"
+      () => "Must have string for regexp match",
     );
     // @ts-expect-error
     const actual: string = this.actual;
     if (typeof expected === "string") {
       assert(
         actual.includes(expected),
-        () => `${actual} does not include ${expected}`
+        () => `${actual} does not include ${expected}`,
       );
     } else {
       assert(
         expected.test(actual),
-        () => `${actual} does not match ${expected}`
+        () => `${actual} does not match ${expected}`,
       );
     }
   }
@@ -54,8 +54,8 @@ export class Matcher<T> {
         equals(actual, v, true),
         () =>
           `Comparing ${k}, properties not equal: ${display(actual)}, ${display(
-            v
-          )}`
+            v,
+          )}`,
       );
     }
   }
@@ -63,7 +63,7 @@ export class Matcher<T> {
   toBeNull() {
     assert(
       this.actual === null,
-      () => `Expected null, got ${JSON.stringify(this.actual)}`
+      () => `Expected null, got ${JSON.stringify(this.actual)}`,
     );
   }
 
@@ -77,7 +77,7 @@ export class Matcher<T> {
     } catch (e) {
       assert(
         ((e as { message?: string }).message ?? "").match(message) !== null,
-        () => `Expected thrown message to match ${message}, got ${e}`
+        () => `Expected thrown message to match ${message}, got ${e}`,
       );
       didThrow = true;
     }
@@ -105,22 +105,22 @@ export class NotMatcher<T> {
       !equals(this.actual, expected),
       () =>
         `Objects are equivalent: ${JSON.stringify(
-          this.actual
-        )}, ${JSON.stringify(expected)}`
+          this.actual,
+        )}, ${JSON.stringify(expected)}`,
     );
   }
 
   toMatch(expected: RegExp | string) {
     assert(
       typeof this.actual === "string",
-      () => "Must have string for regexp match"
+      () => "Must have string for regexp match",
     );
     // @ts-expect-error
     const actual: string = this.actual;
     if (typeof expected === "string") {
       assert(
         !actual.includes(expected),
-        () => `${actual} includes ${expected}`
+        () => `${actual} includes ${expected}`,
       );
     } else {
       assert(!expected.test(actual), () => `${actual} matches ${expected}`);
@@ -135,14 +135,14 @@ export class NotMatcher<T> {
         !equals(actual, v),
         () =>
           `Comparing ${k}, properties equal: ${JSON.stringify(
-            actual
-          )}, ${JSON.stringify(v)}`
+            actual,
+          )}, ${JSON.stringify(v)}`,
       );
     }
   }
 
   toBeNull() {
-    assert(this.actual !== null, () => `Expected not null`);
+    assert(this.actual !== null, () => "Expected not null");
   }
 
   toThrow(message = "") {
@@ -155,7 +155,7 @@ export class NotMatcher<T> {
     } catch (e) {
       assert(
         ((e as { message?: string }).message ?? "").match(message) !== null,
-        () => `Expected thrown message to match ${message}, got ${e}`
+        () => `Expected thrown message to match ${message}, got ${e}`,
       );
       didThrow = true;
     }

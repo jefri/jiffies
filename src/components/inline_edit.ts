@@ -19,7 +19,8 @@ export const InlineEdit = FC<
   },
   InlineEditState
 >("inline-edit", (el, { mode = Mode.VIEW, value, events }) => {
-  const state = (el[State] ??= { mode, value });
+  el[State] ??= { mode, value };
+  const state = el[State];
 
   const render = () => {
     switch (state.mode) {
@@ -43,7 +44,7 @@ export const InlineEdit = FC<
           },
         },
       },
-      state.value ?? ""
+      state.value ?? "",
     );
 
   const edit = () => {
@@ -63,7 +64,7 @@ export const InlineEdit = FC<
         type: "text",
         value: state.value,
       }),
-      "\u00a0" // Hack to get the span to take up space
+      "\u00a0", // Hack to get the span to take up space
     );
     setTimeout(() => {
       edit.dispatchEvent(new Event("focus"));

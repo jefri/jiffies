@@ -1,5 +1,5 @@
-import { DOMElement } from "../dom.js";
-import { Link } from "./link.js";
+import type { DOMElement } from "../dom.js";
+import type { Link } from "./link.js";
 
 export interface Router {
   current?: string;
@@ -7,9 +7,9 @@ export interface Router {
   (target: DOMElement): DOMElement;
 }
 
-let baseURI = `${document.baseURI}`;
+const baseURI = `${document.baseURI}`;
 const normalizeHref = () => {
-  return location.href + "/" === baseURI ? baseURI : location.href;
+  return `${location.href}/` === baseURI ? baseURI : location.href;
 };
 
 let globalRouter: Router;
@@ -40,7 +40,7 @@ export const Router = {
         (
           links.find(({ href }) => link.endsWith(href))?.target ??
           (() => undefined)
-        )()
+        )(),
       );
       return true;
     };

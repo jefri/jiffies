@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import {
+  type IncomingMessage,
+  type RequestListener,
+  type ServerResponse,
   createServer,
-  IncomingMessage,
-  RequestListener,
-  ServerResponse,
-} from "http";
-import { AddressInfo } from "net";
-import * as path from "path";
+} from "node:http";
+import type { AddressInfo } from "node:net";
+import * as path from "node:path";
 import { info } from "../../log.js";
 import { findIndex } from "./apps.js";
 import { cssFileServer } from "./css.js";
@@ -28,13 +28,13 @@ export interface ServerConfig {
   scopes?: Record<`@${string}`, string>;
 }
 
-export interface MiddlewareFactory {
-  (config: ServerConfig): Promise<StaticMiddleware>;
-}
+export type MiddlewareFactory = (
+  config: ServerConfig,
+) => Promise<StaticMiddleware>;
 
-export interface StaticMiddleware {
-  (req: IncomingMessage): Promise<undefined | (() => Promise<StaticResponse>)>;
-}
+export type StaticMiddleware = (
+  req: IncomingMessage,
+) => Promise<undefined | (() => Promise<StaticResponse>)>;
 
 const notFound: MiddlewareFactory =
   async ({ root }) =>
@@ -43,7 +43,7 @@ const notFound: MiddlewareFactory =
       // path.join(path.dirname(FLAGS.argv0), "404.html"),
       path.join(root, "404.html"),
       undefined,
-      404
+      404,
     );
 
 const BASE_MIDDLEWARES: MiddlewareFactory[] = [
@@ -65,7 +65,7 @@ const error = (res: ServerResponse, message: string) => {
 
 const sendContent = async (
   res: ServerResponse,
-  { content, contentType, contentLength }: StaticResponse
+  { content, contentType, contentLength }: StaticResponse,
 ) => {
   res.setHeader("Content-Length", `${contentLength}`);
   res.setHeader("Content-Type", contentType);
@@ -84,10 +84,10 @@ const log = (req: IncomingMessage) => {
 
 export const makeServer = async (
   config: ServerConfig,
-  middlewares: MiddlewareFactory[] = []
+  middlewares: MiddlewareFactory[] = [],
 ) => {
   const handlers = await Promise.all(
-    [...middlewares, ...BASE_MIDDLEWARES].map(async (m) => m(config))
+    [...middlewares, ...BASE_MIDDLEWARES].map(async (m) => m(config)),
   );
   const middlewareHandler: RequestListener = async (req, res) => {
     log(req);
@@ -105,7 +105,7 @@ export const makeServer = async (
         res.end();
       }
     } catch (e) {
-      error(res, (e as Error).message + "\n" + (e as Error).stack);
+      error(res, `${(e as Error).message}\n${(e as Error).stack}`);
     }
   };
 

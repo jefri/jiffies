@@ -1,9 +1,9 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { contentResponse } from "./response.js";
-import { MiddlewareFactory } from "./index.js";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 // @ts-ignore
 import sass from "sass";
+import type { MiddlewareFactory } from "./index.js";
+import { contentResponse } from "./response.js";
 const { compileStringAsync } = sass;
 
 function render(source: string) {
@@ -17,7 +17,7 @@ function render(source: string) {
 async function compile(
   filename: string,
   root: string,
-  vars: string
+  vars: string,
 ): Promise<string> {
   vars = vars.substring(1).replaceAll("=", ":");
   filename = filename.replaceAll("\\", "/"); // Normalize for dart-sass
@@ -33,12 +33,14 @@ export const cssFileServer: MiddlewareFactory =
   async (req) => {
     const Url = new URL(req.url ?? "/", `http://${req.headers.host}`);
     if (Url.pathname.endsWith(".css")) {
-      let scope = Object.entries(scopes).find(([s]) =>
-        Url.pathname.startsWith(`/${s}`)
+      const scope = Object.entries(scopes).find(([s]) =>
+        Url.pathname.startsWith(`/${s}`),
       );
       // Expand url with found scope
       Url.protocol = "file";
-      let url = scope ? Url.pathname.replace(scope[0], scope[1]) : Url.pathname;
+      const url = scope
+        ? Url.pathname.replace(scope[0], scope[1])
+        : Url.pathname;
       let filename = path.join(root, url);
       try {
         const stat = await fs.stat(filename);
@@ -55,7 +57,7 @@ export const cssFileServer: MiddlewareFactory =
           const css = await compile(
             filename.replace(root, "."),
             root,
-            Url.search
+            Url.search,
           );
           return render(css);
         }

@@ -22,7 +22,10 @@ import "./lock.test.js";
 import "./result.test.js";
 import "./observable/observable.test.js";
 
-if (typeof process != "undefined" && process.env.CI?.toLowerCase() !== "true") {
+if (
+  typeof process !== "undefined" &&
+  process.env.CI?.toLowerCase() !== "true"
+) {
   (async () => {
     const components = await import("./components/test.js");
     const dom = await import("./dom/test.js");

@@ -1,6 +1,6 @@
-import { Stats } from "fs";
-import * as fs from "fs/promises";
-import { StaticResponse } from ".";
+import type { Stats } from "node:fs";
+import * as fs from "node:fs/promises";
+import type { StaticResponse } from ".";
 
 const MIME_TYPES: Record<string, string> = {
   js: "text/javascript",
@@ -43,7 +43,7 @@ export const contentResponse =
     const contentBuffer = Buffer.from(content, CHARSET);
     return {
       content: contentBuffer,
-      contentType: contentType.split(";")[0] + "; charset=" + CHARSET,
+      contentType: `${contentType.split(";")[0]}; charset=${CHARSET}`,
       status,
       contentLength: contentBuffer.length,
     };

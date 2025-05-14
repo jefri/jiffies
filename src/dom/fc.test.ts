@@ -1,6 +1,6 @@
-import { describe, it, expect } from "../scope/index.js";
-import { button, div, form, input, label, small } from "./html.js";
+import { describe, expect, it } from "../scope/index.js";
 import { FC } from "./fc.js";
+import { button, div, form, input, label, small } from "./html.js";
 
 describe("FC", () => {
   it("creates FCs", () => {
@@ -10,7 +10,7 @@ describe("FC", () => {
       required?: boolean;
       type?: string;
     }>("fc-input", (el, attrs, children) =>
-      label(attrs.placeholder ?? attrs.name, input(attrs), ...children)
+      label(attrs.placeholder ?? attrs.name, input(attrs), ...children),
     );
 
     const f = form(
@@ -26,13 +26,13 @@ describe("FC", () => {
           name: "lastName",
           placeholder: "Last Name",
           required: true,
-        })
+        }),
       ),
       Input(
         { name: "email", type: "email", placeholder: "E-Mail" },
-        small("We'll never share your information.")
+        small("We'll never share your information."),
       ),
-      button({ type: "submit" }, "Submit")
+      button({ type: "submit" }, "Submit"),
     );
 
     // document.body.appendChild(f);

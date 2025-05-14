@@ -2,7 +2,7 @@ import {
   Err,
   None,
   Ok,
-  Result,
+  type Result,
   Some,
   unwrap,
   unwrapOr,
@@ -95,10 +95,7 @@ describe("Result", () => {
   });
 
   it("allows Result<void> with Ok()", () => {
-    let a: Result<void>;
-    a = Ok();
+    const a: Result<void> = Ok();
     expect(unwrap(a)).toBe(undefined);
   });
 });
-
-export {};

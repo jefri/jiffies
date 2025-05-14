@@ -32,6 +32,7 @@
     "all": "npm run lint && npm run test && npm run build"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/node": "^20.8.9"
   },
   "dependencies": {

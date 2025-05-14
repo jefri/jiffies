@@ -1,9 +1,9 @@
 import { State } from "../dom/fc.js";
 import { div } from "../dom/html.js";
-import { describe, it, expect } from "../scope/index.js";
+import { describe, expect, it } from "../scope/index.js";
 import VirtualScroll, {
   arrayAdapter,
-  VirtualScrollProps,
+  type VirtualScrollProps,
 } from "./virtual_scroll.js";
 
 describe("VirtualScroll", () => {

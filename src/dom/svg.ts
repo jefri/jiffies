@@ -1,4 +1,4 @@
-import { DenormAttrs, DenormChildren, up } from "./dom.js"
+import { type DenormAttrs, type DenormChildren, up } from "./dom.js";
 
 const makeSVGElement =
   <K extends keyof SVGElementTagNameMap>(name: K) =>
@@ -9,7 +9,7 @@ const makeSVGElement =
     up(
       document.createElementNS("http://www.w3.org/2000/svg", name),
       attrs,
-      ...children
+      ...children,
     );
 
 export const a = makeSVGElement("a");

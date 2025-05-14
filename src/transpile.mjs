@@ -12,7 +12,7 @@ const tsmap = new Map();
 
 export async function transpile(
   /** @type string */ url,
-  /** @type {() => Promise<{toString(): string}>} */ get
+  /** @type {() => Promise<{toString(): string}>} */ get,
 ) {
   if (!tsmap.has(url)) {
     const source = ts.transpile(
@@ -20,7 +20,7 @@ export async function transpile(
       compilerOptions,
       url,
       undefined,
-      url
+      url,
     );
     tsmap.set(url, source);
   }

@@ -36,7 +36,7 @@ describe("diff", () => {
   it("diffs objects in an array", () => {
     const diffed = diff(
       [{ a: { b: 1 } }, { a: { b: 2 } }, { a: { b: 3 } }],
-      [{ a: { b: 1 } }, { a: { b: 4 } }, { a: { b: 3 } }]
+      [{ a: { b: 1 } }, { a: { b: 4 } }, { a: { b: 3 } }],
     );
     expect(diffed).toEqual([
       {

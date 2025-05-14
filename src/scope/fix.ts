@@ -10,7 +10,7 @@ export function fix<T>(n: T): T {
     // A primitive
     return n;
   }
-  if (n instanceof Array) {
+  if (Array.isArray(n)) {
     // @ts-ignore
     return n.map(fix) as T;
   }
@@ -20,10 +20,13 @@ export function fix<T>(n: T): T {
 
 function mapreduce<T, U>(
   fn: (t: T) => U,
-  iter: Record<string, T>
+  iter: Record<string, T>,
 ): Record<string, U> {
   return Object.entries(iter).reduce(
-    (acc, [k, v]) => ((acc[k] = fn(v)), acc),
-    {} as Record<string, U>
+    (acc, [k, v]) => {
+      acc[k] = fn(v);
+      return acc;
+    },
+    {} as Record<string, U>,
   );
 }

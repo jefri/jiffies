@@ -1,12 +1,13 @@
 import { takeWhile } from "./generator.js";
-import { describe, it, expect } from "./scope/index.js";
+import { describe, expect, it } from "./scope/index.js";
 
 describe("Generator", () => {
   it("takes from a generator until a predicate", () => {
     const generator = function* () {
       let i = 1;
       while (true) {
-        yield (i = i * 2);
+        i = i * 2;
+        yield i;
       }
     };
     const filter = () => {
