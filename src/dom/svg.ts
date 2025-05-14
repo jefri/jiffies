@@ -1,4 +1,4 @@
-import { type DenormAttrs, type DenormChildren, up } from "./dom.js";
+import { type DenormAttrs, type DenormChildren, up } from "./dom.ts";
 
 const makeSVGElement =
   <K extends keyof SVGElementTagNameMap>(name: K) =>

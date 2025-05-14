@@ -1,4 +1,4 @@
-import { type Width, Widths } from "./constants.js";
+import { type Width, Widths } from "./constants.ts";
 
 export function width(amount: Width, block?: "inline") {
   if (amount === undefined && Widths[block as Width] !== undefined) {

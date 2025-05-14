@@ -1,6 +1,6 @@
-import { display } from "../display.js";
-import { FC } from "../dom/fc.js";
-import { fieldset, input, label } from "../dom/html.js";
+import { display } from "../display.ts";
+import { FC } from "../dom/fc.ts";
+import { fieldset, input, label } from "../dom/html.ts";
 
 let buttonBarId = 1;
 const nextId = () => buttonBarId++;

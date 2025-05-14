@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { MiddlewareFactory } from "./index.js";
-import { fileResponse } from "./response.js";
+import type { MiddlewareFactory } from "./index.ts";
+import { fileResponse } from "./response.ts";
 
 /**
  * Searches up the request path until the first index is found.

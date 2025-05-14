@@ -1,5 +1,5 @@
-import { assertExists } from "../assert.js";
-import type { Properties } from "./types/css.js";
+import { assertExists } from "../assert.ts";
+import type { Properties } from "./types/css.ts";
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");

@@ -1,4 +1,4 @@
-import { NodeFileSystem } from "./fs_node.js";
+import { NodeFileSystem } from "./fs_node.ts";
 
 const fs = new NodeFileSystem();
 

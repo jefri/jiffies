@@ -1,6 +1,6 @@
-import { width } from "../dom/css/sizing.js";
-import { FC, State } from "../dom/fc.js";
-import { input, span } from "../dom/html.js";
+import { width } from "../dom/css/sizing.ts";
+import { FC, State } from "../dom/fc.ts";
+import { input, span } from "../dom/html.ts";
 
 const Mode = { VIEW: 0, EDIT: 1 };
 
@@ -62,7 +62,7 @@ export const InlineEdit = FC<
             events.change((target as HTMLInputElement)?.value ?? ""),
         },
         type: "text",
-        value: state.value,
+        value: state.value ?? "",
       }),
       "\u00a0", // Hack to get the span to take up space
     );

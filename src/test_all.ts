@@ -1,6 +1,6 @@
 // This file must be .js for imports to run. Unused imports in .ts files are
 // discarded during transpilation.
-import { describe, expect, it } from "./scope/index.js";
+import { describe, expect, it } from "./scope/index.ts";
 
 describe("Test executor", () => {
   it("matches equality", () => {
@@ -12,23 +12,23 @@ describe("Test executor", () => {
   });
 });
 
-import "./context.test.js";
-import "./diff.test.js";
-import "./equal.test.js";
-import "./flags.test.js";
-import "./fs.test.js";
-import "./generator.test.js";
-import "./lock.test.js";
-import "./result.test.js";
-import "./observable/observable.test.js";
+import "./context.test.ts";
+import "./diff.test.ts";
+import "./equal.test.ts";
+import "./flags.test.ts";
+import "./fs.test.ts";
+import "./generator.test.ts";
+import "./lock.test.ts";
+import "./result.test.ts";
+import "./observable/observable.test.ts";
 
 if (
   typeof process !== "undefined" &&
   process.env.CI?.toLowerCase() !== "true"
 ) {
   (async () => {
-    const components = await import("./components/test.js");
-    const dom = await import("./dom/test.js");
+    const components = await import("./components/test.ts");
+    const dom = await import("./dom/test.ts");
     await components.loadTests();
     await dom.loadTests();
   })();

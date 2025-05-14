@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { MiddlewareFactory } from "./index.js";
-import { fileResponse } from "./response.js";
+import type { MiddlewareFactory } from "./index.ts";
+import { fileResponse } from "./response.ts";
 
 export const staticFileServer: MiddlewareFactory =
   async ({ root, scopes = {} }) =>

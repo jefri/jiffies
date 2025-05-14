@@ -1,4 +1,4 @@
-import { type DenormAttrs, type DenormChildren, up } from "./dom.js";
+import { type DenormAttrs, type DenormChildren, up } from "./dom.ts";
 
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>
@@ -85,7 +85,6 @@ export const optgroup = makeHTMLElement("optgroup");
 export const option = makeHTMLElement("option");
 export const output = makeHTMLElement("output");
 export const p = makeHTMLElement("p");
-export const param = makeHTMLElement("param");
 export const picture = makeHTMLElement("picture");
 export const pre = makeHTMLElement("pre");
 export const progress = makeHTMLElement("progress");

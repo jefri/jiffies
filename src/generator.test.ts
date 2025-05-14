@@ -1,5 +1,5 @@
-import { takeWhile } from "./generator.js";
-import { describe, expect, it } from "./scope/index.js";
+import { takeWhile } from "./generator.ts";
+import { describe, expect, it } from "./scope/index.ts";
 
 describe("Generator", () => {
   it("takes from a generator until a predicate", () => {

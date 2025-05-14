@@ -1,4 +1,4 @@
-import { type Display, display } from "./display.js";
+import { type Display, display } from "./display.ts";
 
 export type Log = (message: Display, data?: object) => void;
 

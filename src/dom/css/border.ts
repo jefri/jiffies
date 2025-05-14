@@ -1,6 +1,6 @@
-import type { Properties } from "../types/css.js";
-import type { Side, Size } from "./constants.js";
-import { getSide, getSize, isSide } from "./core.js";
+import type { Properties } from "../types/css.ts";
+import type { Side, Size } from "./constants.ts";
+import { getSide, getSize, isSide } from "./core.ts";
 
 export function rounded(size: Size = "", side: Side = "") {
   if (isSide(size)) {

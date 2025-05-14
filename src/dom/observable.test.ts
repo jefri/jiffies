@@ -1,9 +1,9 @@
-import { Subject, map } from "../observable/observable.js";
-import { describe, it } from "../scope/describe.js";
-import { expect } from "../scope/expect.js";
-import type { DOMUpdates } from "./dom.js";
-import { div, span } from "./html.js";
-import { O } from "./observable.js";
+import { Subject, map } from "../observable/observable.ts";
+import { describe, it } from "../scope/describe.ts";
+import { expect } from "../scope/expect.ts";
+import type { DOMUpdates } from "./dom.ts";
+import { div, span } from "./html.ts";
+import { O } from "./observable.ts";
 
 describe("DOM Observable", () => {
   it("updates a dom node with observable results", async () => {

@@ -1,6 +1,6 @@
-import { describe, expect, it } from "../scope/index.js";
-import { FC } from "./fc.js";
-import { button, div, form, input, label, small } from "./html.js";
+import { describe, expect, it } from "../scope/index.ts";
+import { FC } from "./fc.ts";
+import { button, div, form, input, label, small } from "./html.ts";
 
 describe("FC", () => {
   it("creates FCs", () => {

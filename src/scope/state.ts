@@ -1,4 +1,4 @@
-import type { Awaitable } from "../awaitable.js";
+import type { Awaitable } from "../awaitable.ts";
 
 export function cleanState<State extends {}>(
   init: () => Awaitable<State>,

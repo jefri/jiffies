@@ -1,9 +1,9 @@
-export function debounce<CB extends (...args: unknown[]) => unknown>(
-  fn: CB,
+export function debounce<T extends unknown[]>(
+  fn: (...args: T) => void,
   ms = 32,
-) {
+): (...args: T) => void {
   let timer: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<CB>) => {
+  return (...args: T) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       clearTimeout(timer);

@@ -1,8 +1,8 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { info } from "../../log.js";
-import type { MiddlewareFactory } from "./index.js";
-import { contentResponse } from "./response.js";
+import { info } from "../../log.ts";
+import type { MiddlewareFactory } from "./index.ts";
+import { contentResponse } from "./response.ts";
 
 const findSiteMap = async (root: string, prefix = root) => {
   if (root.startsWith("node_modules")) {

@@ -12,16 +12,16 @@ export function Some<T>(t: Option<T> | T): Option<T> {
 }
 
 export const isOk = <T, E>(t: Result<T, E>): t is Ok<T> =>
-  Object.hasOwn(t, "ok");
+  t && Object.hasOwn(t, "ok");
 export const isErr = <T, E>(e: Result<T, E>): e is Err<E> =>
-  Object.hasOwn(e, "err");
+  e && Object.hasOwn(e, "err");
 export const isResult = <T, E>(t: Result<T, E>): t is Result<T, E> =>
   isOk(t) || isErr(t);
 
 // Beware: Order matters for correct inference.
-export function Ok<T, E>(ok: Ok<T>): T;
-export function Ok<T, E>(t?: T): Ok<T>;
-export function Ok<T, E>(t: T | Ok<T>): T | Ok<T> {
+export function Ok<T, E = unknown>(ok: Ok<T>): T;
+export function Ok<T, E = unknown>(t?: T): Ok<T>;
+export function Ok<T, E = unknown>(t: T | Ok<T>): T | Ok<T> {
   return isOk(t as Ok<T>)
     ? (t as Ok<T>).ok
     : ({
@@ -50,7 +50,7 @@ export function Err<T, E>(e: E | string | Err<E>): E | Err<E> {
 
 export function unwrap<T, E>(result: Result<T, E>): T | never;
 export function unwrap<O>(some: Option<O>): O | never;
-export function unwrap<T, E>(t: Result<T, E> | Option<T>): T | never {
+export function unwrap<T, E>(t: Result<T, E> | Option<T> | T): T | never {
   if (isNone(t as Option<T>)) {
     throw new Error("Attempted to unwrap None");
   }
@@ -60,7 +60,7 @@ export function unwrap<T, E>(t: Result<T, E> | Option<T>): T | never {
   if (isOk(t as Result<T, E>)) {
     return Ok(t as Ok<T>);
   }
-  throw Err(t);
+  return t as T;
 }
 
 export function unwrapOr<T, E>(result: Result<T, E>, def: T): T;

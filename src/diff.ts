@@ -1,5 +1,5 @@
-import { range } from "./range.js";
-import { None, type Option, Some, isSome } from "./result.js";
+import { range } from "./range.ts";
+import { None, type Option, Some, isSome } from "./result.ts";
 
 export const DiffA = Symbol("A");
 export const DiffB = Symbol("B");
@@ -24,7 +24,7 @@ function doDiff<T>(va: T, vb: T, k: DiffIndex): Option<DiffList | DiffEntry> {
     return diffArray(va, vb, k);
   }
   if (typeof va === "object") {
-    const d = diffObject(va, vb, k);
+    const d = diffObject(va ?? {}, vb ?? {}, k);
     if (d.children.length === 0) {
       return None();
     }

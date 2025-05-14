@@ -1,7 +1,7 @@
 const locks = new WeakSet<CallableFunction>();
 
 export function lock<CF extends (...args: unknown[]) => unknown>(fn: CF): CF {
-  const lockingFn: CF = (...args: Parameters<CF>): ReturnType<CF> => {
+  const lockingFn = (...args: unknown[]): ReturnType<CF> => {
     let ret: ReturnType<CF>;
     let ex = null;
     if (!locks.has(fn)) {
@@ -19,5 +19,5 @@ export function lock<CF extends (...args: unknown[]) => unknown>(fn: CF): CF {
     // @ts-ignore 2454 can't track ret's assignment
     return ret;
   };
-  return lockingFn;
+  return lockingFn as CF;
 }

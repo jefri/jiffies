@@ -1,5 +1,5 @@
-import { equalArrays, equals, matchArrays } from "./equal.js";
-import { describe, expect, it } from "./scope/index.js";
+import { equalArrays, equals, matchArrays } from "./equal.ts";
+import { describe, expect, it } from "./scope/index.ts";
 
 describe("Equality", () => {
   it("compares objects", () => {

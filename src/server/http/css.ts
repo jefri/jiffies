@@ -2,8 +2,8 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 // @ts-ignore
 import sass from "sass";
-import type { MiddlewareFactory } from "./index.js";
-import { contentResponse } from "./response.js";
+import type { MiddlewareFactory } from "./index.ts";
+import { contentResponse } from "./response.ts";
 const { compileStringAsync } = sass;
 
 function render(source: string) {

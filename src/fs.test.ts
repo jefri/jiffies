@@ -2,9 +2,9 @@ import {
   FileSystem,
   ObjectFileSystemAdapter,
   RecordFileSystemAdapter,
-} from "./fs.js";
-import { beforeEach, describe, expect, it } from "./scope/index.js";
-import { cleanState } from "./scope/state.js";
+} from "./fs.ts";
+import { beforeEach, describe, expect, it } from "./scope/index.ts";
+import { cleanState } from "./scope/state.ts";
 
 describe("FileSystem", () => {
   describe("Writing", () => {

@@ -8,7 +8,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { FileSystem, type FileSystemAdapter, type Stats } from "./fs.js";
+import { FileSystem, type FileSystemAdapter, type Stats } from "./fs.ts";
 
 export class NodeFileSystem extends FileSystem {
   constructor(cd: string = process.cwd()) {

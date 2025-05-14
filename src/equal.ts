@@ -7,8 +7,11 @@ export function compareArrays<T>(
 
 export const equalArrays = compareArrays(Object.is);
 
-export const matchArrays: <T>(a: T[], b: T[], partial?: boolean) => boolean =
-  compareArrays(equals);
+// export const matchArrays: <T>(a: T[], b: T[], partial?: boolean) => boolean = compareArrays(equals);
+export function matchArrays<T>(a: T[], b: T[], partial?: boolean): boolean {
+  return compareArrays<T>(equals)(a, b, partial);
+}
+
 
 export function asArray<T = unknown>(a: Record<string, T>): [string, T][] {
   return Object.entries(a).sort((a, b) => a[0].localeCompare(b[0]));
@@ -26,8 +29,8 @@ export const matchObjects = (
   return true;
 };
 
-export function equals<T>(a: T, b: T, partial: boolean): boolean;
-export function equals<T>(a: T[], b: T[], partial: boolean): boolean;
+export function equals<T>(a: T, b: T, partial?: boolean): boolean;
+export function equals<T>(a: T[], b: T[], partial?: boolean): boolean;
 export function equals<T>(a: T | T[], b: T | T[], partial = false): boolean {
   // runtime type checking
   if (a === null && a === b) return true;
@@ -40,7 +43,12 @@ export function equals<T>(a: T | T[], b: T | T[], partial = false): boolean {
       if (Array.isArray(a) && Array.isArray(b)) {
         return matchArrays(a, b, partial);
       }
-      return matchObjects(a, b, partial);
+      return matchObjects(
+        a ?? {},
+        // @ts-ignore
+        b,
+        partial,
+      );
     case "function":
       return a.name === (b as unknown as CallableFunction).name;
     default:

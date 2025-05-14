@@ -1,6 +1,6 @@
-import { debounce } from "../debounce.js";
-import { FC, State } from "../dom/fc.js";
-import { div } from "../dom/html.js";
+import { debounce } from "../debounce.ts";
+import { FC, State } from "../dom/fc.ts";
+import { div } from "../dom/html.ts";
 
 export interface VirtualScrollSettings {
   minIndex: number;
@@ -125,10 +125,10 @@ interface VirtualScrollState<T, U extends HTMLElement = HTMLElement> {
   rows: U[];
 }
 
-// export interface VirtualScroll<T, U extends HTMLElement> {
-//   state: VirtualScrollState<T>;
-//   rows: UHTMLElement<U>[];
-// }
+export interface VirtualScroll<T, U extends HTMLElement> {
+  state: VirtualScrollState<T>;
+  rows: U[];
+}
 
 export const VirtualScroll = FC<
   VirtualScrollProps<unknown, HTMLElement>,
@@ -154,7 +154,10 @@ export const VirtualScroll = FC<
 
   const viewportElement = div({
     style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
-    events: { scroll: debounce(scrollTo, 0) },
+    events: {
+      // @ts-ignore
+      scroll: debounce(scrollTo, 0),
+    },
   });
   setTimeout(() => {
     viewportElement.scroll({ top: state.scrollTop });

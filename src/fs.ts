@@ -1,4 +1,4 @@
-import { assertExists } from "./assert.js";
+import { assertExists } from "./assert.ts";
 
 // Treat localstorage as a file system
 export type PathLike = string;

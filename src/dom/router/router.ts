@@ -1,5 +1,5 @@
-import type { DOMElement } from "../dom.js";
-import type { Link } from "./link.js";
+import type { DOMElement } from "../dom.ts";
+import type { Link } from "./link.ts";
 
 export interface Router {
   current?: string;

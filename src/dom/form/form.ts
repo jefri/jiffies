@@ -1,5 +1,5 @@
-import type { Attrs, DenormChildren } from "../dom.js";
-import { form, input, label, option, select } from "../html.js";
+import type { Attrs, DenormChildren } from "../dom.ts";
+import { form, input, label, option, select } from "../html.ts";
 import type {
   FormAttributes,
   InputAttributes,
@@ -19,7 +19,13 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
   return form(attrs as Attrs<HTMLFormElement>, ...children);
 };
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
-  label(input(attrs as Attrs<HTMLInputElement>), ...children);
+  label(
+    input(
+      // @ts-ignore
+      attrs as Attrs<HTMLInputElement>,
+    ),
+    ...children,
+  );
 
 export const Select = (
   attrs: { options: string[] | object; selected?: string } & SelectAttributes &
@@ -29,7 +35,7 @@ export const Select = (
     { style: attrs.style ?? {} },
     select(
       { events: attrs.events ?? {} },
-      ...prepareOptions(attrs.options, attrs.selected).map(Option),
+      ...prepareOptions(attrs.options as string[], attrs.selected).map(Option),
     ),
   );
 export const Button = () => {};
@@ -55,7 +61,10 @@ const prepareOptions = (
           : { value, ...label },
       );
 export const Option = (attrs: OptionAttributes) =>
-  option(attrs as Attrs<HTMLOptionElement>);
+  option(
+    // @ts-ignore
+    attrs as Attrs<HTMLOptionElement>,
+  );
 
 export const Dropdown = (
   attrs: SelectAttributes | { selected?: string },

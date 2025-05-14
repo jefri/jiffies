@@ -1,5 +1,5 @@
-import { article, button, div, main, small } from "../html.js";
-import { Form, Input } from "./form.js";
+import { article, button, div, main, small } from "../html.ts";
+import { Form, Input } from "./form.ts";
 
 export const App = () =>
   main(

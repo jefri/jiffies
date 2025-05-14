@@ -1,18 +1,18 @@
-import { assertExists } from "../assert.js";
-import type { Display } from "../display.js";
-import { DEFAULT_LOGGER, type Logger } from "../log.js";
+import { assertExists } from "../assert.ts";
+import type { Display } from "../display.ts";
+import { DEFAULT_LOGGER, type Logger } from "../log.ts";
 
 export interface FullSubscriber<T, E> {
   // (t: T): void | Promise<undefined>;
-  next?: (t: T) => undefined | Promise<undefined>;
-  error?: (e: E) => undefined | Promise<undefined>;
-  complete?: () => undefined | Promise<undefined>;
+  next?: (t: T) => void | Promise<void>;
+  error?: (e: E) => void | Promise<void>;
+  complete?: () => void | Promise<void>;
 }
 
 export type Subscriber<T, E> =
   | FullSubscriber<T, E>
   // | EventSubscriber<T, E>
-  | ((t: T) => undefined | Promise<undefined>);
+  | ((t: T) => void | Promise<void>);
 
 export interface Subscription {
   // (): void;
@@ -104,13 +104,11 @@ export const Observable = {
 };
 
 interface Scheduler {
-  execute(
-    fn: () => (undefined | Promise<undefined>)[],
-  ): undefined | Promise<undefined>;
+  execute(fn: () => (void | Promise<void>)[]): void | Promise<void>;
 }
 
 export const AsyncScheduler: Scheduler = {
-  execute(fn: () => Promise<undefined>[]): Promise<undefined> {
+  execute(fn: () => Promise<void>[]): Promise<void> {
     return Promise.all(fn()).then(() => undefined);
   },
 };
@@ -120,6 +118,11 @@ export const SyncScheduler: Scheduler = {
     fn();
   },
 };
+
+let DefaultScheduler = SyncScheduler;
+export function setDefaultScheduler(scheduler: Scheduler) {
+  DefaultScheduler = scheduler;
+}
 
 export class Subject<T, E = unknown, T2 = T>
   implements FullSubscriber<T, E>, Observable<T, E>
@@ -141,7 +144,7 @@ export class Subject<T, E = unknown, T2 = T>
     return !this.hot;
   }
 
-  constructor(scheduler: Scheduler) {
+  constructor(scheduler: Scheduler = DefaultScheduler) {
     this.scheduler = scheduler;
   }
 
@@ -149,7 +152,7 @@ export class Subject<T, E = unknown, T2 = T>
     if (this.cold) this.#coldWaiters.add(fn);
   }
 
-  next(t: T | T2): undefined | Promise<undefined> {
+  next(t: T | T2): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call next on a completed subject");
     return this.scheduler.execute(() =>
@@ -157,7 +160,7 @@ export class Subject<T, E = unknown, T2 = T>
     );
   }
 
-  error(e: E): undefined | Promise<undefined> {
+  error(e: E): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call error on a completed subject");
     return this.scheduler.execute(() =>
@@ -165,7 +168,7 @@ export class Subject<T, E = unknown, T2 = T>
     );
   }
 
-  complete(): undefined | Promise<undefined> {
+  complete(): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call complete on a completed subject");
     this.#complete = true;
@@ -304,8 +307,8 @@ export function eventListener<E extends Event>() {
 }
 
 export class EventHandler<E extends Event> extends Subject<E> {
-  private readonly eventFn: (e: E) => undefined | Promise<undefined>;
-  constructor(eventFn: (e: E) => undefined | Promise<undefined>) {
+  private readonly eventFn: (e: E) => void | Promise<void>;
+  constructor(eventFn: (e: E) => void | Promise<void>) {
     super(AsyncScheduler);
     this.eventFn = eventFn;
   }
@@ -337,12 +340,12 @@ class MapOperator<T, U, E>
   implements FullSubscriber<T, E>, Observable<U, E>
 {
   private readonly mapFn: (t: T) => U;
-  constructor(mapFn: (t: T) => U, scheduler: Scheduler = AsyncScheduler) {
-    super(scheduler);
+  constructor(mapFn: (t: T) => U) {
+    super(SyncScheduler);
     this.mapFn = mapFn;
   }
 
-  next(t: T): undefined | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     return super.next(this.mapFn(t));
   }
 }
@@ -351,11 +354,13 @@ class FilterOperator<T, E>
   extends Subject<T, E>
   implements FullSubscriber<T, E>, Observable<T, E>
 {
-  constructor(private readonly filterFn: (t: T) => boolean) {
-    super();
+  private readonly filterFn: (t: T) => boolean;
+  constructor(filterFn: (t: T) => boolean) {
+    super(SyncScheduler);
+    this.filterFn = filterFn;
   }
 
-  next(t: T): undefined | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     return this.filterFn(t) ? super.next(t) : undefined;
   }
 }
@@ -365,14 +370,14 @@ class DistinctOperator<T, E>
   implements FullSubscriber<T, E>, Observable<T, E>
 {
   #prior: T | undefined = undefined;
+  private readonly distinctFn: (t1: T, t2: T) => boolean;
 
-  constructor(
-    private readonly distinctFn: (t1: T, t2: T) => boolean = Object.is,
-  ) {
-    super();
+  constructor(distinctFn: (t1: T, t2: T) => boolean = Object.is) {
+    super(SyncScheduler);
+    this.distinctFn = distinctFn;
   }
 
-  next(t: T): undefined | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     if (this.#prior === undefined) {
       this.#prior = t;
       return super.next(t);
@@ -387,11 +392,10 @@ class DistinctOperator<T, E>
 }
 
 class ReduceOperator<A, T, E> extends BehaviorSubject<A, E, T> {
-  constructor(
-    private readonly fn: (acc: A, t: T) => A,
-    init: A,
-  ) {
+  private readonly fn: (acc: A, t: T) => A;
+  constructor(fn: (acc: A, t: T) => A, init: A) {
     super(init);
+    this.fn = fn;
   }
 
   next(t: T) {
@@ -429,7 +433,7 @@ export class TapOperator<T, E> extends Subject<T, E> {
 }
 
 class FirstOperator<T, E> extends Subject<T, E> {
-  next(t: T): undefined | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     const next = super.next(t);
     this.complete();
     return next;
@@ -443,7 +447,7 @@ class LastOperator<T, E = Error> extends Subject<T, E> {
     this.#latest = t;
   }
 
-  complete(): undefined | Promise<undefined> {
+  complete(): void | Promise<void> {
     if (this.#latest !== undefined) {
       super.next(this.#latest);
     }

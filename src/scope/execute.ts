@@ -4,13 +4,13 @@ import {
   beforeall,
   beforeeach,
   rootCases,
-} from "./describe.js";
+} from "./describe.ts";
 import type {
   TestFailed,
   TestPassed,
   TestResult,
   TestSummary,
-} from "./scope.js";
+} from "./scope.ts";
 
 export async function execute(cases = rootCases()): Promise<TestResult> {
   const beforeallfn = cases[beforeall] ?? (() => {});

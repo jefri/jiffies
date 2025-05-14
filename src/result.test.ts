@@ -7,9 +7,9 @@ import {
   unwrap,
   unwrapOr,
   unwrapOrElse,
-} from "./result.js";
-import { describe, it } from "./scope/describe.js";
-import { expect } from "./scope/expect.js";
+} from "./result.ts";
+import { describe, it } from "./scope/describe.ts";
+import { expect } from "./scope/expect.ts";
 
 describe("Result", () => {
   it("converts Nones", () => {

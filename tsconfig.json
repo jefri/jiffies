@@ -4,7 +4,8 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "emitDeclarationOnly": true,
     "allowJs": true,
     "checkJs": true,
     "jsx": "react",
@@ -23,6 +24,7 @@
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true,
     "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
 
     "incremental": true,
     "outDir": "lib/esm",

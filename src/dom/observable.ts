@@ -1,4 +1,4 @@
-import type { Observable } from "../observable/observable.js";
+import type { Observable } from "../observable/observable.ts";
 
 export function O<E extends Element>(
   element: E,

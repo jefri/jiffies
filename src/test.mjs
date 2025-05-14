@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { parse } from "./flags.js";
-import { onConsole } from "./scope/display/console.js";
-import { asXML } from "./scope/display/junit.js";
-import { execute } from "./scope/execute.js";
+import { parse } from "./flags.ts";
+import { onConsole } from "./scope/display/console.ts";
+import { asXML } from "./scope/display/junit.ts";
+import { execute } from "./scope/execute.ts";
 
 async function main() {
-  await import("./test_all.js");
+  await import("./test_all.ts");
 
   (async () => {
     const results = await execute();
