@@ -21,6 +21,7 @@ export interface StaticResponse {
   content: Buffer;
   contentType: string;
   contentLength?: number;
+  headers?: Map<string, string>;
 }
 
 export interface ServerConfig {
@@ -65,10 +66,15 @@ const error = (res: ServerResponse, message: string) => {
 
 const sendContent = async (
   res: ServerResponse,
-  { content, contentType, contentLength }: StaticResponse,
+  { content, contentType, contentLength, headers }: StaticResponse,
 ) => {
   res.setHeader("Content-Length", `${contentLength}`);
   res.setHeader("Content-Type", contentType);
+  if (headers) {
+    for (const [header, value] of headers.entries()) {
+      res.setHeader(header.toLowerCase(), value);
+    }
+  }
   await res.write(content);
   res.end();
   return true;

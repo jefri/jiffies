@@ -1,10 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-// @ts-ignore
-import sass from "sass";
 import type { MiddlewareFactory } from "./index.ts";
 import { contentResponse } from "./response.ts";
-const { compileStringAsync } = sass;
 
 function render(source: string) {
   // Replace `from "@scope` with `from "/@scope`, for browsers
@@ -12,17 +9,6 @@ function render(source: string) {
   //   .replaceAll(`from "@`, 'from "/@')
   //   .replaceAll(`import("@`, 'import("/@');
   return contentResponse(source, "text/css");
-}
-
-async function compile(
-  filename: string,
-  root: string,
-  vars: string,
-): Promise<string> {
-  vars = vars.substring(1).replaceAll("=", ":");
-  filename = filename.replaceAll("\\", "/"); // Normalize for dart-sass
-  const sassString = `// Using variables: ${vars}\n${vars};\n@import "${filename}";`;
-  return (await compileStringAsync(sassString, { loadPaths: [root] })).css;
 }
 
 /**
@@ -54,11 +40,7 @@ export const cssFileServer: MiddlewareFactory =
       try {
         const stat = await fs.stat(filename);
         if (stat.isFile()) {
-          const css = await compile(
-            filename.replace(root, "."),
-            root,
-            Url.search,
-          );
+          const css = (await fs.readFile(filename)).toString();
           return render(css);
         }
       } catch {}

@@ -21,6 +21,9 @@ export const staticFileServer: MiddlewareFactory =
       const stat = await fs.stat(filename);
       return stat.isDirectory() ? undefined : fileResponse(filename, stat);
     } catch (e) {
+      if ((e as { code?: string }).code === "ENOENT") {
+        return fileResponse(filename, undefined, 404);
+      }
       console.error(e);
       return undefined;
     }

@@ -11,8 +11,8 @@ export const parse = (parseArgs: string[]) => {
   const advance = () => parseArgs[index++];
 
   const parseLong = (arg: string) => {
-    if (arg.substr(0, 3) === "no-") {
-      flags.set(arg.substr(3), false);
+    if (arg.substring(0, 3) === "no-") {
+      flags.set(arg.substring(3), false);
     } else if (!arg.includes("=")) {
       flags.set(arg, true);
     } else {
