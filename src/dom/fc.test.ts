@@ -9,7 +9,7 @@ describe("FC", () => {
       name: string;
       required?: boolean;
       type?: string;
-    }>("fc-input", (el, attrs, children) =>
+    }>("fc-input", (_el, attrs, children) =>
       label(attrs.placeholder ?? attrs.name, input(attrs), ...children),
     );
 

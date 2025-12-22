@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import {
+  createServer,
   type IncomingMessage,
   type RequestListener,
   type ServerResponse,
-  createServer,
 } from "node:http";
 import type { AddressInfo } from "node:net";
 import * as path from "node:path";

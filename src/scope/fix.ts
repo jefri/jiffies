@@ -3,7 +3,7 @@
  */
 export function fix<T>(n: T): T {
   if (typeof n === "number") {
-    // @ts-ignore
+    // @ts-expect-error
     return +n.toFixed(1) as T;
   }
   if (n !== Object(n)) {
@@ -11,10 +11,10 @@ export function fix<T>(n: T): T {
     return n;
   }
   if (Array.isArray(n)) {
-    // @ts-ignore
+    // @ts-expect-error
     return n.map(fix) as T;
   }
-  // @ts-ignore
+  // @ts-expect-error
   return mapreduce<T>(fix, n as Record<string, T>);
 }
 

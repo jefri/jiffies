@@ -155,7 +155,7 @@ export const VirtualScroll = FC<
   const viewportElement = div({
     style: { height: `${state.viewportHeight}px`, overflowY: "scroll" },
     events: {
-      // @ts-ignore
+      // @ts-expect-error
       scroll: debounce(scrollTo, 0),
     },
   });

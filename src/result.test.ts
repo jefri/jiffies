@@ -40,7 +40,7 @@ describe("Result", () => {
     expect(b).toMatchObject({ message: "a error" });
 
     // Assign Err to Result
-    const c: Result<string> = a;
+    const _c: Result<string> = a;
   });
 
   it("converts Oks", () => {
@@ -49,7 +49,7 @@ describe("Result", () => {
     expect(b).toBe("a ok");
 
     // Assign ok to Result
-    const c: Result<string> = a;
+    const _c: Result<string> = a;
   });
 
   it("unwraps", () => {

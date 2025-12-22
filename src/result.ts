@@ -19,8 +19,8 @@ export const isResult = <T, E>(t: Result<T, E>): t is Result<T, E> =>
   isOk(t) || isErr(t);
 
 // Beware: Order matters for correct inference.
-export function Ok<T, E = unknown>(ok: Ok<T>): T;
-export function Ok<T, E = unknown>(t?: T): Ok<T>;
+export function Ok<T, _E = unknown>(ok: Ok<T>): T;
+export function Ok<T, _E = unknown>(t?: T): Ok<T>;
 export function Ok<T, E = unknown>(t: T | Ok<T>): T | Ok<T> {
   return isOk(t as Ok<T>)
     ? (t as Ok<T>).ok
@@ -33,9 +33,9 @@ export function Ok<T, E = unknown>(t: T | Ok<T>): T | Ok<T> {
 }
 
 // Beware: Order matters for correct inference.
-export function Err<T, E>(e: Err<E>): E;
-export function Err<T, E>(e: E): Err<E>;
-export function Err<T, E>(e: string): Err<E>;
+export function Err<_T, E>(e: Err<E>): E;
+export function Err<_T, E>(e: E): Err<E>;
+export function Err<_T, E>(e: string): Err<E>;
 export function Err<T, E>(e: E | string | Err<E>): E | Err<E> {
   return (
     ((e as Err<E>).err as E) ??
@@ -79,7 +79,7 @@ export function unwrapOr<T, E>(t: Some<T> | Result<T, E>, def: T): T {
 }
 
 export function unwrapOrElse<T, E>(result: Result<T, E>, def: () => T): T;
-export function unwrapOrElse<T, E>(some: Some<T>, def: () => T): T;
+export function unwrapOrElse<T, _E>(some: Some<T>, def: () => T): T;
 export function unwrapOrElse<T, E>(t: Result<T, E> | Some<T>, def: () => T): T {
   if (isNone(t as Some<T>)) {
     return def();

@@ -17,7 +17,7 @@ describe("VirtualScroll", () => {
     };
 
     const scroll = VirtualScroll(
-      // @ts-ignore
+      // @ts-expect-error
       props,
     );
 

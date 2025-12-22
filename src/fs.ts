@@ -214,7 +214,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
     });
   }
 
-  mkdir(path: string): Promise<void> {
+  mkdir(_path: string): Promise<void> {
     return Promise.resolve();
   }
 

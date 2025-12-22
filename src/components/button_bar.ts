@@ -7,13 +7,13 @@ const nextId = () => buttonBarId++;
 
 const ButtonBar = FC<{
   // T extends Display
-  // @ts-ignore TODO(TFC)
+  // @ts-expect-error TODO(TFC)
   value: T;
-  // @ts-ignore TODO(TFC)
+  // @ts-expect-error TODO(TFC)
   values: T[];
-  // @ts-ignore TODO(TFC)
+  // @ts-expect-error TODO(TFC)
   events: { onSelect: (current: T) => void };
-}>("button-bar", (el, { value, values, events }) => {
+}>("button-bar", (_el, { value, values, events }) => {
   const name = `button-bar-${nextId()}`;
   return fieldset(
     { class: "input-group" },

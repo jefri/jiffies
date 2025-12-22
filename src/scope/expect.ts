@@ -70,7 +70,7 @@ export class Matcher<T> {
   toThrow(message = "") {
     let didThrow = false;
 
-    let result: unknown = undefined;
+    let result: unknown;
     try {
       // @ts-expect-error
       result = this.actual();
@@ -148,7 +148,7 @@ export class NotMatcher<T> {
   toThrow(message = "") {
     let didThrow = false;
 
-    let result: unknown = undefined;
+    let result: unknown;
     try {
       // @ts-expect-error
       result = this.actual();

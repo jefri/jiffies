@@ -18,7 +18,7 @@ export const findIndex: MiddlewareFactory =
       try {
         const stat = await fs.stat(index);
         return fileResponse(index, stat);
-      } catch (e) {
+      } catch (_e) {
         filename = path.dirname(filename);
       }
     }

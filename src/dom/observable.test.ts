@@ -1,4 +1,4 @@
-import { Subject, map } from "../observable/observable.ts";
+import { map, Subject } from "../observable/observable.ts";
 import { describe, it } from "../scope/describe.ts";
 import { expect } from "../scope/expect.ts";
 import type { DOMUpdates } from "./dom.ts";

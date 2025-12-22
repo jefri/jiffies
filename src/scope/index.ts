@@ -1,5 +1,3 @@
-export { expect } from "./expect.ts";
-export { fix } from "./fix.ts";
 export {
   afterAll,
   afterEach,
@@ -9,3 +7,5 @@ export {
   describe,
   it,
 } from "./describe.ts";
+export { expect } from "./expect.ts";
+export { fix } from "./fix.ts";

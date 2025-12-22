@@ -1,8 +1,8 @@
 import {
   copyFile,
   mkdir,
-  readFile,
   readdir,
+  readFile,
   rm,
   stat,
   writeFile,

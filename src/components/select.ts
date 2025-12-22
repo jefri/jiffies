@@ -12,7 +12,7 @@ export const Select = FC<{
   options: [string, string][];
 }>(
   "jiffies-select",
-  (el, { name, events: { change }, disabled, value, options }) =>
+  (_el, { name, events: { change }, disabled, value, options }) =>
     select(
       { name, events: { change }, disabled },
       ...options.map(([v, name]) =>

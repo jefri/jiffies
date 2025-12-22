@@ -1,5 +1,5 @@
 import { type Context, Enter, Exit, using } from "./context.ts";
-import { Err, Ok, isErr, isOk, unwrap } from "./result.ts";
+import { Err, isErr, isOk, Ok, unwrap } from "./result.ts";
 import { describe, it } from "./scope/describe.ts";
 import { expect } from "./scope/expect.ts";
 

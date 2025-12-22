@@ -23,10 +23,10 @@
         import("./components/test.js"),
       ]);
 
-      import { execute } from "./scope/execute.ts";
-      import { displayStatistics } from "./scope/display/dom.ts";
       import { onConsole } from "./scope/display/console.ts";
+      import { displayStatistics } from "./scope/display/dom.ts";
       import { asXML } from "./scope/display/junit.ts";
+      import { execute } from "./scope/execute.ts";
 
       function write(id, value) {
         const start = `--- START_${id.toUpperCase()} ---`;
@@ -46,7 +46,7 @@
       })();
     </script>
     <script type="module">
-      import { nav, ul, li, strong } from "./dom/html.ts";
+      import { li, nav, strong, ul } from "./dom/html.ts";
       import { link } from "./dom/router/link.ts";
 
       const getUrls = async () => {
@@ -65,7 +65,7 @@
       const urls = (await getUrls()).map((url) => ({
         href: url.replace("index.html", ""),
         link:
-          url.match(/\/(?<link>[^\/]+)(\/index\.html)?$/)?.groups["link"] ??
+          url.match(/\/(?<link>[^/]+)(\/index\.html)?$/)?.groups.link ??
           url.replace("index.html", ""),
       }));
 

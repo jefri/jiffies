@@ -15,7 +15,7 @@ export function displayStatistics(
       return makeHTMLLogger(
         `Executed ${executed} of ${getTotalCases()}; ${failed} failed.`,
       );
-    } catch (e) {
+    } catch (_e) {
       return DEFAULT_LOGGER;
     }
   })();

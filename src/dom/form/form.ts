@@ -21,7 +21,7 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
   label(
     input(
-      // @ts-ignore
+      // @ts-expect-error
       attrs as Attrs<HTMLInputElement>,
     ),
     ...children,
@@ -62,7 +62,7 @@ const prepareOptions = (
       );
 export const Option = (attrs: OptionAttributes) =>
   option(
-    // @ts-ignore
+    // @ts-expect-error
     attrs as Attrs<HTMLOptionElement>,
   );
 
@@ -78,8 +78,8 @@ export const Radios = () => {};
 export const Checks = () => {};
 export const Switches = () => {};
 
-export const Radio = (attrs: Omit<InputAttributes, "type">) =>
+export const Radio = (_attrs: Omit<InputAttributes, "type">) =>
   Input({ type: "radio" });
-export const Checkbox = (attrs: Omit<InputAttributes, "type">) =>
+export const Checkbox = (_attrs: Omit<InputAttributes, "type">) =>
   Input({ type: "checkbox" });
 export const Switch = () => Checkbox({ role: "switch" });

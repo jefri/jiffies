@@ -1,4 +1,4 @@
-import { Err, Ok, type Result, isResult } from "./result.ts";
+import { Err, isResult, Ok, type Result } from "./result.ts";
 
 export const Enter = Symbol("Context Enter");
 export const Exit = Symbol("Context Exit");
@@ -20,7 +20,7 @@ export function using<T, E extends Error, C extends Context>(
   context: C | (() => C) | Operation<T, E, C>,
   operation?: Operation<T, E, C>,
   normalizeError: (e: Error | unknown) => Err<E> = (e) =>
-    // @ts-ignore
+    // @ts-expect-error
     Err(e),
 ): Result<T, E> {
   if (typeof context === "function") {
@@ -57,7 +57,7 @@ export async function asyncUsing<T, E extends Error, C extends Context>(
     result = isResult(op as Result<T, E>) ? (op as Result<T, E>) : Ok(op as T);
   } catch (e) {
     result = normalizeError(
-      // @ts-ignore
+      // @ts-expect-error
       e,
     );
   } finally {

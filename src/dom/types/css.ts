@@ -1,8 +1,9 @@
-export type PropertyValue<TValue> = TValue extends Array<infer AValue>
-  ? Array<AValue extends infer TUnpacked & {} ? TUnpacked : AValue>
-  : TValue extends infer TUnpacked & {}
-    ? TUnpacked
-    : TValue;
+export type PropertyValue<TValue> =
+  TValue extends Array<infer AValue>
+    ? Array<AValue extends infer TUnpacked & {} ? TUnpacked : AValue>
+    : TValue extends infer TUnpacked & {}
+      ? TUnpacked
+      : TValue;
 
 export type Fallback<T> = { [P in keyof T]: T[P] | NonNullable<T[P]>[] };
 
@@ -5805,7 +5806,7 @@ export interface StandardProperties<
 
 export interface SvgProperties<
   TLength = (string & {}) | 0,
-  TTime = string & {},
+  _TTime = string & {},
 > {
   alignmentBaseline?: Property.AlignmentBaseline | undefined;
   baselineShift?: Property.BaselineShift<TLength> | undefined;
@@ -9196,11 +9197,11 @@ export namespace Property {
 
   export type AlignmentBaseline =
     | Globals
-    | "after-edge"
+    // | "auto" # Deprecated
+    // | "after-edge"
+    // | "before-edge"
     | "alphabetic"
-    | "auto"
     | "baseline"
-    | "before-edge"
     | "central"
     | "hanging"
     | "ideographic"
@@ -9311,8 +9312,8 @@ export namespace Property {
 
 export namespace AtRule {
   export interface CounterStyle<
-    TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
   > {
     additiveSymbols?: string | undefined;
     fallback?: string | undefined;
@@ -9327,8 +9328,8 @@ export namespace AtRule {
   }
 
   export interface CounterStyleHyphen<
-    TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
   > {
     "additive-symbols"?: string | undefined;
     fallback?: string | undefined;
@@ -9352,7 +9353,10 @@ export namespace AtRule {
     TTime = string & {},
   > = Fallback<CounterStyleHyphen<TLength, TTime>>;
 
-  export interface FontFace<TLength = (string & {}) | 0, TTime = string & {}> {
+  export interface FontFace<
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
+  > {
     MozFontFeatureSettings?: FontFeatureSettings | undefined;
     ascentOverride?: AscentOverride | undefined;
     descentOverride?: DescentOverride | undefined;
@@ -9371,8 +9375,8 @@ export namespace AtRule {
   }
 
   export interface FontFaceHyphen<
-    TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
   > {
     "ascent-override"?: AscentOverride | undefined;
     "descent-override"?: DescentOverride | undefined;
@@ -9400,7 +9404,7 @@ export namespace AtRule {
     TTime = string & {},
   > = Fallback<FontFaceHyphen<TLength, TTime>>;
 
-  export interface Page<TLength = (string & {}) | 0, TTime = string & {}> {
+  export interface Page<TLength = (string & {}) | 0, _TTime = string & {}> {
     bleed?: Bleed<TLength> | undefined;
     marks?: Marks | undefined;
     size?: Size<TLength> | undefined;
@@ -9408,7 +9412,7 @@ export namespace AtRule {
 
   export interface PageHyphen<
     TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TTime = string & {},
   > {
     bleed?: Bleed<TLength> | undefined;
     marks?: Marks | undefined;
@@ -9425,15 +9429,18 @@ export namespace AtRule {
     TTime = string & {},
   > = Fallback<PageHyphen<TLength, TTime>>;
 
-  export interface Property<TLength = (string & {}) | 0, TTime = string & {}> {
+  export interface Property<
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
+  > {
     inherits?: Inherits | undefined;
     initialValue?: string | undefined;
     syntax?: string | undefined;
   }
 
   export interface PropertyHyphen<
-    TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TLength = (string & {}) | 0,
+    _TTime = string & {},
   > {
     inherits?: Inherits | undefined;
     "initial-value"?: string | undefined;
@@ -9450,7 +9457,7 @@ export namespace AtRule {
     TTime = string & {},
   > = Fallback<PropertyHyphen<TLength, TTime>>;
 
-  export interface Viewport<TLength = (string & {}) | 0, TTime = string & {}> {
+  export interface Viewport<TLength = (string & {}) | 0, _TTime = string & {}> {
     height?: Height<TLength> | undefined;
     maxHeight?: MaxHeight<TLength> | undefined;
     maxWidth?: MaxWidth<TLength> | undefined;
@@ -9467,7 +9474,7 @@ export namespace AtRule {
 
   export interface ViewportHyphen<
     TLength = (string & {}) | 0,
-    TTime = string & {},
+    _TTime = string & {},
   > {
     height?: Height<TLength> | undefined;
     "max-height"?: MaxHeight<TLength> | undefined;

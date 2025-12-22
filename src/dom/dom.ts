@@ -106,7 +106,7 @@ export function update(
       for (const [k, v] of Object.entries(
         style as Partial<CSSStyleDeclaration>,
       )) {
-        // @ts-ignore Object.entries is unable to statically look into args
+        // @ts-expect-error Object.entries is unable to statically look into args
         _style[k] = v;
       }
     }

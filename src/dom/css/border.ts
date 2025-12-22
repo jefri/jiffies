@@ -12,7 +12,7 @@ export function rounded(size: Size = "", side: Side = "") {
     if (curr === "") {
       prev.borderRadius = sized;
     } else {
-      // @ts-ignore
+      // @ts-expect-error
       prev[`border${curr}Radius`] = sized;
     }
     return prev;
@@ -20,11 +20,11 @@ export function rounded(size: Size = "", side: Side = "") {
 }
 
 export function border({
-  side = "",
-  style = "solid",
-  radius = "",
-  width = 1,
-  color = "black",
+  side: _side = "",
+  style: _style = "solid",
+  radius: _radius = "",
+  width: _width = 1,
+  color: _color = "black",
 }: {
   side?: Side;
   style?: "solid" | "dotted" | "dashed" | "double" | "none";

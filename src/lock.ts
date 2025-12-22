@@ -16,7 +16,7 @@ export function lock<CF extends (...args: unknown[]) => unknown>(fn: CF): CF {
     if (ex !== null) {
       throw ex;
     }
-    // @ts-ignore 2454 can't track ret's assignment
+    // @ts-expect-error 2454 can't track ret's assignment
     return ret;
   };
   return lockingFn as CF;

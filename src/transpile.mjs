@@ -1,12 +1,11 @@
-// @ts-ignore
+// @ts-expect-error
 import tsBlankSpace from "ts-blank-space";
-import ts from "typescript";
 
 const tsmap = new Map();
 
 export async function transpile(
   /** @type string */ url,
-  /** @type {() => Promise<{toString(): string}>} */ get
+  /** @type {() => Promise<{toString(): string}>} */ get,
 ) {
   if (!tsmap.has(url)) {
     const source = (await get()).toString();

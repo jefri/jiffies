@@ -1,5 +1,5 @@
 import { describe, expect, it } from "../scope/index.ts";
-import { Observable, Subject, filter, map } from "./observable.ts";
+import { filter, map, Observable, Subject } from "./observable.ts";
 
 describe("Observables", () => {
   describe("basics", () => {

@@ -1,5 +1,5 @@
 import { range } from "./range.ts";
-import { None, type Option, Some, isSome } from "./result.ts";
+import { isSome, None, type Option, Some } from "./result.ts";
 
 export const DiffA = Symbol("A");
 export const DiffB = Symbol("B");
@@ -20,7 +20,7 @@ interface DiffList {
 
 function doDiff<T>(va: T, vb: T, k: DiffIndex): Option<DiffList | DiffEntry> {
   if (Array.isArray(va)) {
-    // @ts-ignore
+    // @ts-expect-error
     return diffArray(va, vb, k);
   }
   if (typeof va === "object") {
@@ -33,7 +33,7 @@ function doDiff<T>(va: T, vb: T, k: DiffIndex): Option<DiffList | DiffEntry> {
   if (Object.is(va, vb)) {
     return None();
   }
-  // @ts-ignore
+  // @ts-expect-error
   return { key: k, left: va, right: vb };
 }
 
@@ -56,7 +56,7 @@ function diffObject<T>(
 ): DiffList {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   const children = [...keys]
-    // @ts-ignore
+    // @ts-expect-error
     .map((k) => doDiff(a[k], b[k], k))
     .filter(isSome);
   return {
@@ -70,7 +70,7 @@ export function diff<T>(
   b: Partial<T>,
 ): (DiffEntry | DiffList)[] {
   if (typeof a !== "object" && !Object.is(a, b)) {
-    // @ts-ignore
+    // @ts-expect-error
     return [{ key: "", left: a, right: b }];
   }
   return (

@@ -12,7 +12,6 @@ export function matchArrays<T>(a: T[], b: T[], partial?: boolean): boolean {
   return compareArrays<T>(equals)(a, b, partial);
 }
 
-
 export function asArray<T = unknown>(a: Record<string, T>): [string, T][] {
   return Object.entries(a).sort((a, b) => a[0].localeCompare(b[0]));
 }
@@ -45,7 +44,7 @@ export function equals<T>(a: T | T[], b: T | T[], partial = false): boolean {
       }
       return matchObjects(
         a ?? {},
-        // @ts-ignore
+        // @ts-expect-error
         b,
         partial,
       );
@@ -57,10 +56,11 @@ export function equals<T>(a: T | T[], b: T | T[], partial = false): boolean {
 }
 
 // prettier-ignore
-export type Equals<T1, T2> = (<T>() => T extends T2 ? true : false) extends <
-  T,
->() => T extends T1 ? true : false
-  ? true
-  : false;
+export type Equals<T1, T2> =
+  (<T>() => T extends T2 ? true : false) extends <T>() => T extends T1
+    ? true
+    : false
+    ? true
+    : false;
 
 export type Not<B extends boolean> = B extends true ? false : true;
