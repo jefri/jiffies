@@ -1,4 +1,9 @@
-import { type DenormAttrs, type DenormChildren, up } from "./dom.ts";
+import {
+  type DenormAttrs,
+  type DenormChildren,
+  SVG_NAMESPACE_URI,
+  up,
+} from "./dom.js";
 
 const makeSVGElement =
   <K extends keyof SVGElementTagNameMap>(name: K) =>
@@ -6,11 +11,7 @@ const makeSVGElement =
     attrs?: DenormAttrs<SVGElementTagNameMap[K]>,
     ...children: DenormChildren[]
   ) =>
-    up(
-      document.createElementNS("http://www.w3.org/2000/svg", name),
-      attrs,
-      ...children,
-    );
+    up(document.createElementNS(SVG_NAMESPACE_URI, name), attrs, ...children);
 
 export const a = makeSVGElement("a");
 export const animate = makeSVGElement("animate");
