@@ -1,8 +1,14 @@
-export function debounce(fn: (...args: any[]) => any, ms = 32) {
+export function debounce<T extends unknown[]>(
+  fn: (...args: T) => void,
+  ms = 32,
+): (...args: T) => void {
   let timer: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<typeof fn>) => {
+  return (...args: T) => {
     clearTimeout(timer);
-    timer = setTimeout(() => (clearTimeout(timer), fn(...args)), ms);
+    timer = setTimeout(() => {
+      clearTimeout(timer);
+      return fn(...args);
+    }, ms);
     return timer;
   };
 }

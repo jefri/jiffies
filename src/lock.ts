@@ -1,13 +1,13 @@
-const locks = new WeakSet<Function>();
+const locks = new WeakSet<CallableFunction>();
 
-export function lock(fn: Function): Function {
-  return function (...args: unknown[]) {
-    let ret = null;
+export function lock<CF extends (...args: unknown[]) => unknown>(fn: CF): CF {
+  const lockingFn = (...args: unknown[]): ReturnType<CF> => {
+    let ret: ReturnType<CF>;
     let ex = null;
     if (!locks.has(fn)) {
       locks.add(fn);
       try {
-        ret = fn(...args);
+        ret = fn(...args) as ReturnType<CF>;
       } catch (e) {
         ex = e;
       }
@@ -15,8 +15,9 @@ export function lock(fn: Function): Function {
     locks.delete(fn);
     if (ex !== null) {
       throw ex;
-    } else {
-      return ret;
     }
+    // @ts-expect-error 2454 can't track ret's assignment
+    return ret;
   };
+  return lockingFn as CF;
 }

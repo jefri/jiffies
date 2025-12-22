@@ -1,16 +1,18 @@
-import { DEFAULT_LOGGER, Logger } from "../log.js"
+import { assertExists } from "../assert.ts";
+import type { Display } from "../display.ts";
+import { DEFAULT_LOGGER, type Logger } from "../log.ts";
 
 export interface FullSubscriber<T, E> {
   // (t: T): void | Promise<undefined>;
-  next?: (t: T) => void | Promise<undefined>;
-  error?: (e: E) => void | Promise<undefined>;
-  complete?: () => void | Promise<undefined>;
+  next?: (t: T) => void | Promise<void>;
+  error?: (e: E) => void | Promise<void>;
+  complete?: () => void | Promise<void>;
 }
 
 export type Subscriber<T, E> =
   | FullSubscriber<T, E>
   // | EventSubscriber<T, E>
-  | ((t: T) => void | Promise<undefined>);
+  | ((t: T) => void | Promise<void>);
 
 export interface Subscription {
   // (): void;
@@ -23,7 +25,7 @@ export interface Observable<T, E = unknown> {
   pipe<T1>(o1: Subscriber<T, E> & Observable<T1, E>): Observable<T1, E>;
   pipe<T1, T2>(
     o1: Subscriber<T, E> & Observable<T1, E>,
-    o2: Subscriber<T1, E> & Observable<T2, E>
+    o2: Subscriber<T1, E> & Observable<T2, E>,
   ): Observable<T2, E>;
   filter(fn: (t: T) => boolean): Observable<T, E>;
   distinct(fn?: (t1: T, t2: T) => boolean): Observable<T, E>;
@@ -45,7 +47,7 @@ export const Observable = {
         subject.complete();
         return;
       }
-      const t = ts.shift()!;
+      const t = assertExists(ts.shift());
       await subject.next(t);
       next();
     })();
@@ -53,9 +55,9 @@ export const Observable = {
   },
   combineLatest<T1, T2, E>(
     o1: Observable<T1, E>,
-    o2: Observable<T2, E>
+    o2: Observable<T2, E>,
   ): Observable<[T1, T2], E> {
-    let latestSubject = new Subject<[T1, T2], E>();
+    const latestSubject = new Subject<[T1, T2], E>();
     let o1LatestSet = false;
     let o1Latest: T1;
     let o2LatestSet = false;
@@ -77,7 +79,7 @@ export const Observable = {
       o2sub.unsubscribe();
     }
 
-    let o1sub = o1.subscribe({
+    const o1sub = o1.subscribe({
       next(t: T1) {
         o1Latest = t;
         o1LatestSet = true;
@@ -87,7 +89,7 @@ export const Observable = {
       complete,
     });
 
-    let o2sub = o2.subscribe({
+    const o2sub = o2.subscribe({
       next(t: T2) {
         o2Latest = t;
         o2LatestSet = true;
@@ -102,25 +104,31 @@ export const Observable = {
 };
 
 interface Scheduler {
-  execute(fn: () => (void | Promise<undefined>)[]): void | Promise<undefined>;
+  execute(fn: () => (void | Promise<void>)[]): void | Promise<void>;
 }
 
 export const AsyncScheduler: Scheduler = {
-  execute(fn: () => Promise<undefined>[]): Promise<undefined> {
+  execute(fn: () => Promise<void>[]): Promise<void> {
     return Promise.all(fn()).then(() => undefined);
   },
 };
 
 export const SyncScheduler: Scheduler = {
-  execute(fn: () => void[]): void {
+  execute(fn: () => undefined[]): void {
     fn();
   },
 };
 
+let DefaultScheduler = SyncScheduler;
+export function setDefaultScheduler(scheduler: Scheduler) {
+  DefaultScheduler = scheduler;
+}
+
 export class Subject<T, E = unknown, T2 = T>
   implements FullSubscriber<T, E>, Observable<T, E>
 {
-  #coldWaiters = new Set<Function>();
+  private readonly scheduler: Scheduler;
+  #coldWaiters = new Set<CallableFunction>();
   #subscribers = new Set<FullSubscriber<T, E>>();
   #complete = false;
 
@@ -136,34 +144,36 @@ export class Subject<T, E = unknown, T2 = T>
     return !this.hot;
   }
 
-  constructor(private readonly scheduler: Scheduler = AsyncScheduler) {}
+  constructor(scheduler: Scheduler = DefaultScheduler) {
+    this.scheduler = scheduler;
+  }
 
-  onWarm(fn: Function) {
+  onWarm(fn: CallableFunction) {
     if (this.cold) this.#coldWaiters.add(fn);
   }
 
-  next(t: T | T2): void | Promise<undefined> {
+  next(t: T | T2): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call next on a completed subject");
     return this.scheduler.execute(() =>
-      [...this.#subscribers].map((s) => s.next?.(t as T))
+      [...this.#subscribers].map((s) => s.next?.(t as T)),
     );
   }
 
-  error(e: E): void | Promise<undefined> {
+  error(e: E): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call error on a completed subject");
     return this.scheduler.execute(() =>
-      [...this.#subscribers].map((s) => s.error?.(e))
+      [...this.#subscribers].map((s) => s.error?.(e)),
     );
   }
 
-  complete(): void | Promise<undefined> {
+  complete(): void | Promise<void> {
     if (this.#complete)
       throw new Error("Cannot call complete on a completed subject");
     this.#complete = true;
     const finished = this.scheduler.execute(() =>
-      [...this.#subscribers].map((s) => s.complete?.())
+      [...this.#subscribers].map((s) => s.complete?.()),
     );
     this.#subscribers.clear(); // Free subscribers for garbage collection
     return finished;
@@ -179,7 +189,7 @@ export class Subject<T, E = unknown, T2 = T>
 
     this.#subscribers.add(subscriber);
 
-    [...this.#coldWaiters].forEach((w) => w());
+    for (const w of this.#coldWaiters) w();
     this.#coldWaiters.clear();
 
     return {
@@ -191,7 +201,7 @@ export class Subject<T, E = unknown, T2 = T>
   pipe<T1>(o1: Subscriber<T, E> & Observable<T1, E>): Observable<T1, E>;
   pipe<T1, T2>(
     o1: Subscriber<T, E> & Observable<T1, E>,
-    o2: Subscriber<T1, E> & Observable<T2, E>
+    o2: Subscriber<T1, E> & Observable<T2, E>,
   ): Observable<T2, E>;
   pipe(
     ...os: (Subscriber<unknown, unknown> & Observable<unknown, unknown>)[]
@@ -232,7 +242,7 @@ export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
   #current: T;
 
   constructor(t: T, scheduler?: Scheduler) {
-    super(scheduler);
+    super(scheduler ?? AsyncScheduler);
     this.#current = t;
   }
 
@@ -255,10 +265,12 @@ export class BehaviorSubject<T, E = unknown, T2 = T> extends Subject<T, E, T2> {
 }
 
 export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
+  readonly n: number;
   #history: T[] = [];
 
-  constructor(private readonly n: number, scheduler?: Scheduler) {
-    super(scheduler);
+  constructor(n: number, scheduler?: Scheduler) {
+    super(scheduler ?? SyncScheduler);
+    this.n = n;
   }
 
   next(t: T) {
@@ -275,8 +287,8 @@ export class ReplaySubject<T, E = unknown> extends Subject<T, E> {
     }
     const history = [...this.#history];
     (function send() {
-      if (history.length == 0) return;
-      const t = history.shift()!;
+      if (history.length === 0) return;
+      const t = assertExists(history.shift());
       subscriber.next?.(t);
       new Promise(send);
     })();
@@ -295,27 +307,28 @@ export function eventListener<E extends Event>() {
 }
 
 export class EventHandler<E extends Event> extends Subject<E> {
-  constructor(private readonly eventFn: (e: E) => void | Promise<undefined>) {
-    super();
+  constructor(eventFn: (e: E) => void | Promise<void>) {
+    super(AsyncScheduler);
+    this.eventFn = eventFn;
   }
 
-  next(e: E) {
+  async next(e: E): Promise<undefined> {
     e.preventDefault();
     super.next(e);
   }
 }
 
 export const watch =
-  <T, E>(logger: Logger = DEFAULT_LOGGER) =>
+  <T extends Display, E extends Display>(logger: Logger = DEFAULT_LOGGER) =>
   (observable: Observable<T, E>) => {
     observable.tap({
-      next(t: T) {
+      async next(t: T) {
         logger.info(t);
       },
-      complete() {
+      async complete() {
         logger.info("Observable completed");
       },
-      error(e: E) {
+      async error(e: E) {
         logger.warn(e);
       },
     });
@@ -325,11 +338,13 @@ class MapOperator<T, U, E>
   extends Subject<U, E, T>
   implements FullSubscriber<T, E>, Observable<U, E>
 {
-  constructor(private readonly mapFn: (t: T) => U) {
-    super();
+  private readonly mapFn: (t: T) => U;
+  constructor(mapFn: (t: T) => U) {
+    super(SyncScheduler);
+    this.mapFn = mapFn;
   }
 
-  next(t: T): void | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     return super.next(this.mapFn(t));
   }
 }
@@ -338,11 +353,13 @@ class FilterOperator<T, E>
   extends Subject<T, E>
   implements FullSubscriber<T, E>, Observable<T, E>
 {
-  constructor(private readonly filterFn: (t: T) => boolean) {
-    super();
+  private readonly filterFn: (t: T) => boolean;
+  constructor(filterFn: (t: T) => boolean) {
+    super(SyncScheduler);
+    this.filterFn = filterFn;
   }
 
-  next(t: T): void | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     return this.filterFn(t) ? super.next(t) : undefined;
   }
 }
@@ -352,19 +369,19 @@ class DistinctOperator<T, E>
   implements FullSubscriber<T, E>, Observable<T, E>
 {
   #prior: T | undefined = undefined;
+  private readonly distinctFn: (t1: T, t2: T) => boolean;
 
-  constructor(
-    private readonly distinctFn: (t1: T, t2: T) => boolean = Object.is
-  ) {
-    super();
+  constructor(distinctFn: (t1: T, t2: T) => boolean = Object.is) {
+    super(SyncScheduler);
+    this.distinctFn = distinctFn;
   }
 
-  next(t: T): void | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     if (this.#prior === undefined) {
       this.#prior = t;
       return super.next(t);
     }
-    const same = this.distinctFn(this.#prior!, t);
+    const same = this.distinctFn(assertExists(this.#prior), t);
     if (!same) {
       this.#prior = t;
       return super.next(t);
@@ -374,8 +391,10 @@ class DistinctOperator<T, E>
 }
 
 class ReduceOperator<A, T, E> extends BehaviorSubject<A, E, T> {
-  constructor(private readonly fn: (acc: A, t: T) => A, init: A) {
+  private readonly fn: (acc: A, t: T) => A;
+  constructor(fn: (acc: A, t: T) => A, init: A) {
     super(init);
+    this.fn = fn;
   }
 
   next(t: T) {
@@ -413,7 +432,7 @@ export class TapOperator<T, E> extends Subject<T, E> {
 }
 
 class FirstOperator<T, E> extends Subject<T, E> {
-  next(t: T): void | Promise<undefined> {
+  next(t: T): void | Promise<void> {
     const next = super.next(t);
     this.complete();
     return next;
@@ -427,7 +446,7 @@ class LastOperator<T, E = Error> extends Subject<T, E> {
     this.#latest = t;
   }
 
-  complete(): void | Promise<undefined> {
+  complete(): void | Promise<void> {
     if (this.#latest !== undefined) {
       super.next(this.#latest);
     }

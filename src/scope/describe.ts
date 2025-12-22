@@ -1,7 +1,7 @@
-import { assert } from "../assert.js";
-import { getLogger } from "../log.js";
-import { TestCase } from "./scope.js";
-import * as state from "./state.js";
+import { assert } from "../assert.ts";
+import { getLogger } from "../log.ts";
+import type { TestCase } from "./scope.ts";
+import * as state from "./state.ts";
 
 export const beforeall = Symbol("beforeAll");
 export const beforeeach = Symbol("beforeEach");
@@ -11,12 +11,13 @@ export const aftereach = Symbol("afterEach");
 const logger = getLogger("scope");
 
 const CASES: TestCase = {};
-let cases = [CASES];
+const cases = [CASES];
 let totalCases = 0;
 let skippedCases = 0;
 
 function push(title: string) {
-  const next = (cases[0][title] = cases[0][title] ?? {}) as TestCase;
+  cases[0][title] = cases[0][title] ?? {};
+  const next = cases[0][title] as TestCase;
   cases.unshift(next);
 }
 
@@ -36,21 +37,21 @@ export function getSkippedCases() {
   return skippedCases;
 }
 
-export function describe(title: string, block: Function) {
+export function describe(title: string, block: CallableFunction) {
   logger.debug(`describe(${title})`);
   push(title);
   block();
   pop();
 }
 
-export function it(title: string, block: Function) {
+export function it(title: string, block: CallableFunction) {
   logger.debug(`it(${title})`);
-  assert(cases[0][title] == undefined, `Block already has test ${title}`);
+  assert(cases[0][title] === undefined, `Block already has test ${title}`);
   totalCases += 1;
   cases[0][title] = block;
 }
 
-it.skip = (title: string, _block: Function) => {
+it.skip = (title: string, _block: CallableFunction) => {
   logger.debug(`it.skip(${title})`);
   totalCases += 1;
   skippedCases += 1;
@@ -74,7 +75,7 @@ export function afterAll(fn: () => void) {
 
 export function cleanState<State extends {}>(
   init: () => State,
-  runner: (action: () => void) => void = beforeEach
+  runner: (action: () => void) => void = beforeEach,
 ): State {
   return state.cleanState(init, runner);
 }

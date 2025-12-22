@@ -1,6 +1,6 @@
-import { diff } from "./diff.js";
-import { describe, it } from "./scope/describe.js";
-import { expect } from "./scope/expect.js";
+import { diff } from "./diff.ts";
+import { describe, it } from "./scope/describe.ts";
+import { expect } from "./scope/expect.ts";
 
 describe("diff", () => {
   it("diffs primitives", () => {
@@ -36,7 +36,7 @@ describe("diff", () => {
   it("diffs objects in an array", () => {
     const diffed = diff(
       [{ a: { b: 1 } }, { a: { b: 2 } }, { a: { b: 3 } }],
-      [{ a: { b: 1 } }, { a: { b: 4 } }, { a: { b: 3 } }]
+      [{ a: { b: 1 } }, { a: { b: 4 } }, { a: { b: 3 } }],
     );
     expect(diffed).toEqual([
       {

@@ -1,28 +1,16 @@
-// @ts-ignore
-import ts from "typescript";
-
-const compilerOptions = {
-  target: ts.ScriptTarget.ESNext,
-  module: ts.ModuleKind.ESNext,
-  inlineSourceMap: true,
-  inlineSources: true,
-};
+// @ts-expect-error
+import tsBlankSpace from "ts-blank-space";
 
 const tsmap = new Map();
 
 export async function transpile(
   /** @type string */ url,
-  /** @type {() => Promise<{toString(): string}>} */ get
+  /** @type {() => Promise<{toString(): string}>} */ get,
 ) {
   if (!tsmap.has(url)) {
-    const source = ts.transpile(
-      (await get()).toString(),
-      compilerOptions,
-      url,
-      undefined,
-      url
-    );
-    tsmap.set(url, source);
+    const source = (await get()).toString();
+    const js = tsBlankSpace(source);
+    tsmap.set(url, js);
   }
 
   return tsmap.get(url);

@@ -1,12 +1,12 @@
-import { Attrs, DenormChildren } from "../dom.js"
-import { form, input, label, option, select } from "../html.js"
-import {
+import type { Attrs, DenormChildren } from "../dom.ts";
+import { form, input, label, option, select } from "../html.ts";
+import type {
   FormAttributes,
   InputAttributes,
   LabelAttributes,
   OptionAttributes,
   SelectAttributes,
-} from "../types/html"
+} from "../types/html";
 
 export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
   if (attrs.events?.submit) {
@@ -19,18 +19,24 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
   return form(attrs as Attrs<HTMLFormElement>, ...children);
 };
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
-  label(input(attrs as Attrs<HTMLInputElement>), ...children);
+  label(
+    input(
+      // @ts-expect-error
+      attrs as Attrs<HTMLInputElement>,
+    ),
+    ...children,
+  );
 
 export const Select = (
-  attrs: { options: string[] | {}; selected?: string } & SelectAttributes &
-    LabelAttributes
+  attrs: { options: string[] | object; selected?: string } & SelectAttributes &
+    LabelAttributes,
 ) =>
   label(
     { style: attrs.style ?? {} },
     select(
       { events: attrs.events ?? {} },
-      ...prepareOptions(attrs.options, attrs.selected).map(Option)
-    )
+      ...prepareOptions(attrs.options as string[], attrs.selected).map(Option),
+    ),
   );
 export const Button = () => {};
 
@@ -41,21 +47,24 @@ const prepareOptions = (
         string,
         string | { label: string; disabled?: boolean; selected?: boolean }
       >,
-  selected?: string
+  selected?: string,
 ): Parameters<typeof Option>[0][] =>
   Array.isArray(attrs)
     ? attrs.map((value) => ({
         value,
         label: value,
-        selected: selected == value,
+        selected: selected === value,
       }))
     : Object.entries(attrs).map(([value, label]) =>
         typeof label === "string"
           ? { value, label, selected: selected === value }
-          : { value, ...label }
+          : { value, ...label },
       );
 export const Option = (attrs: OptionAttributes) =>
-  option(attrs as Attrs<HTMLOptionElement>);
+  option(
+    // @ts-expect-error
+    attrs as Attrs<HTMLOptionElement>,
+  );
 
 export const Dropdown = (
   attrs: SelectAttributes | { selected?: string },
@@ -63,14 +72,14 @@ export const Dropdown = (
 ) =>
   Select({
     ...attrs,
-    options: typeof options[0] == "string" ? options : options[0],
+    options: typeof options[0] === "string" ? options : options[0],
   });
 export const Radios = () => {};
 export const Checks = () => {};
 export const Switches = () => {};
 
-export const Radio = (attrs: Omit<InputAttributes, "type">) =>
+export const Radio = (_attrs: Omit<InputAttributes, "type">) =>
   Input({ type: "radio" });
-export const Checkbox = (attrs: Omit<InputAttributes, "type">) =>
+export const Checkbox = (_attrs: Omit<InputAttributes, "type">) =>
   Input({ type: "checkbox" });
 export const Switch = () => Checkbox({ role: "switch" });

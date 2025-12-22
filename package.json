@@ -1,6 +1,6 @@
 {
   "name": "@davidsouther/jiffies",
-  "version": "2.2.5",
+  "version": "2.3.0",
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
@@ -15,12 +15,13 @@
   },
   "scripts": {
     "node": "node --import ./src/loader-register.mjs",
-    "start": "npm run node ./src/server/main.js",
-    "test": "npm run node ./src/test.mjs",
+    "start": "node ./src/server/main.ts",
+    "test": "node ./src/test.mjs",
     "ci": "npm run node ./src/test.mjs --mode=junit",
-    "lint": "prettier . --check",
-    "check": "tsc --noEmit",
-    "format": "prettier . --write",
+    "format": "biome format --write",
+    "fix": "biome check --write --unsafe",
+    "check:format": "biome format",
+    "check:lint": "biome check",
     "build": "npm run build:esm & npm run build:cjs & npm run build:css",
     "postbuild": "npm run fixup",
     "build:esm": "tsc",
@@ -29,13 +30,14 @@
     "fixup": "npm run fixup:cjs",
     "build:css": "sass ./src/pico/pico.scss ./build/pico.css",
     "watch": "npx tsc --watch",
-    "all": "npm run lint && npm run test && npm run build"
+    "all": "npm run check:lint && npm run test && npm run build"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
     "@types/node": "^20.8.9"
   },
   "dependencies": {
-    "sass": "^1.49.9",
-    "typescript": "^4.7.1"
+    "ts-blank-space": "^0.6.2",
+    "typescript": "^5.9.3"
   }
 }

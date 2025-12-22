@@ -1,6 +1,6 @@
-import { Properties } from "../types/css.js"
-import { Side, Size } from "./constants.js"
-import { isSide, getSize, getSide } from "./core.js"
+import type { Properties } from "../types/css.ts";
+import type { Side, Size } from "./constants.ts";
+import { getSide, getSize, isSide } from "./core.ts";
 
 export function rounded(size: Size = "", side: Side = "") {
   if (isSide(size)) {
@@ -12,7 +12,7 @@ export function rounded(size: Size = "", side: Side = "") {
     if (curr === "") {
       prev.borderRadius = sized;
     } else {
-      // @ts-ignore
+      // @ts-expect-error
       prev[`border${curr}Radius`] = sized;
     }
     return prev;
@@ -20,11 +20,11 @@ export function rounded(size: Size = "", side: Side = "") {
 }
 
 export function border({
-  side = "",
-  style = "solid",
-  radius = "",
-  width = 1,
-  color = "black",
+  side: _side = "",
+  style: _style = "solid",
+  radius: _radius = "",
+  width: _width = 1,
+  color: _color = "black",
 }: {
   side?: Side;
   style?: "solid" | "dotted" | "dashed" | "double" | "none";
@@ -37,8 +37,8 @@ export function border({
 
 export function inset(
   width: 0 | 1 | 2 | 4 | 8,
-  color1: string = "gray",
-  color2: string = "lightgray"
+  color1 = "gray",
+  color2 = "lightgray",
 ) {
   return {
     ...border({ side: "tl", width, color: color1, radius: "none" }),

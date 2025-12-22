@@ -1,3 +1,5 @@
+import { assertExists } from "./assert.ts";
+
 // Treat localstorage as a file system
 export type PathLike = string;
 
@@ -10,17 +12,17 @@ export interface PlatformParts {
 export const PLATFORM_PARTS_WIN: PlatformParts = {
   SEP: "\\",
   WD: "C:\\\\",
-  isAbsolute: (path) => Boolean(path.match(new RegExp("^[a-zA-Z]:\\\\"))),
+  isAbsolute: (path) => Boolean(path.match(/^[a-zA-Z]:\\/)),
 };
 
 export const PLATFORM_PARTS_UNIX: PlatformParts = {
   SEP: "/",
   WD: "/",
-  isAbsolute: (path) => path[0] == "/",
+  isAbsolute: (path) => path[0] === "/",
 };
 
 export const PLATFORM_PARTS: PlatformParts =
-  typeof process !== "undefined" && process.platform == "win32"
+  typeof process !== "undefined" && process.platform === "win32"
     ? PLATFORM_PARTS_WIN
     : PLATFORM_PARTS_UNIX;
 
@@ -60,7 +62,7 @@ function join(...paths: string[]): string {
     }
   }
   return (
-    (PLATFORM_PARTS == PLATFORM_PARTS_UNIX ? SEP : "") + pathParts.join(SEP)
+    (PLATFORM_PARTS === PLATFORM_PARTS_UNIX ? SEP : "") + pathParts.join(SEP)
   );
 }
 
@@ -78,10 +80,11 @@ export interface FileSystemAdapter {
 export class FileSystem implements FileSystemAdapter {
   protected wd = WD;
   protected stack: string[] = [];
+  protected adapter: FileSystemAdapter;
 
-  constructor(
-    protected adapter: FileSystemAdapter = new RecordFileSystemAdapter()
-  ) {}
+  constructor(adapter: FileSystemAdapter = new RecordFileSystemAdapter()) {
+    this.adapter = adapter;
+  }
 
   cwd(): string {
     return this.wd;
@@ -98,7 +101,7 @@ export class FileSystem implements FileSystemAdapter {
 
   popd() {
     if (this.stack.length > 0) {
-      this.wd = this.stack.pop()!;
+      this.wd = assertExists(this.stack.pop());
     }
   }
 
@@ -140,7 +143,10 @@ export class FileSystem implements FileSystemAdapter {
 }
 
 export class RecordFileSystemAdapter implements FileSystemAdapter {
-  constructor(private fs: Record<string, string> = {}) {}
+  private fs: Record<string, string>;
+  constructor(fs: Record<string, string> = {}) {
+    this.fs = fs;
+  }
 
   stat(path: PathLike): Promise<Stats> {
     return new Promise((resolve, reject) => {
@@ -157,7 +163,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
       }
 
       if (!path.endsWith(SEP)) path += SEP;
-      for (let filename of Object.keys(this.fs)) {
+      for (const filename of Object.keys(this.fs)) {
         if (filename.startsWith(path)) {
           return resolve({
             name: basename(path),
@@ -177,7 +183,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
 
   async scandir(path: PathLike): Promise<Stats[]> {
     return (await this.readdir(path)).map<Stats>((name) => {
-      let isFile = this.fs[join(path, name)] !== undefined;
+      const isFile = this.fs[join(path, name)] !== undefined;
       return {
         name,
         isDirectory() {
@@ -193,13 +199,13 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
   readdir(path: PathLike): Promise<string[]> {
     if (!path.endsWith(SEP)) path += SEP;
     return new Promise((resolve) => {
-      let dir = new Set<string>();
+      const dir = new Set<string>();
       for (const filename of Object.keys(this.fs)) {
         if (filename.startsWith(path)) {
           const end = filename.indexOf(SEP, path.length + 1);
           const basename = filename.substring(
             path.length,
-            end === -1 ? undefined : end
+            end === -1 ? undefined : end,
           );
           dir.add(basename);
         }
@@ -208,7 +214,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
     });
   }
 
-  mkdir(path: string): Promise<void> {
+  mkdir(_path: string): Promise<void> {
     return Promise.resolve();
   }
 
@@ -221,7 +227,7 @@ export class RecordFileSystemAdapter implements FileSystemAdapter {
 
   readFile(path: PathLike): Promise<string> {
     return new Promise((resolve, reject) => {
-      let file = this.fs[path];
+      const file = this.fs[path];
       if (file === undefined) {
         const error = new Error(`File Not Found ${path}`);
         reject(error);
@@ -260,15 +266,15 @@ export class ObjectFileSystemAdapter extends RecordFileSystemAdapter {
 }
 
 function reduceObjectFileSystem(
-  object: ObjectFileSystem
+  object: ObjectFileSystem,
 ): Record<string, string> {
-  let level: Record<string, string> = {};
+  const level: Record<string, string> = {};
 
-  for (let [k, v] of Object.entries(object)) {
-    if (typeof v == "string") {
+  for (const [k, v] of Object.entries(object)) {
+    if (typeof v === "string") {
       level[`/${k}`] = v;
     } else {
-      for (let [k2, v2] of Object.entries(reduceObjectFileSystem(v))) {
+      for (const [k2, v2] of Object.entries(reduceObjectFileSystem(v))) {
         level[`/${k}${k2}`] = v2;
       }
     }

@@ -3,27 +3,30 @@
  */
 export function fix<T>(n: T): T {
   if (typeof n === "number") {
-    // @ts-ignore
+    // @ts-expect-error
     return +n.toFixed(1) as T;
   }
   if (n !== Object(n)) {
     // A primitive
     return n;
   }
-  if (n instanceof Array) {
-    // @ts-ignore
+  if (Array.isArray(n)) {
+    // @ts-expect-error
     return n.map(fix) as T;
   }
-  // @ts-ignore
+  // @ts-expect-error
   return mapreduce<T>(fix, n as Record<string, T>);
 }
 
 function mapreduce<T, U>(
   fn: (t: T) => U,
-  iter: Record<string, T>
+  iter: Record<string, T>,
 ): Record<string, U> {
   return Object.entries(iter).reduce(
-    (acc, [k, v]) => ((acc[k] = fn(v)), acc),
-    {} as Record<string, U>
+    (acc, [k, v]) => {
+      acc[k] = fn(v);
+      return acc;
+    },
+    {} as Record<string, U>,
   );
 }

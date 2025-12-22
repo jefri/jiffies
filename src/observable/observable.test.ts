@@ -1,5 +1,5 @@
-import { describe, expect, it } from "../scope/index.js"
-import { Observable, Subject, filter, map } from "./observable.js"
+import { describe, expect, it } from "../scope/index.ts";
+import { filter, map, Observable, Subject } from "./observable.ts";
 
 describe("Observables", () => {
   describe("basics", () => {
@@ -23,7 +23,7 @@ describe("Observables", () => {
   describe("creation", () => {
     it("builds an observable of items", async () => {
       const stream = Observable.of(2, 4, 8, 16);
-      let values: number[] = [];
+      const values: number[] = [];
       await new Promise<void>((resolve) => {
         stream.subscribe({
           next: (n) => {

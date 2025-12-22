@@ -2,25 +2,26 @@
 
 import {
   createServer,
-  IncomingMessage,
-  RequestListener,
-  ServerResponse,
-} from "http";
-import { AddressInfo } from "net";
-import * as path from "path";
-import { info } from "../../log.js";
-import { findIndex } from "./apps.js";
-import { cssFileServer } from "./css.js";
-import { fileResponse } from "./response.js";
-import { sitemap } from "./sitemap.js";
-import { staticFileServer } from "./static.js";
-import { tsFileServer } from "./typescript.js";
+  type IncomingMessage,
+  type RequestListener,
+  type ServerResponse,
+} from "node:http";
+import type { AddressInfo } from "node:net";
+import * as path from "node:path";
+import { info } from "../../log.ts";
+import { findIndex } from "./apps.ts";
+import { cssFileServer } from "./css.ts";
+import { fileResponse } from "./response.ts";
+import { sitemap } from "./sitemap.ts";
+import { staticFileServer } from "./static.ts";
+import { tsFileServer } from "./typescript.ts";
 
 export interface StaticResponse {
   status: 200 | 404 | 500;
   content: Buffer;
   contentType: string;
   contentLength?: number;
+  headers?: Map<string, string>;
 }
 
 export interface ServerConfig {
@@ -28,13 +29,13 @@ export interface ServerConfig {
   scopes?: Record<`@${string}`, string>;
 }
 
-export interface MiddlewareFactory {
-  (config: ServerConfig): Promise<StaticMiddleware>;
-}
+export type MiddlewareFactory = (
+  config: ServerConfig,
+) => Promise<StaticMiddleware>;
 
-export interface StaticMiddleware {
-  (req: IncomingMessage): Promise<undefined | (() => Promise<StaticResponse>)>;
-}
+export type StaticMiddleware = (
+  req: IncomingMessage,
+) => Promise<undefined | (() => Promise<StaticResponse>)>;
 
 const notFound: MiddlewareFactory =
   async ({ root }) =>
@@ -43,7 +44,7 @@ const notFound: MiddlewareFactory =
       // path.join(path.dirname(FLAGS.argv0), "404.html"),
       path.join(root, "404.html"),
       undefined,
-      404
+      404,
     );
 
 const BASE_MIDDLEWARES: MiddlewareFactory[] = [
@@ -65,10 +66,15 @@ const error = (res: ServerResponse, message: string) => {
 
 const sendContent = async (
   res: ServerResponse,
-  { content, contentType, contentLength }: StaticResponse
+  { content, contentType, contentLength, headers }: StaticResponse,
 ) => {
   res.setHeader("Content-Length", `${contentLength}`);
   res.setHeader("Content-Type", contentType);
+  if (headers) {
+    for (const [header, value] of headers.entries()) {
+      res.setHeader(header.toLowerCase(), value);
+    }
+  }
   await res.write(content);
   res.end();
   return true;
@@ -84,10 +90,10 @@ const log = (req: IncomingMessage) => {
 
 export const makeServer = async (
   config: ServerConfig,
-  middlewares: MiddlewareFactory[] = []
+  middlewares: MiddlewareFactory[] = [],
 ) => {
   const handlers = await Promise.all(
-    [...middlewares, ...BASE_MIDDLEWARES].map(async (m) => m(config))
+    [...middlewares, ...BASE_MIDDLEWARES].map(async (m) => m(config)),
   );
   const middlewareHandler: RequestListener = async (req, res) => {
     log(req);
@@ -105,7 +111,7 @@ export const makeServer = async (
         res.end();
       }
     } catch (e) {
-      error(res, (e as Error).message + "\n" + (e as Error).stack);
+      error(res, `${(e as Error).message}\n${(e as Error).stack}`);
     }
   };
 

@@ -1,8 +1,8 @@
-import { Awaitable } from "../awaitable.js";
+import type { Awaitable } from "../awaitable.ts";
 
 export function cleanState<State extends {}>(
   init: () => Awaitable<State>,
-  runner: (action: () => Promise<void>) => void
+  runner: (action: () => Promise<void>) => void,
 ): State {
   const state = {};
   runner(async () => {

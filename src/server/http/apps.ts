@@ -1,7 +1,7 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { MiddlewareFactory } from "./index.js";
-import { fileResponse } from "./response.js";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import type { MiddlewareFactory } from "./index.ts";
+import { fileResponse } from "./response.ts";
 
 /**
  * Searches up the request path until the first index is found.
@@ -18,7 +18,7 @@ export const findIndex: MiddlewareFactory =
       try {
         const stat = await fs.stat(index);
         return fileResponse(index, stat);
-      } catch (e) {
+      } catch (_e) {
         filename = path.dirname(filename);
       }
     }

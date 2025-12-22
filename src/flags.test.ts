@@ -1,5 +1,5 @@
-import { describe, it, expect } from "./scope/index.js";
-import { parse } from "./flags.js";
+import { parse } from "./flags.ts";
+import { describe, expect, it } from "./scope/index.ts";
 
 const TEST_CASES = {
   SIMPLE: "program",

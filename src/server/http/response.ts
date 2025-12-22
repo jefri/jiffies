@@ -1,9 +1,10 @@
-import { Stats } from "fs";
-import * as fs from "fs/promises";
-import { StaticResponse } from ".";
+import type { Stats } from "node:fs";
+import * as fs from "node:fs/promises";
+import type { StaticResponse } from ".";
 
 const MIME_TYPES: Record<string, string> = {
   js: "text/javascript",
+  ts: "text/javascript",
   json: "text/javascript",
   css: "text/css",
   html: "text/html",
@@ -38,13 +39,19 @@ export const fileResponse =
 
 const CHARSET = "utf-8";
 export const contentResponse =
-  (content: string, contentType: string, status: 200 | 404 | 500 = 200) =>
+  (
+    content: string,
+    contentType: string,
+    status: 200 | 404 | 500 = 200,
+    headers: Map<string, string> = new Map(),
+  ) =>
   async (): Promise<StaticResponse> => {
     const contentBuffer = Buffer.from(content, CHARSET);
     return {
       content: contentBuffer,
-      contentType: contentType.split(";")[0] + "; charset=" + CHARSET,
+      contentType: `${contentType.split(";")[0]}; charset=${CHARSET}`,
       status,
       contentLength: contentBuffer.length,
+      headers,
     };
   };

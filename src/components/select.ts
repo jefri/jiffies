@@ -1,6 +1,6 @@
-import { EventHandler } from "../dom/dom.js";
-import { FC } from "../dom/fc.js";
-import { option, select } from "../dom/html.js";
+import type { EventHandler } from "../dom/dom.ts";
+import { FC } from "../dom/fc.ts";
+import { option, select } from "../dom/html.ts";
 
 export const Select = FC<{
   name: string;
@@ -12,11 +12,11 @@ export const Select = FC<{
   options: [string, string][];
 }>(
   "jiffies-select",
-  (el, { name, events: { change }, disabled, value, options }) =>
+  (_el, { name, events: { change }, disabled, value, options }) =>
     select(
       { name, events: { change }, disabled },
       ...options.map(([v, name]) =>
-        option({ value: v, selected: value === v }, `${name}`)
-      )
-    )
+        option({ value: v, selected: value === v }, `${name}`),
+      ),
+    ),
 );

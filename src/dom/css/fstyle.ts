@@ -1,5 +1,5 @@
-import { dashCase } from "../../case.js"
-import { Properties } from "../types/css.js"
+import { dashCase } from "../../case.ts";
+import type { Properties } from "../types/css.ts";
 
 export type FStyle =
   | Properties
@@ -12,7 +12,7 @@ export function compileFStyle(fstyle: FStyle, prefix = ""): string {
   const rules: { key: string; value: FStyle }[] = [];
 
   for (const [key, value] of Object.entries(fstyle)) {
-    if (typeof value == "string") {
+    if (typeof value === "string") {
       properties.push({ key, value });
     } else {
       rules.push({ key, value });
@@ -33,7 +33,7 @@ export function compileFStyle(fstyle: FStyle, prefix = ""): string {
     if (key.startsWith("@media")) {
       rule += `${key} {\n`;
       rule += compileFStyle(value, "  ");
-      rule += `}\n\n`;
+      rule += "}\n\n";
     } else {
       rule += compileFStyle(value, `${prefix} ${key}`);
     }

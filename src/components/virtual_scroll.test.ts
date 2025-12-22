@@ -1,10 +1,10 @@
-import { State } from "../dom/fc.js";
-import { div } from "../dom/html.js";
-import { describe, it, expect } from "../scope/index.js";
+import { State } from "../dom/fc.ts";
+import { div } from "../dom/html.ts";
+import { describe, expect, it } from "../scope/index.ts";
 import VirtualScroll, {
   arrayAdapter,
-  VirtualScrollProps,
-} from "./virtual_scroll.js";
+  type VirtualScrollProps,
+} from "./virtual_scroll.ts";
 
 describe("VirtualScroll", () => {
   it("tracks scroll position", () => {
@@ -16,7 +16,10 @@ describe("VirtualScroll", () => {
       row: (i) => div(`${i}`),
     };
 
-    const scroll = VirtualScroll(props);
+    const scroll = VirtualScroll(
+      // @ts-expect-error
+      props,
+    );
 
     expect(scroll[State]?.bufferedItems).toBe(9);
     expect(scroll[State]?.data).toEqual([0, 1, 2, 3, 4]);

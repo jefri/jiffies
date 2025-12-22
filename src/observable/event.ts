@@ -1,5 +1,5 @@
-import { display } from "../display.js"
-import { Observable } from "./observable.js"
+import { display } from "../display.ts";
+import type { Observable } from "./observable.ts";
 
 export interface Next<T> {
   value: T;
@@ -47,7 +47,7 @@ export const isNext = <T>(event: Event<T, unknown>): event is Next<T> =>
 export const isError = <E>(event: Event<unknown, E>): event is Error<E> =>
   event.failed && !event.completed;
 export const isCompleted = (
-  event: Event<unknown, unknown>
+  event: Event<unknown, unknown>,
 ): event is Completed => event.completed && !event.failed;
 export const isFailed = (event: Event<unknown, unknown>): event is Failed =>
   event.completed && event.failed;
@@ -64,10 +64,10 @@ const marble = <T, E>(event: Event<T, E>): string =>
   isError(event)
     ? "X"
     : isFailed(event)
-    ? "!"
-    : isCompleted(event)
-    ? "|"
-    : `(${display(event.value)})`;
+      ? "!"
+      : isCompleted(event)
+        ? "|"
+        : `(${display(event.value)})`;
 
 export const marbles = <T, E>(events: Event<T, E>[]): string =>
   `:${events.map(marble).join("-")}`;

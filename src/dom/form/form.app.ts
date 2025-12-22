@@ -1,5 +1,5 @@
-import { article, button, div, main, small } from "../html.js"
-import { Form, Input } from "./form.js"
+import { article, button, div, main, small } from "../html.ts";
+import { Form, Input } from "./form.ts";
 
 export const App = () =>
   main(
@@ -10,7 +10,7 @@ export const App = () =>
           events: {
             submit(event) {
               console.log(
-                "Should see fields for firstname, lastname, email, etc"
+                "Should see fields for firstname, lastname, email, etc",
               );
               console.log(event);
             },
@@ -19,7 +19,7 @@ export const App = () =>
         div(
           { class: "grid" },
           Input({ id: "firstname", placeholder: "First name" }),
-          Input({ id: "lastname", placeholder: "Last name" })
+          Input({ id: "lastname", placeholder: "Last name" }),
         ),
         Input(
           {
@@ -28,7 +28,7 @@ export const App = () =>
             placeholder: "Email address",
             required: true,
           },
-          small("We will never share your email with anyone.")
+          small("We will never share your email with anyone."),
         ),
         button({ type: "submit" }, "Submit"),
         div(
@@ -40,11 +40,11 @@ export const App = () =>
             "aria-invalid": "true",
           }),
           Input({ id: "disabled", placeholder: "Disabled", disabled: true }),
-          Input({ id: "readonly", value: "Readonly", readOnly: true })
-        )
+          Input({ id: "readonly", value: "Readonly", readOnly: true }),
+        ),
         // Dropdown({id: 'fruit', label: "Fruit", placeholder: "Select a fruit...", options: ['Banana', 'Watermelon', 'Apple', 'Orange', 'Mango']}),
         // Radios({legend: 'Size', options: {small: 'Small', medium: 'Medium', large: 'Large', extralarge: "Extra Large"}, checked: 'small'}),
         // Checkboxes({options: {terms: 'I agree to the Terms and Conditions', termsSharing: {label: 'I agree to share my information with partners', disabled: true, checked: true}}),
-      )
-    )
+      ),
+    ),
   );

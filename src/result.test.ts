@@ -2,14 +2,14 @@ import {
   Err,
   None,
   Ok,
-  Result,
+  type Result,
   Some,
   unwrap,
   unwrapOr,
   unwrapOrElse,
-} from "./result.js";
-import { describe, it } from "./scope/describe.js";
-import { expect } from "./scope/expect.js";
+} from "./result.ts";
+import { describe, it } from "./scope/describe.ts";
+import { expect } from "./scope/expect.ts";
 
 describe("Result", () => {
   it("converts Nones", () => {
@@ -40,7 +40,7 @@ describe("Result", () => {
     expect(b).toMatchObject({ message: "a error" });
 
     // Assign Err to Result
-    const c: Result<string> = a;
+    const _c: Result<string> = a;
   });
 
   it("converts Oks", () => {
@@ -49,7 +49,7 @@ describe("Result", () => {
     expect(b).toBe("a ok");
 
     // Assign ok to Result
-    const c: Result<string> = a;
+    const _c: Result<string> = a;
   });
 
   it("unwraps", () => {
@@ -95,10 +95,7 @@ describe("Result", () => {
   });
 
   it("allows Result<void> with Ok()", () => {
-    let a: Result<void>;
-    a = Ok();
+    const a: Result<void> = Ok();
     expect(unwrap(a)).toBe(undefined);
   });
 });
-
-export {};

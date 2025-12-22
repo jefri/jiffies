@@ -1,4 +1,4 @@
-import { Properties } from "./css"
+import type { Properties } from "./css";
 
 export interface AriaAttributes {
   [_: `aria-${string}`]: string;
@@ -21,9 +21,7 @@ export type ReferrerPolicy =
   | "strict-origin-when-cross-origin"
   | "unsafe-url";
 
-export interface EventHandler {
-  (k: Event): void;
-}
+export type EventHandler = (k: Event) => void;
 
 export interface GlobalEvents {
   abort: EventHandler;

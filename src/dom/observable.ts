@@ -1,8 +1,8 @@
-import { Observable } from "../observable/observable.js"
+import type { Observable } from "../observable/observable.ts";
 
 export function O<E extends Element>(
   element: E,
-  observable: Observable<Parameters<E["update"]>>
+  observable: Observable<Parameters<E["update"]>>,
 ): E {
   observable.subscribe((t) => {
     element.update(...t);
