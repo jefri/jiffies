@@ -4,12 +4,16 @@
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
-  "main": "./lib/cjs/",
-  "module": "./lib/esm/",
-  "types": "./lib/esm/index.d.ts",
-  "directories": {
-    "lib": "./lib/cjs"
+  "exports": {
+    "./*.ts": "./src/*.ts"
   },
+  "files": [
+    "src",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "tsconfig.json"
+  ],
   "engines": {
     "node": ">=22.18.0"
   },
