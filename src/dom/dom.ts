@@ -1,6 +1,13 @@
 import { assertExists } from "../assert.ts";
 import type { Properties as SVGProperties } from "./types/css.ts";
 
+if (typeof window === "undefined") {
+  const { JSDOM } = await import("jsdom");
+  // biome-ignore lint/suspicious/noGlobalAssign: Load JSDom globally
+  window = global.window = new JSDOM().window as unknown as Window &
+    typeof globalThis;
+}
+
 export const XHTML_NAMESPACE_URI = "http://www.w3.org/1999/xhtml";
 export const SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
 

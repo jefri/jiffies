@@ -35,7 +35,7 @@ export const Input(name, type="string") => {
     )
 }
 
-document.body.append(
+window.document.body.append(
     Form(
         {
             title: "Details",

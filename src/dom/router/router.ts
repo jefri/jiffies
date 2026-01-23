@@ -7,7 +7,7 @@ export interface Router {
   (target: DOMElement): DOMElement;
 }
 
-const baseURI = `${document.baseURI}`;
+const baseURI = `${window.document.baseURI}`;
 const normalizeHref = () => {
   return `${location.href}/` === baseURI ? baseURI : location.href;
 };

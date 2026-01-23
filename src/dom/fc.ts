@@ -68,7 +68,10 @@ export function FC<Props extends object, State extends object = object>(
     attrs?: Attrs<Props> | DenormChildren,
     ...children: DenormChildren[]
   ): FCComponent<Props, State> => {
-    const element = document.createElement(name) as FCComponent<Props, State>;
+    const element = window.document.createElement(name) as FCComponent<
+      Props,
+      State
+    >;
     element.update(attrs, ...children);
     return element;
   };
