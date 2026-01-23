@@ -1,4 +1,3 @@
-// @ts-expect-error
 import tsBlankSpace from "ts-blank-space";
 
 const tsmap = new Map();
