@@ -307,6 +307,8 @@ export function eventListener<E extends Event>() {
 }
 
 export class EventHandler<E extends Event> extends Subject<E> {
+  eventFn: (e: E) => void | Promise<void>;
+
   constructor(eventFn: (e: E) => void | Promise<void>) {
     super(AsyncScheduler);
     this.eventFn = eventFn;

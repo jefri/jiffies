@@ -3,7 +3,6 @@
  */
 export function fix<T>(n: T): T {
   if (typeof n === "number") {
-    // @ts-expect-error
     return +n.toFixed(1) as T;
   }
   if (n !== Object(n)) {
@@ -11,7 +10,6 @@ export function fix<T>(n: T): T {
     return n;
   }
   if (Array.isArray(n)) {
-    // @ts-expect-error
     return n.map(fix) as T;
   }
   // @ts-expect-error
