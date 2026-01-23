@@ -1,6 +1,6 @@
 {
   "name": "@davidsouther/jiffies",
-  "version": "2026.4.0",
+  "version": "2026.4.1",
   "private": false,
   "displayName": "JEFRi Jiffies",
   "type": "module",
@@ -29,9 +29,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^20.8.9"
   },
   "dependencies": {
+    "jsdom": "^27.4.0",
     "ts-blank-space": "^0.7.0",
     "typescript": "^5.9.3"
   }

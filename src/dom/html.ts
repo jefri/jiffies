@@ -7,7 +7,7 @@ const makeHTMLElement =
     ...children: DenormChildren[]
   ) =>
     up(
-      document.createElement(name),
+      window.document.createElement(name),
       attrs,
       ...children,
     ) as HTMLElementTagNameMap[K];
