@@ -1,5 +1,8 @@
 import { assertExists } from "../assert.ts";
-import type { Properties } from "./types/css.ts";
+import type { Properties as SVGProperties } from "./types/css.ts";
+
+export const XHTML_NAMESPACE_URI = "http://www.w3.org/1999/xhtml";
+export const SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
 
 const Events = Symbol("events");
 export const CLEAR = Symbol("Clear children");
@@ -11,7 +14,7 @@ export type DOMElement = Element & ElementCSSInlineStyle;
 
 export type DomAttrs = {
   class: string | string[];
-  style: Partial<Properties> | string;
+  style: Partial<SVGProperties> | string;
   role: "button" | "list" | "listbox";
   events: Partial<{
     [K in keyof HTMLElementEventMap]: EventHandler | null;
@@ -19,7 +22,9 @@ export type DomAttrs = {
 };
 
 export type Attrs<E extends Omit<Element, "update">, S = object> = Partial<
-  Omit<E, "style"> & S & DomAttrs
+  Omit<{ [k in keyof E]: string | number | boolean }, "style" | "toString"> &
+    S &
+    DomAttrs
 >;
 
 export type DenormAttrs<E extends Omit<Element, "update">, S = object> =
@@ -38,7 +43,7 @@ export type DOMUpdates<E extends Element = Element> =
   | DenormChildren[];
 
 function isAttrs<E extends Element>(
-  attrs: DenormAttrs<E> | undefined,
+  attrs: DenormAttrs<E> | undefined
 ): attrs is Attrs<E> {
   if (!attrs) {
     return false;
@@ -52,7 +57,7 @@ function isAttrs<E extends Element>(
 export function normalizeArguments<E extends Element>(
   attrs?: DenormAttrs<E>,
   children: DenormChildren[] = [],
-  defaultAttrs: Attrs<E> = {},
+  defaultAttrs: Attrs<E> = {}
 ): [Attrs<E>, DenormChildren[]] {
   let attributes: Attrs<E>;
   if (isAttrs(attrs)) {
@@ -77,15 +82,15 @@ export function up<E extends Element>(
 export function update(
   element: Omit<Element, "update">,
   attrs: Attrs<Element>,
-  children: DenormChildren[],
+  children: DenormChildren[]
 ): Element {
   // Track events, to remove later
   element[Events] ??= new Map<string, EventHandler>();
   const $events = element[Events];
-  const { style = {}, events = {}, ...rest } = attrs;
+  // const { style = {}, events = {}, ...rest } = attrs;
 
   for (const [k, v] of Object.entries(
-    events as NonNullable<typeof attrs.events>,
+    (attrs.events as NonNullable<typeof attrs.events>) ?? {}
   )) {
     if (v === null) {
       if ($events.has(k)) {
@@ -100,11 +105,11 @@ export function update(
 
   const _style = (element as { style?: Partial<CSSStyleDeclaration> }).style;
   if (_style) {
-    if (typeof style === "string") {
-      _style.cssText = style;
+    if (typeof attrs.style === "string") {
+      _style.cssText = attrs.style;
     } else {
       for (const [k, v] of Object.entries(
-        style as Partial<CSSStyleDeclaration>,
+        (attrs.style as Partial<CSSStyleDeclaration>) ?? {}
       )) {
         // @ts-expect-error Object.entries is unable to statically look into args
         _style[k] = v;
@@ -112,23 +117,31 @@ export function update(
     }
   }
 
-  for (let [k, v] of Object.entries(rest)) {
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "style") {
+      continue;
+    }
+
+    if (k === "events") {
+      continue;
+    }
+
     if (k === "class") {
-      v = Array.isArray(v)
-        ? v
-        : (typeof v === "string" ? v : `${v}`).split(/\s+/m);
-      for (const c of (v as string[]).filter((s) => s !== "")) {
+      const cs = Array.isArray(v) ? v : String(v).split(/\s+/m).filter(Boolean);
+      for (const c of cs) {
         if (c.startsWith("!")) {
           element.classList.remove(c.substring(1));
         } else {
           element.classList.add(c);
         }
       }
+      continue;
     }
 
-    const useNamespace =
-      element.namespaceURI &&
-      element.namespaceURI !== "http://www.w3.org/1999/xhtml";
+    const useNamespace = false;
+    element.namespaceURI &&
+      element.namespaceURI !== XHTML_NAMESPACE_URI &&
+      element.namespaceURI !== SVG_NAMESPACE_URI;
     const remove = !v;
 
     if (useNamespace) {
@@ -137,7 +150,7 @@ export function update(
       } else if (v === true) {
         element.setAttributeNS(element.namespaceURI, k, k);
       } else {
-        element.setAttributeNS(element.namespaceURI, k, v as string);
+        element.setAttributeNS(element.namespaceURI, k, String(v));
       }
     } else {
       if (remove) {
@@ -145,14 +158,14 @@ export function update(
       } else if (v === true) {
         element.setAttribute(k, k);
       } else {
-        element.setAttribute(k, v as string);
+        element.setAttribute(k, String(v));
       }
     }
   }
 
   if (children?.length > 0) {
     element.replaceChildren(
-      ...(children[0] === CLEAR ? [] : (children as (string | Node)[])),
+      ...(children[0] === CLEAR ? [] : (children as (string | Node)[]))
     );
   }
 

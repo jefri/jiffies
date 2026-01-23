@@ -1,3 +1,6 @@
 useEffect
 useState
 useContext
+
+
+signal(n) => n, setN
