@@ -22,7 +22,9 @@ export type DomAttrs = {
 };
 
 export type Attrs<E extends Omit<Element, "update">, S = object> = Partial<
-  Omit<{ [k in keyof E]: string | number | boolean }, "style"> & S & DomAttrs
+  Omit<{ [k in keyof E]: string | number | boolean }, "style" | "toString"> &
+    S &
+    DomAttrs
 >;
 
 export type DenormAttrs<E extends Omit<Element, "update">, S = object> =

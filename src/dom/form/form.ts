@@ -61,10 +61,7 @@ const prepareOptions = (
           : { value, ...label },
       );
 export const Option = (attrs: OptionAttributes) =>
-  option(
-    // @ts-expect-error
-    attrs as Attrs<HTMLOptionElement>,
-  );
+  option(attrs as Attrs<HTMLOptionElement>);
 
 export const Dropdown = (
   attrs: SelectAttributes | { selected?: string },
