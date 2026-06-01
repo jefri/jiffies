@@ -6,7 +6,6 @@ JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulle
 - `context` - JavaScript implementation of the Python [`with`][pywith] statement.
 - `display` - TypeScript implementation of the Rust [Display][rustdisplay] trait.
 - `equal` - JavaScript deep equality checkers, including TS type checking.
-- `flags` - JavaScript flag, environment, and configuration loader.
 - `log` - JavaScript implementation of a [log4j][log4j]-alike logger.
 - `result` - JavaScript implementation of Rust's [Option][rustoption] and [Result][rustresult] types.
 
