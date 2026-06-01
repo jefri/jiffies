@@ -9,7 +9,6 @@ JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulle
 - `flags` - JavaScript flag, environment, and configuration loader.
 - `log` - JavaScript implementation of a [log4j][log4j]-alike logger.
 - `result` - JavaScript implementation of Rust's [Option][rustoption] and [Result][rustresult] types.
-- `loader.mjs` - Node 16.x typescript-transpiling module loader.
 
 Jiffies also includes several microframeworks.
 

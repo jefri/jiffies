@@ -1,4 +1,4 @@
-#!/usr/bin/env node --experimental-loader ../loader.mjs
+#!/usr/bin/env node
 import * as process from "node:process";
 
 import { info } from "../log.ts";

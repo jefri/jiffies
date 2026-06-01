@@ -3,29 +3,12 @@
   "configurations": [
     {
       "type": "node",
-      "nodeVersionHint": 16,
+      "nodeVersionHint": 22,
       "request": "launch",
       "name": "Server",
       "skipFiles": ["<node_internals>/**"],
-      "runtimeArgs": [
-        "--experimental-loader",
-        "${workspaceFolder}/src/loader.mjs"
-      ],
       "program": "${workspaceFolder}/src/server/main.ts",
-      "args": ["--port=8080"],
-      // TODO(fix)
-      "runtimeExecutable": "/usr/local/bin/node"
-    },
-    {
-      "name": "Debug CRA Tests",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "${workspaceFolder}/computron5k/node_modules/.bin/react-scripts",
-      "args": ["test", "--runInBand", "--no-cache", "--env=jsdom"],
-      "cwd": "${workspaceFolder}",
-      "protocol": "inspector",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "args": ["--port=8080"]
     }
   ]
 }
