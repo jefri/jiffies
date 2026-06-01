@@ -12,8 +12,6 @@ async function main() {
     const results = await execute();
 
     // The test runner selects its reporter from --mode (default "console").
-    // test.mjs owns its own option parsing and no longer imports the flags
-    // module being removed.
     const { values } = parseArgs({
       options: { mode: { type: "string", default: "console" } },
     });
