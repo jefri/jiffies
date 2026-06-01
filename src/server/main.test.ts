@@ -38,6 +38,9 @@ function runServer(
 
     let stdout = "";
     let stderr = "";
+    // Holds the not-yet-newline-terminated tail between chunks so each
+    // completed line is parsed exactly once.
+    let pending = "";
     let listeningAddress: string | undefined;
     let listened = false;
     let settled = false;
@@ -55,7 +58,11 @@ function runServer(
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
       stdout += chunk;
-      for (const line of stdout.split("\n")) {
+      pending += chunk;
+      const lines = pending.split("\n");
+      // Keep the trailing element: it is the partial line not yet terminated.
+      pending = lines.pop() ?? "";
+      for (const line of lines) {
         try {
           const record = JSON.parse(line) as {
             message?: string;
@@ -68,7 +75,7 @@ function runServer(
             finish(null);
           }
         } catch {
-          // Partial or non-JSON line; ignore.
+          // Non-JSON line; ignore.
         }
       }
     });
