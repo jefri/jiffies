@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { parse } from "./flags.ts";
+import { parseArgs } from "node:util";
 import { onConsole } from "./scope/display/console.ts";
 import { asXML } from "./scope/display/junit.ts";
 import { execute } from "./scope/execute.ts";
@@ -11,9 +11,12 @@ async function main() {
   (async () => {
     const results = await execute();
 
-    const FLAGS = parse(process.argv);
+    // The test runner selects its reporter from --mode (default "console").
+    const { values } = parseArgs({
+      options: { mode: { type: "string", default: "console" } },
+    });
 
-    switch (FLAGS.asString("mode", "console")) {
+    switch (values.mode) {
       case "junit": {
         const xml = asXML(results);
         console.log(xml);
