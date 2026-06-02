@@ -95,18 +95,16 @@ export function update(
   attrs: Attrs<Element>,
   children: DenormChildren[],
 ): Element {
-  // Track events, to remove later
   element[Events] ??= new Map<string, EventHandler>();
   const $events = element[Events];
-  // const { style = {}, events = {}, ...rest } = attrs;
 
   for (const [k, v] of Object.entries(
     (attrs.events as NonNullable<typeof attrs.events>) ?? {},
   )) {
     if (v === null) {
       if ($events.has(k)) {
-        const listener = assertExists($events.get(k));
-        element.removeEventListener(k, listener);
+        element.removeEventListener(k, assertExists($events.get(k)));
+        $events.delete(k);
       }
     } else if (v !== undefined) {
       if ($events.has(k)) {
