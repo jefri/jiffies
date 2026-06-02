@@ -44,6 +44,20 @@ describe("html", () => {
     assert.strictEqual(clicked, 1);
   });
 
+  it("replaces event handler on update", () => {
+    let count = 0;
+    const handler1 = () => {
+      count += 1;
+    };
+    const handler2 = () => {
+      count += 10;
+    };
+    const btn = button({ events: { click: handler1 } });
+    btn.update({ events: { click: handler2 } });
+    btn.dispatchEvent(new Event("click"));
+    assert.strictEqual(count, 10);
+  });
+
   it("sets style properties", () => {
     const btn = button({
       style: { flexDirection: "column" },

@@ -109,6 +109,9 @@ export function update(
         element.removeEventListener(k, listener);
       }
     } else if (v !== undefined) {
+      if ($events.has(k)) {
+        element.removeEventListener(k, assertExists($events.get(k)));
+      }
       element.addEventListener(k as keyof ElementEventMap, v);
       $events.set(k, v);
     }
