@@ -16,11 +16,16 @@ no entities, value objects, or domain services — only file moves, assertion
 rewrites, and `package.json` script changes. The domain stays untouched.
 
 **Steps:**
-- [ ] Step 1: Exclude browser tests from discovery; delete the two orphans
-- [ ] Step 2: Switch the Node entrypoint to `node --test`
-- [ ] Step 3: Migrate the eight straight-matcher Node test files
-- [ ] Step 4: Migrate `fs.test.ts` (inline `cleanState`)
-- [ ] Step 5: Delete the dead Node-side `scope` pieces
+- [x] Step 1: Exclude browser tests from discovery; delete the two orphans
+- [x] Step 2: Switch the Node entrypoint to `node --test`
+- [x] Step 3: Migrate the eight straight-matcher Node test files
+- [x] Step 4: Migrate `fs.test.ts` (inline `cleanState`)
+- [x] Step 5: Delete the dead Node-side `scope` pieces
+
+All steps complete; `src/migrate_scope.feature.ts` passes 5/5. Remaining:
+the finishing pass tracked in `TASKS.md` (general:review, developer:refactor,
+manual `src/index.html` browser check, then developer:cleanup which also
+removes the feature scaffold).
 
 ---
 
