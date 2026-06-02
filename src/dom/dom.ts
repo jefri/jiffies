@@ -150,28 +150,13 @@ export function update(
       continue;
     }
 
-    const useNamespace = false;
-    element.namespaceURI &&
-      element.namespaceURI !== XHTML_NAMESPACE_URI &&
-      element.namespaceURI !== SVG_NAMESPACE_URI;
     const remove = !v;
-
-    if (useNamespace) {
-      if (remove) {
-        element.removeAttributeNS(element.namespaceURI, k);
-      } else if (v === true) {
-        element.setAttributeNS(element.namespaceURI, k, k);
-      } else {
-        element.setAttributeNS(element.namespaceURI, k, String(v));
-      }
+    if (remove) {
+      element.removeAttribute(k);
+    } else if (v === true) {
+      element.setAttribute(k, k);
     } else {
-      if (remove) {
-        element.removeAttribute(k);
-      } else if (v === true) {
-        element.setAttribute(k, k);
-      } else {
-        element.setAttribute(k, String(v));
-      }
+      element.setAttribute(k, String(v));
     }
   }
 
