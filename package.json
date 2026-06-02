@@ -19,8 +19,8 @@
   },
   "scripts": {
     "start": "node ./src/server/main.ts",
-    "test": "node ./src/test.mjs",
-    "ci": "npm run node ./src/test.mjs --mode=junit",
+    "test": "node --test --test-reporter=tap",
+    "ci": "node --test --test-reporter=junit",
     "format": "biome format --write",
     "fix": "biome check --write --unsafe",
     "check:format": "biome format",
