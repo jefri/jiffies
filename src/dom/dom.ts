@@ -50,7 +50,7 @@ export type DOMUpdates<E extends Element = Element> =
   | DenormChildren[];
 
 function isAttrs<E extends Element>(
-  attrs: DenormAttrs<E> | undefined
+  attrs: DenormAttrs<E> | undefined,
 ): attrs is Attrs<E> {
   if (!attrs) {
     return false;
@@ -64,7 +64,7 @@ function isAttrs<E extends Element>(
 export function normalizeArguments<E extends Element>(
   attrs?: DenormAttrs<E>,
   children: DenormChildren[] = [],
-  defaultAttrs: Attrs<E> = {}
+  defaultAttrs: Attrs<E> = {},
 ): [Attrs<E>, DenormChildren[]] {
   let attributes: Attrs<E>;
   if (isAttrs(attrs)) {
@@ -89,7 +89,7 @@ export function up<E extends Element>(
 export function update(
   element: Omit<Element, "update">,
   attrs: Attrs<Element>,
-  children: DenormChildren[]
+  children: DenormChildren[],
 ): Element {
   // Track events, to remove later
   element[Events] ??= new Map<string, EventHandler>();
@@ -97,7 +97,7 @@ export function update(
   // const { style = {}, events = {}, ...rest } = attrs;
 
   for (const [k, v] of Object.entries(
-    (attrs.events as NonNullable<typeof attrs.events>) ?? {}
+    (attrs.events as NonNullable<typeof attrs.events>) ?? {},
   )) {
     if (v === null) {
       if ($events.has(k)) {
@@ -116,7 +116,7 @@ export function update(
       _style.cssText = attrs.style;
     } else {
       for (const [k, v] of Object.entries(
-        (attrs.style as Partial<CSSStyleDeclaration>) ?? {}
+        (attrs.style as Partial<CSSStyleDeclaration>) ?? {},
       )) {
         // @ts-expect-error Object.entries is unable to statically look into args
         _style[k] = v;
@@ -172,7 +172,7 @@ export function update(
 
   if (children?.length > 0) {
     element.replaceChildren(
-      ...(children[0] === CLEAR ? [] : (children as (string | Node)[]))
+      ...(children[0] === CLEAR ? [] : (children as (string | Node)[])),
     );
   }
 

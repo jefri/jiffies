@@ -2,7 +2,7 @@ import type { Stats } from "node:fs";
 import * as fs from "node:fs/promises";
 import type { StaticResponse } from ".";
 
-const MIME_TYPES: Record<string, string> = {
+const MIME_TYPES = {
   js: "text/javascript",
   ts: "text/javascript",
   json: "text/javascript",
@@ -16,13 +16,16 @@ const MIME_TYPES: Record<string, string> = {
   ttf: "application/font-ttf",
   woff: "application/font-woff",
   woff2: "application/font-woff2",
-};
+} as const;
 
 const mime = (basename: string) => {
   const extension = basename
     .substring(basename.lastIndexOf(".") + 1)
     .toLowerCase();
-  return MIME_TYPES[extension] ?? "application/octet-stream";
+  return (
+    MIME_TYPES[extension as keyof typeof MIME_TYPES] ??
+    "application/octet-stream"
+  );
 };
 
 export const fileResponse =

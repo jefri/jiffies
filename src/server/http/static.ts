@@ -14,8 +14,6 @@ export const staticFileServer: MiddlewareFactory =
       ? url.pathname.replace(scope[0], scope[1])
       : url.pathname;
     const filename = path.join(root, pathname);
-    // Expand url with found scope
-    console.log(scope, req.url, filename);
 
     try {
       const stat = await fs.stat(filename);

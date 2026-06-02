@@ -32,7 +32,7 @@ function runServer(
   args: string[],
   { timeoutMs = 8000 } = {},
 ): Promise<RunResult> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [MAIN, ...args], {
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -53,7 +53,17 @@ function runServer(
       if (child.exitCode === null && child.signalCode === null) {
         child.kill("SIGKILL");
       }
-      resolve({ listeningAddress, exitCode, listened, stdout, stderr });
+      if (!listeningAddress) {
+        reject(new Error("undefined listeningAddress in runServer"));
+      } else {
+        resolve({
+          listeningAddress,
+          exitCode,
+          listened,
+          stdout,
+          stderr,
+        } satisfies RunResult);
+      }
     };
 
     child.stdout.setEncoding("utf8");
