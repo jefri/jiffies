@@ -11,7 +11,11 @@ const makeSVGElement =
     attrs?: DenormAttrs<SVGElementTagNameMap[K]>,
     ...children: DenormChildren[]
   ) =>
-    up(window.document.createElementNS(SVG_NAMESPACE_URI, name), attrs, ...children);
+    up(
+      window.document.createElementNS(SVG_NAMESPACE_URI, name),
+      attrs,
+      ...children,
+    );
 
 export const a = makeSVGElement("a");
 export const animate = makeSVGElement("animate");
