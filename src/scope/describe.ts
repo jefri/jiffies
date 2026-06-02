@@ -1,7 +1,6 @@
 import { assert } from "../assert.ts";
 import { getLogger } from "../log.ts";
 import type { TestCase } from "./scope.ts";
-import * as state from "./state.ts";
 
 export const beforeall = Symbol("beforeAll");
 export const beforeeach = Symbol("beforeEach");
@@ -71,11 +70,4 @@ export function afterEach(fn: () => void) {
 
 export function afterAll(fn: () => void) {
   cases[0][afterall] = fn;
-}
-
-export function cleanState<State extends {}>(
-  init: () => State,
-  runner: (action: () => void) => void = beforeEach,
-): State {
-  return state.cleanState(init, runner);
 }

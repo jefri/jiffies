@@ -1,7 +1,8 @@
+import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import * as path from "node:path";
 import * as process from "node:process";
-import { describe, expect, it } from "../scope/index.ts";
+import { describe, it } from "node:test";
 
 // Feature test for: Remove `flags` module in favor of `node:util` `parseArgs`.
 //
@@ -94,20 +95,20 @@ function runServer(
 describe("server entrypoint flag handling", () => {
   it("binds to the supplied --host and --port", async () => {
     const result = await runServer(["--port=9091", "--host=127.0.0.1"]);
-    expect(result.listened).toBe(true);
-    expect(result.listeningAddress).toBe("http://127.0.0.1:9091");
+    assert.strictEqual(result.listened, true);
+    assert.strictEqual(result.listeningAddress, "http://127.0.0.1:9091");
   });
 
   it("binds 0.0.0.0:8080 when no flags are supplied", async () => {
     const result = await runServer([]);
-    expect(result.listened).toBe(true);
-    expect(result.listeningAddress).toBe("http://0.0.0.0:8080");
+    assert.strictEqual(result.listened, true);
+    assert.strictEqual(result.listeningAddress, "http://0.0.0.0:8080");
   });
 
   it("rejects a malformed invocation instead of starting", async () => {
     const result = await runServer(["--bogus"]);
-    expect(result.listened).toBe(false);
-    expect(result.listeningAddress).toBe(undefined);
-    expect(result.exitCode).not.toBe(0);
+    assert.strictEqual(result.listened, false);
+    assert.strictEqual(result.listeningAddress, undefined);
+    assert.notStrictEqual(result.exitCode, 0);
   });
 });

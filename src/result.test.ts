@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
   Err,
   None,
@@ -8,36 +10,36 @@ import {
   unwrapOr,
   unwrapOrElse,
 } from "./result.ts";
-import { describe, it } from "./scope/describe.ts";
-import { expect } from "./scope/expect.ts";
 
 describe("Result", () => {
   it("converts Nones", () => {
     const a = None<string>();
-    expect(a).toBeNull();
+    assert.strictEqual(a, null);
 
     const b = None<string>();
-    expect(b).toBeNull();
+    assert.strictEqual(b, null);
 
     const c = Some(a);
-    expect(c).toBeNull();
+    assert.strictEqual(c, null);
 
     const d = Some(b);
-    expect(d).toBeNull();
+    assert.strictEqual(d, null);
   });
 
   it("converts Somes", () => {
     const a = Some("a");
-    expect(a).toBe("a");
+    assert.strictEqual(a, "a");
 
     const b = Some(a);
-    expect(b).toBe("a");
+    assert.strictEqual(b, "a");
   });
 
   it("converts Errs", () => {
     const a = Err(new Error("a error"));
     const b = Err(a);
-    expect(b).toMatchObject({ message: "a error" });
+    // Error.message is non-enumerable, so assert the property directly rather
+    // than via a structural compare.
+    assert.strictEqual((b as Error).message, "a error");
 
     // Assign Err to Result
     const _c: Result<string> = a;
@@ -46,7 +48,7 @@ describe("Result", () => {
   it("converts Oks", () => {
     const a = Ok("a ok");
     const b = Ok(a);
-    expect(b).toBe("a ok");
+    assert.strictEqual(b, "a ok");
 
     // Assign ok to Result
     const _c: Result<string> = a;
@@ -59,11 +61,11 @@ describe("Result", () => {
     const d = Err(new Error("err"));
     const e: string = "else";
 
-    expect(unwrap(a)).toBe("some");
-    expect(unwrap<string, Error>(c)).toBe("ok");
-    expect(() => unwrap(b)).toThrow("Attempted to unwrap None");
-    expect(() => unwrap(d)).toThrow("err");
-    expect(unwrap(e)).toBe("else");
+    assert.strictEqual(unwrap(a), "some");
+    assert.strictEqual(unwrap<string, Error>(c), "ok");
+    assert.throws(() => unwrap(b), /Attempted to unwrap None/);
+    assert.throws(() => unwrap(d), /err/);
+    assert.strictEqual(unwrap(e), "else");
   });
 
   it("unwrapsOrs", () => {
@@ -73,11 +75,11 @@ describe("Result", () => {
     const d = Err(new Error("err"));
     const e: string = "else";
 
-    expect(unwrapOr(a, "z")).toBe("some");
-    expect(unwrapOr(c, "z")).toBe("ok");
-    expect(unwrapOr(b, "z")).toBe("z");
-    expect(unwrapOr(d, "z")).toBe("z");
-    expect(unwrapOr(e, "z")).toBe("else");
+    assert.strictEqual(unwrapOr(a, "z"), "some");
+    assert.strictEqual(unwrapOr(c, "z"), "ok");
+    assert.strictEqual(unwrapOr(b, "z"), "z");
+    assert.strictEqual(unwrapOr(d, "z"), "z");
+    assert.strictEqual(unwrapOr(e, "z"), "else");
   });
 
   it("unwrapsOrElse", () => {
@@ -87,15 +89,30 @@ describe("Result", () => {
     const d = Err(new Error("err"));
     const e = "else";
 
-    expect(unwrapOrElse(a, () => "z")).toBe("some");
-    expect(unwrapOrElse(c, () => "z")).toBe("ok");
-    expect(unwrapOrElse(b, () => "z")).toBe("z");
-    expect(unwrapOrElse(d, () => "z")).toBe("z");
-    expect(unwrapOrElse(e, () => "z")).toBe("else");
+    assert.strictEqual(
+      unwrapOrElse(a, () => "z"),
+      "some",
+    );
+    assert.strictEqual(
+      unwrapOrElse(c, () => "z"),
+      "ok",
+    );
+    assert.strictEqual(
+      unwrapOrElse(b, () => "z"),
+      "z",
+    );
+    assert.strictEqual(
+      unwrapOrElse(d, () => "z"),
+      "z",
+    );
+    assert.strictEqual(
+      unwrapOrElse(e, () => "z"),
+      "else",
+    );
   });
 
   it("allows Result<void> with Ok()", () => {
     const a: Result<void> = Ok();
-    expect(unwrap(a)).toBe(undefined);
+    assert.strictEqual(unwrap(a), undefined);
   });
 });

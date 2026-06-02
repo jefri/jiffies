@@ -1,5 +1,6 @@
-// This file must be .js for imports to run. Unused imports in .ts files are
-// discarded during transpilation.
+// Browser-only test aggregator. `src/index.html` imports this module to drive
+// the in-page `scope` harness. The Node suite runs on `node --test` directly,
+// so the per-file Node `*.test.ts` imports that used to live here are gone.
 import { describe, expect, it } from "./scope/index.ts";
 
 describe("Test executor", () => {
@@ -11,16 +12,6 @@ describe("Test executor", () => {
     expect(() => expect(1).toBe(2)).toThrow();
   });
 });
-
-import "./context.test.ts";
-import "./diff.test.ts";
-import "./equal.test.ts";
-import "./fs.test.ts";
-import "./generator.test.ts";
-import "./lock.test.ts";
-import "./result.test.ts";
-import "./observable/observable.test.ts";
-import "./server/main.test.ts";
 
 if (
   typeof process !== "undefined" &&

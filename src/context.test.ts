@@ -1,15 +1,15 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { type Context, Enter, Exit, using } from "./context.ts";
 import { Err, isErr, isOk, Ok, unwrap } from "./result.ts";
-import { describe, it } from "./scope/describe.ts";
-import { expect } from "./scope/expect.ts";
 
 describe("Context", () => {
   it("performs an operation using a context", () => {
     const context = TestContext();
     const result = using(context, () => Ok(5));
-    expect(unwrap(result)).toBe(5);
-    expect(context.initialized).toBe(true);
-    expect(context.completed).toBe(true);
+    assert.strictEqual(unwrap(result), 5);
+    assert.strictEqual(context.initialized, true);
+    assert.strictEqual(context.completed, true);
   });
 
   it("reports the result of a thrown error", () => {
@@ -19,10 +19,10 @@ describe("Context", () => {
       throw new Error("Failed");
     });
 
-    expect(isErr(result)).toBe(true);
-    expect(Err(result as Err<Error>)).toMatchObject({
-      message: "Failed",
-    });
+    assert.strictEqual(isErr(result), true);
+    // Error.message is non-enumerable, so a partial structural compare does not
+    // see it; assert the property directly.
+    assert.strictEqual(Err(result as Err<Error>).message, "Failed");
   });
 
   it("passes the context to the operation", () => {
@@ -31,10 +31,10 @@ describe("Context", () => {
       completed,
     }));
 
-    expect(isOk(op)).toBe(true);
+    assert.strictEqual(isOk(op), true);
     const { completed, initialized } = unwrap(op);
-    expect(initialized).toBe(true);
-    expect(completed).toBe(false);
+    assert.strictEqual(initialized, true);
+    assert.strictEqual(completed, false);
   });
 });
 
