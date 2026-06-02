@@ -114,7 +114,7 @@ browser tests, which then error because `scope`'s `describe`/`it` are not
 `node:test` registrations. The browser tests must be excluded from discovery.
 
 Approach: rename the browser-only test files off the `*.test.ts` discovery
-pattern to a `*.browser-test.ts` convention, and have the browser entry import
+pattern to a `*.browser.ts` convention, and have the browser entry import
 them explicitly (the role `test_all.ts`/`loadTests()` plays today). Files:
 `dom/html.test.ts`, `dom/fc.test.ts`, `dom/observable.test.ts`, and
 `components/virtual_scroll.test.ts` (the four the browser actually loads today).
@@ -135,7 +135,7 @@ execute them:
   to delete it unless it is a deliberate manual probe worth keeping.
 - **`src/dom/form/form.test.ts`** — a browser DOM test that `dom/test.ts` does
   not load, so it never runs today. Resolution: rename it to the
-  `*.browser-test.ts` convention and add it to the browser list (newly run in
+  `*.browser.ts` convention and add it to the browser list (newly run in
   the browser), or leave it excluded if it is stale. Decide during planning by
   reading the file; do not silently expand coverage.
 
@@ -171,7 +171,7 @@ deleted:
 - **Replaced:** `test_all.ts`. Today it registers the 9 Node tests *and* defers
   the browser tests to `loadTests()`. After migration the Node tests run under
   `node:test` and can no longer be imported in a browser, so `test_all` becomes
-  a browser-only aggregator that imports just the `*.browser-test.ts` files and
+  a browser-only aggregator that imports just the `*.browser.ts` files and
   the existing `dom`/`components` loaders.
 - **Deleted:** the Node entrypoint (`test.mjs`), `state.ts` (`cleanState`),
   `fix.ts`.
@@ -229,7 +229,7 @@ inlining the single `cleanState` use. Delete `test.mjs`, `state.ts`, and
 browser-harness slice of `scope` (`expect`, `describe`/`it`/`execute`,
 `display/dom.ts`, plus `display/console.ts` and `display/junit.ts` which
 `index.html` still uses) so `src/index.html` keeps running the DOM/component
-tests, renamed to a `*.browser-test.ts` convention to exclude them from
+tests, renamed to a `*.browser.ts` convention to exclude them from
 `node --test`. Handle the two orphaned files (`fs_win.test.ts`,
 `dom/form/form.test.ts`) deliberately so default discovery does not silently
 run them. Scripts become `node --test` and `node --test --test-reporter=junit`.

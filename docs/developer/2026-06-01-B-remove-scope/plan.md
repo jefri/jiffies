@@ -46,23 +46,29 @@ is the order that keeps a real, passing safety net at every commit boundary:
 
 **Enables:** The file-rename/removal half of the feature test's
 *"does not run the browser-only DOM/component tests"* assertion — the four
-`*.browser-test.ts` files exist and the four `*.test.ts` originals are gone.
+`*.browser.ts` files exist and the four `*.test.ts` originals are gone.
 
-Rename the four browser-only test files off the `*.test.ts` discovery pattern,
-update the two browser loaders that import them, and delete the two orphaned
-files that no harness runs today.
+Rename the four browser-only test files off the `node --test` discovery
+patterns, update the two browser loaders that import them, and delete the two
+orphaned files that no harness runs today.
+
+Discovery-pattern correction (found during implementation): bare `node --test`
+matches `*.test.ts`, `*-test.ts`, AND `*_test.ts`. The originally planned
+`*.browser-test.ts` suffix ends in `-test` and is therefore still discovered
+(it crashes on `HTMLElement is not defined`). The suffix must avoid the trailing
+`-test`/`_test` too, so the convention is `*.browser.ts`, which node ignores.
 
 Renames (the four files the browser actually loads):
-- `src/dom/html.test.ts`              → `src/dom/html.browser-test.ts`
-- `src/dom/fc.test.ts`                → `src/dom/fc.browser-test.ts`
-- `src/dom/observable.test.ts`        → `src/dom/observable.browser-test.ts`
-- `src/components/virtual_scroll.test.ts` → `src/components/virtual_scroll.browser-test.ts`
+- `src/dom/html.test.ts`              → `src/dom/html.browser.ts`
+- `src/dom/fc.test.ts`                → `src/dom/fc.browser.ts`
+- `src/dom/observable.test.ts`        → `src/dom/observable.browser.ts`
+- `src/components/virtual_scroll.test.ts` → `src/components/virtual_scroll.browser.ts`
 
 Loader updates (import paths only — these run only when `IsBrowser`, so the Node
 runner never touches them):
-- `src/dom/test.ts` — import `./html.browser-test.js`, `./fc.browser-test.js`,
-  `./observable.browser-test.js`.
-- `src/components/test.ts` — import `./virtual_scroll.browser-test.ts`.
+- `src/dom/test.ts` — import `./html.browser.js`, `./fc.browser.js`,
+  `./observable.browser.js`.
+- `src/components/test.ts` — import `./virtual_scroll.browser.ts`.
 
 Orphan deletions (decided by reading them, per the design's "Orphaned files"):
 - `src/fs_win.test.ts` — **delete.** A 12-line manual `scandir` probe with no
@@ -77,7 +83,7 @@ which stays green. `src/index.html` import list is unchanged (it imports
 `test_all.js` for side effects plus the reporters/`execute` directly; the renames
 are internal to the loaders). Manually confirm `src/index.html` still loads.
 
-**End state:** scope runner green; browser harness green; four `*.browser-test.ts`
+**End state:** scope runner green; browser harness green; four `*.browser.ts`
 present, four `*.test.ts` originals and both orphans gone.
 
 ## Step 2: Switch the Node entrypoint to `node --test`
@@ -89,8 +95,13 @@ the runner-removal assertion, and the exact-scripts / zero-dependencies
 assertion.
 
 `package.json` scripts:
-- `"test": "node --test"`
+- `"test": "node --test --test-reporter=tap"`
 - `"ci": "node --test --test-reporter=junit"`
+
+Reporter correction (found during implementation): Node 24's bare `node --test`
+defaults to the **spec** reporter (`ℹ fail 0`), not TAP, even in a non-TTY
+subprocess. The feature test's assertion 1 checks for `TAP version 13` /
+`# fail 0`, so `--test-reporter=tap` is set explicitly on the `test` script.
 
 Delete `src/test.mjs` (the `--mode`/`parseArgs` reporter selector is now the
 built-in `--test-reporter` flag).
@@ -98,7 +109,7 @@ built-in `--test-reporter` flag).
 Reshape `src/test_all.ts` into the browser-only aggregator: drop the nine
 `import "./<node>.test.ts"` side-effect lines (which `node --test` now discovers
 directly) and keep only the browser path — the `dom`/`components` `loadTests()`
-block, which now reaches the renamed `*.browser-test.ts` files via the Step 1
+block, which now reaches the renamed `*.browser.ts` files via the Step 1
 loaders. `src/index.html` still imports `test_all.js`, so leave that import in
 place; verify it still drives the browser run.
 

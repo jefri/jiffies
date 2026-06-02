@@ -25,11 +25,19 @@ import { describe, it } from "node:test";
 const repoRoot = path.resolve(import.meta.dirname, "..");
 
 function run(script: string): { status: number; output: string } {
+  // This file is run via `node --test`, which sets NODE_TEST_CONTEXT in the
+  // environment. If the spawned `npm test` (= node --test) inherits it, the
+  // child detects a nested test run and switches to the internal child-reporter
+  // protocol, ignoring --test-reporter (no TAP, no JUnit). Strip it so the
+  // subprocess behaves like a real top-level invocation.
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
   try {
     const output = execFileSync("npm", ["run", "--silent", script], {
       cwd: repoRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
+      env,
     });
     return { status: 0, output };
   } catch (e) {
@@ -80,12 +88,14 @@ describe("removing the in-house `scope` test framework", () => {
       "browser tests must be excluded from `node --test` discovery",
     );
 
-    // The exclusion mechanism: browser tests live off the `*.test.ts` pattern.
+    // The exclusion mechanism: browser tests live off every `node --test`
+    // discovery pattern. node matches `*.test.ts`, `*-test.ts`, AND `*_test.ts`,
+    // so the suffix must avoid the trailing `-test` too — hence `.browser.ts`.
     const renamed = [
-      "src/dom/html.browser-test.ts",
-      "src/dom/fc.browser-test.ts",
-      "src/dom/observable.browser-test.ts",
-      "src/components/virtual_scroll.browser-test.ts",
+      "src/dom/html.browser.ts",
+      "src/dom/fc.browser.ts",
+      "src/dom/observable.browser.ts",
+      "src/components/virtual_scroll.browser.ts",
     ];
     for (const f of renamed) {
       assert.ok(existsSync(path.join(repoRoot, f)), `expected ${f} to exist`);
@@ -140,7 +150,9 @@ describe("removing the in-house `scope` test framework", () => {
   it("adds zero dependencies and points the scripts at node --test", () => {
     const pkg = readPackageJson();
 
-    assert.equal(pkg.scripts.test, "node --test");
+    // Node 24's bare `node --test` defaults to the spec reporter, so `--test-
+    // reporter=tap` is set explicitly to get the TAP output assertion 1 checks.
+    assert.equal(pkg.scripts.test, "node --test --test-reporter=tap");
     assert.equal(pkg.scripts.ci, "node --test --test-reporter=junit");
 
     const forbidden = [

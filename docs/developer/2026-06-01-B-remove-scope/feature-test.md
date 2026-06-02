@@ -46,14 +46,16 @@ runner files still exist.
 
 1. `npm test` → `node:test` TAP output, `# fail 0`, exit `0`.
 2. `npm test` does not error on the browser tests; the four browser test files
-   are renamed to the `*.browser-test.ts` convention and the `*.test.ts`
+   are renamed to the `*.browser.ts` convention and the `*.test.ts`
    versions are gone.
 3. `npm run ci` emits a well-formed `<testsuites>`/`<testcase>` JUnit document.
 4. The Node runner (`test.mjs`, `scope/state.ts`, `scope/fix.ts`) is deleted;
    the browser slice (`scope/expect.ts`, `scope/execute.ts`, `scope/describe.ts`,
    `scope/display/{dom,console,junit}.ts`) is kept.
-5. Zero test-framework dependencies added; `test` = `node --test`, `ci` =
-   `node --test --test-reporter=junit`.
+5. Zero test-framework dependencies added; `test` =
+   `node --test --test-reporter=tap` (the `=tap` is explicit because Node 24's
+   bare `node --test` defaults to the spec reporter, and assertion 1 checks for
+   TAP), `ci` = `node --test --test-reporter=junit`.
 
 ### Deliberately out of this test
 
