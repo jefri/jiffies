@@ -160,7 +160,7 @@ export const VirtualScroll = FC<
     },
   });
   setTimeout(() => {
-    viewportElement.scroll({ top: state.scrollTop });
+    viewportElement.scroll?.({ top: state.scrollTop });
   });
 
   const setState = (newState: VirtualScrollState<unknown>) => {

@@ -1,6 +1,7 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { State } from "../dom/fc.ts";
 import { div } from "../dom/html.ts";
-import { describe, expect, it } from "../scope/index.ts";
 import VirtualScroll, {
   arrayAdapter,
   type VirtualScrollProps,
@@ -21,10 +22,8 @@ describe("VirtualScroll", () => {
       props,
     );
 
-    expect(scroll[State]?.bufferedItems).toBe(9);
-    expect(scroll[State]?.data).toEqual([0, 1, 2, 3, 4]);
-    //expect(scroll.state.topPaddingHeight).toBe(0);
-    expect(scroll[State]?.viewportHeight).toBe(60);
-    //expect(scroll.state.totalHeight).toBe(200);
+    assert.strictEqual(scroll[State]?.bufferedItems, 9);
+    assert.deepStrictEqual(scroll[State]?.data, [0, 1, 2, 3, 4]);
+    assert.strictEqual(scroll[State]?.viewportHeight, 60);
   });
 });

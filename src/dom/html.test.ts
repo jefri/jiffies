@@ -1,5 +1,5 @@
-import { describe, it } from "../scope/describe.ts";
-import { expect } from "../scope/expect.ts";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { button, table, tbody, td, th, thead, tr } from "./html.ts";
 
 describe("html", () => {
@@ -10,7 +10,7 @@ describe("html", () => {
     for (let x = 1; x <= 3; x++) {
       tableBody.appendChild(tr(td(`${x}`), td(`${x * 2}`)));
     }
-    expect(myTable.textContent).toEqual("Col ACol B122436");
+    assert.strictEqual(myTable.textContent, "Col ACol B122436");
   });
 
   it("attaches event handlers", () => {
@@ -23,7 +23,7 @@ describe("html", () => {
       },
     });
     btn.dispatchEvent(new Event("click"));
-    expect(clicked).toBe(1);
+    assert.strictEqual(clicked, 1);
   });
 
   it("removes event handlers", () => {
@@ -37,11 +37,11 @@ describe("html", () => {
     });
     btn.dispatchEvent(new Event("click"));
 
-    expect(clicked).toBe(1);
+    assert.strictEqual(clicked, 1);
 
     btn.update({ events: { click: null } });
     btn.dispatchEvent(new Event("click"));
-    expect(clicked).toBe(1);
+    assert.strictEqual(clicked, 1);
   });
 
   it("sets style properties", () => {
@@ -49,7 +49,7 @@ describe("html", () => {
       style: { flexDirection: "column" },
     });
 
-    expect(btn.style.flexDirection).toBe("column");
+    assert.strictEqual(btn.style.flexDirection, "column");
   });
 
   it("sets style, attributes, and events together", () => {
@@ -65,10 +65,8 @@ describe("html", () => {
     });
     btn.dispatchEvent(new Event("click"));
 
-    expect(btn.classList.contains("test-class")).toBe(true);
-    expect((btn as unknown as HTMLButtonElement).style.flexDirection).toBe(
-      "column",
-    );
-    expect(clicked).toBe(true);
+    assert.ok(btn.classList.contains("test-class"));
+    assert.strictEqual(btn.style.flexDirection, "column");
+    assert.ok(clicked);
   });
 });

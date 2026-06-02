@@ -6,6 +6,10 @@ if (typeof window === "undefined") {
   // biome-ignore lint/suspicious/noGlobalAssign: Load JSDom globally
   window = global.window = new JSDOM().window as unknown as Window &
     typeof globalThis;
+  global.HTMLElement ??= window.HTMLElement;
+  global.customElements ??= window.customElements;
+  // Unconditional: jsdom's dispatchEvent instanceof-checks its own Event class, so Node's native Event must be replaced.
+  global.Event = window.Event as unknown as typeof Event;
 }
 
 export const XHTML_NAMESPACE_URI = "http://www.w3.org/1999/xhtml";

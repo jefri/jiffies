@@ -1,6 +1,6 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { map, Subject } from "../observable/observable.ts";
-import { describe, it } from "../scope/describe.ts";
-import { expect } from "../scope/expect.ts";
 import type { DOMUpdates } from "./dom.ts";
 import { div, span } from "./html.ts";
 import { O } from "./observable.ts";
@@ -12,11 +12,11 @@ describe("DOM Observable", () => {
 
     const element = O(div(), observable);
 
-    expect(element.innerText).toEqual("");
+    assert.strictEqual(element.textContent, "");
     await subject.next("H");
-    expect(element.innerText).toEqual("H");
+    assert.strictEqual(element.textContent, "H");
     await subject.next("He");
-    expect(element.innerText).toEqual("He");
+    assert.strictEqual(element.textContent, "He");
   });
 
   it("updates a dom node's attributes", async () => {
@@ -25,19 +25,19 @@ describe("DOM Observable", () => {
 
     const element = O(span(), observable);
 
-    expect(element.classList.contains("warning")).toBe(false);
-    expect(element.classList.contains("error")).toBe(false);
+    assert.ok(!element.classList.contains("warning"));
+    assert.ok(!element.classList.contains("error"));
 
     await classes.next(["warning"]);
-    expect(element.classList.contains("warning")).toBe(true);
-    expect(element.classList.contains("error")).toBe(false);
+    assert.ok(element.classList.contains("warning"));
+    assert.ok(!element.classList.contains("error"));
 
     await classes.next(["error"]);
-    expect(element.classList.contains("warning")).toBe(true);
-    expect(element.classList.contains("error")).toBe(true);
+    assert.ok(element.classList.contains("warning"));
+    assert.ok(element.classList.contains("error"));
 
     await classes.next(["!warning", "!error"]);
-    expect(element.classList.contains("warning")).toBe(false);
-    expect(element.classList.contains("error")).toBe(false);
+    assert.ok(!element.classList.contains("warning"));
+    assert.ok(!element.classList.contains("error"));
   });
 });
