@@ -1,5 +1,6 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { takeWhile } from "./generator.ts";
-import { describe, expect, it } from "./scope/index.ts";
 
 describe("Generator", () => {
   it("takes from a generator until a predicate", () => {
@@ -22,6 +23,6 @@ describe("Generator", () => {
     };
 
     const values = [...takeWhile(filter(), generator())];
-    expect(values).toEqual([2, 4, 8, 16, 32, 64, 128]);
+    assert.deepStrictEqual(values, [2, 4, 8, 16, 32, 64, 128]);
   });
 });

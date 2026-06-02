@@ -1,5 +1,6 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { lock } from "./lock.ts";
-import { describe, expect, it } from "./scope/index.ts";
 
 describe("Lock", () => {
   it("prevents reentry", () => {
@@ -12,6 +13,6 @@ describe("Lock", () => {
       count++;
     });
     inc();
-    expect(count).toBe(1);
+    assert.strictEqual(count, 1);
   });
 });

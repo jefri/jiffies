@@ -1,4 +1,5 @@
-import { describe, expect, it } from "../scope/index.ts";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { filter, map, Observable, Subject } from "./observable.ts";
 
 describe("Observables", () => {
@@ -14,9 +15,9 @@ describe("Observables", () => {
         },
       });
 
-      expect(resolved).toBe(42);
+      assert.strictEqual(resolved, 42);
       await subject.next(64);
-      expect(resolved).toBe(64);
+      assert.strictEqual(resolved, 64);
     });
   });
 
@@ -34,7 +35,7 @@ describe("Observables", () => {
           },
         });
       });
-      expect(values).toEqual([16, 8, 4, 2]);
+      assert.deepStrictEqual(values, [16, 8, 4, 2]);
     });
   });
 
@@ -51,11 +52,11 @@ describe("Observables", () => {
 
       subject.pipe(map(inflate(22)), filter(biggerThan(70))).subscribe(assign);
 
-      expect(resolved).toBe(0);
+      assert.strictEqual(resolved, 0);
       await subject.next(42);
-      expect(resolved).toBe(0);
+      assert.strictEqual(resolved, 0);
       await subject.next(50);
-      expect(resolved).toBe(72);
+      assert.strictEqual(resolved, 72);
     });
   });
 
@@ -67,7 +68,7 @@ describe("Observables", () => {
         resolved = n;
       });
       await subject.next(42);
-      expect(resolved).toBe(42);
+      assert.strictEqual(resolved, 42);
     });
   });
 });
