@@ -1,19 +1,5 @@
 # Node Modernization Tasks
 
-- **Final refactor + review for `remove-scope`.**
-  - After the `2026-06-01-B-remove-scope` inner loop is green (feature test
-    `src/migrate_scope.feature.ts` passes), do a finishing pass: run
-    `general:review`, tidy with `developer:refactor`, and confirm the feature
-    file's `*.feature.ts` exclusion and the manual `src/index.html` browser
-    check still hold. Then `developer:cleanup` the topic.
-    During cleanup, also remove the migrate_scope.feature.ts scaffold.
-
-- **Fix the malformed `ci` script in `package.json`.**
-  - `"ci": "npm run node ./src/test.mjs --mode=junit"` is not a valid script
-    invocation (`npm run node` runs no such script), so the junit/CI reporter
-    path is never exercised. Pre-existing, surfaced during the flags→parseArgs
-    review. Likely intended `node ./src/test.mjs --mode=junit`.
-
 - **`context.ts` → native `using` / `await using`.**
   - Safety net exists: `src/context.test.ts`.
   - Red: add a test asserting `Symbol.dispose` / `Symbol.asyncDispose` teardown
@@ -58,6 +44,23 @@
     document that the server itself runs on native Node stripping. No code
     change if the boundary already holds — just the test and a note.
 
+- **Move the browser DOM/component tests to jsdom under `node:test`; delete the
+  browser harness.**
+  - Deferred from the `remove-scope` topic (`2026-06-01-B`). That migration kept
+    a minimal browser-harness slice of `scope` (`expect`, `describe`/`execute`,
+    `display/{dom,console,junit}.ts`) so `src/index.html` can still run the four
+    `*.browser.ts` DOM/component tests in a real browser. jsdom already
+    auto-loads under Node, so these tests *could* run in CI via `node --test`,
+    which would let `src/index.html` and the retained `src/scope/` slice be
+    deleted entirely.
+  - Gate: first confirm jsdom-under-Node fidelity for the DOM/component suites
+    (event dispatch, layout-dependent assertions, `virtual_scroll`). Do not
+    start until that check passes; if jsdom diverges from a real browser on any
+    asserted behavior, the harness stays and this task is abandoned.
+  - Done when: the four `*.browser.ts` files run under `node --test`, the
+    `src/index.html` harness and the remaining `src/scope/` files are deleted,
+    and `npm test` still covers the DOM/component assertions.
+
 ## Tier 4 — DOM reentrancy correctness
 
 
@@ -93,5 +96,3 @@
 
 - MIME utility — Node ships none; the hand-map in `response.ts` stays.
 - Static file serving — no built-in handler; the middleware design stays.
-- Replacing the `scope` test framework with `node:test` — large, separate
-  initiative. Tracked here only as a known overlap, not a task.
