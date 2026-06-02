@@ -30,7 +30,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
     "@types/jsdom": "^27.0.0",
-    "@types/node": "^20.8.9"
+    "@types/node": "^22.19.19"
   },
   "dependencies": {
     "jsdom": "^27.4.0",
