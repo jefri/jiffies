@@ -3,6 +3,7 @@ import {
   type DenormChildren,
   type DomAttrs,
   normalizeArguments,
+  reconcileChildren,
   update,
 } from "./dom.ts";
 
@@ -56,8 +57,8 @@ export function FC<Props extends object, State extends object = object>(
       update(this, this.#attrs, []);
 
       // Re-run the component function using new element, attrs, and children.
-      const replace = [component(this, this.#attrs, this.#children)];
-      this.replaceChildren(...replace.flat());
+      const rendered = [component(this, this.#attrs, this.#children)];
+      reconcileChildren(this, rendered.flat());
       return this;
     }
   }
