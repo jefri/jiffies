@@ -161,8 +161,9 @@ export function update(
   }
 
   if (children?.length > 0) {
-    element.replaceChildren(
-      ...(children[0] === CLEAR ? [] : (children as (string | Node)[])),
+    reconcileChildren(
+      element,
+      children[0] === CLEAR ? [] : (children as (string | Node)[]),
     );
   }
 
@@ -170,4 +171,69 @@ export function update(
     update(element, ...normalizeArguments(attrs, children));
 
   return element as Element;
+}
+
+/**
+ * Reconcile `element`'s mounted children against `children` by NODE OBJECT
+ * IDENTITY, mutating the live DOM in place. Replaces the `replaceChildren`
+ * calls in `update()` and FC `update()`.
+ *
+ * Why: the library's core model is "hold a node reference and reuse it." A
+ * child passed back by the same reference must stay attached across an update,
+ * so its focus, scroll position, text selection, and connected state survive.
+ * `replaceChildren` detaches every child first, which loses all of that.
+ *
+ * Contract:
+ *  - A `string` entry is materialized into a fresh text node every call
+ *    (strings carry no identity, so text children rebuild — same as today).
+ *  - A `children` entry that `===` a currently-mounted child is left in place
+ *    and never detached.
+ *  - A mounted child absent from `children` is removed.
+ *  - Final child order equals `children`; genuinely new nodes — and existing
+ *    nodes that changed position — are placed with `insertBefore`.
+ *  - Each node reference appears at most once in `children`: a DOM node can
+ *    occupy only one position, so a repeated reference collapses to a single
+ *    (last) placement.
+ *
+ * Invariants:
+ *  - O(n) in the number of children. No quadratic scan. (design.md Metrics:
+ *    "Linear cost".)
+ *  - Removal iterates a SNAPSHOT of the mounted children, NOT the live
+ *    `childNodes`, because `removeChild` mutates that collection mid-iteration.
+ *  - Namespace-neutral: matching is pure `===`, and `insertBefore`/`removeChild`
+ *    are namespace-agnostic, so SVG and custom elements reconcile unchanged.
+ *  - Each reused node keeps its own `Symbol(events)` map for free — the node
+ *    object is reused, never content-copied, so no event reconciliation.
+ */
+export function reconcileChildren(
+  element: Node,
+  children: (string | Node)[],
+): void {
+  const doc = element.ownerDocument ?? window.document;
+  // Materialize the desired list: strings become fresh text nodes (they carry
+  // no identity); nodes are kept by reference for identity matching below.
+  const desired: Node[] = children.map((child) =>
+    typeof child === "string" ? doc.createTextNode(child) : child,
+  );
+  const keep = new Set(desired);
+
+  // Remove mounted children absent from the desired list. Iterate a SNAPSHOT —
+  // removeChild mutates the live childNodes collection mid-loop.
+  for (const mounted of Array.from(element.childNodes)) {
+    if (!keep.has(mounted)) {
+      element.removeChild(mounted);
+    }
+  }
+
+  // Place each desired node in order against a cursor over the survivors. A node
+  // already at the cursor is in position — left untouched, so reused subtrees
+  // are never detached. Otherwise insertBefore moves or inserts it.
+  let cursor: ChildNode | null = element.firstChild;
+  for (const node of desired) {
+    if (node === cursor) {
+      cursor = cursor.nextSibling;
+    } else {
+      element.insertBefore(node, cursor);
+    }
+  }
 }
