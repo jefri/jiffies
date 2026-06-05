@@ -7,9 +7,8 @@ import { circle, svg } from "./svg.ts";
 import { renderDocument, renderToString } from "./render.ts";
 import { build } from "./ssg.ts";
 
-const Greeting = FC<{ name: string }>(
-  "x-offline-greeting",
-  (_el, attrs) => p(`Hello, ${attrs.name}!`),
+const Greeting = FC<{ name: string }>("x-offline-greeting", (_el, attrs) =>
+  p(`Hello, ${attrs.name}!`),
 );
 
 // --- renderToString ---
@@ -31,10 +30,7 @@ describe("renderToString", () => {
   });
 
   it("escapes special characters in text content", () => {
-    assert.equal(
-      renderToString(p("A & B < C")),
-      "<p>A &amp; B &lt; C</p>",
-    );
+    assert.equal(renderToString(p("A & B < C")), "<p>A &amp; B &lt; C</p>");
   });
 
   it("escapes double-quotes in attribute values", () => {
@@ -65,10 +61,10 @@ describe("renderToString", () => {
     );
   });
 
-  it("omits event listeners from output", () => {
+  it("omits event listeners from output but stamps data-hydrate", () => {
     assert.equal(
       renderToString(div({ events: { click: () => {} } })),
-      "<div></div>",
+      '<div data-hydrate=""></div>',
     );
   });
 });
@@ -87,7 +83,10 @@ describe("renderDocument", () => {
     assert.equal(
       renderDocument({
         body: p("body"),
-        head: [title("My Page"), meta({ name: "description", content: "test" })],
+        head: [
+          title("My Page"),
+          meta({ name: "description", content: "test" }),
+        ],
       }),
       '<!doctype html><html lang="en"><head><title>My Page</title><meta name="description" content="test"></head><body><p>body</p></body></html>',
     );
@@ -157,7 +156,12 @@ describe("build", () => {
     const fs = new FileSystem(new RecordFileSystemAdapter(store));
 
     await build({
-      pages: [{ route: "/about", module: { default: () => p("À propos"), lang: "fr" } }],
+      pages: [
+        {
+          route: "/about",
+          module: { default: () => p("À propos"), lang: "fr" },
+        },
+      ],
       out: "/out",
       fs,
     });
@@ -173,13 +177,15 @@ describe("build", () => {
     const fs = new FileSystem(new RecordFileSystemAdapter(store));
 
     await build({
-      pages: [{
-        route: "/",
-        module: {
-          default: () => p("hello"),
-          head: async () => title("Hello Page"),
+      pages: [
+        {
+          route: "/",
+          module: {
+            default: () => p("hello"),
+            head: async () => title("Hello Page"),
+          },
         },
-      }],
+      ],
       out: "/out",
       fs,
     });

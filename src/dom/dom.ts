@@ -142,6 +142,7 @@ export function update(
       setListener(element, $events, k, v);
     }
   }
+  element.toggleAttribute("data-hydrate", $events.size > 0);
 
   const _style = (element as { style?: Partial<CSSStyleDeclaration> }).style;
   if (_style) {
