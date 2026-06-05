@@ -133,15 +133,14 @@ export function update(
   element[Events] ??= new Map<string, EventHandler>();
   const $events = element[Events];
 
-  for (const [k, v] of Object.entries(
-    (attrs.events as NonNullable<typeof attrs.events>) ?? {},
-  )) {
+  for (const [k, v] of Object.entries(attrs.events ?? {})) {
     if (v === null) {
       clearListener(element, $events, k);
     } else if (v !== undefined) {
       setListener(element, $events, k, v);
     }
   }
+  element.toggleAttribute("data-hydrate", $events.size > 0);
 
   const _style = (element as { style?: Partial<CSSStyleDeclaration> }).style;
   if (_style) {
@@ -178,8 +177,7 @@ export function update(
       continue;
     }
 
-    const remove = !v;
-    if (remove) {
+    if (!v) {
       element.removeAttribute(k);
     } else if (v === true) {
       element.setAttribute(k, k);
