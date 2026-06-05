@@ -374,6 +374,11 @@ export function patchNode(kept: Element, fresh: Element): void {
     setListener(kept, keptEvents, type, handler);
   }
 
+  // Custom elements own their own subtrees; the FC's update() reconciles its
+  // children via start(). Recursing here would overwrite server children that
+  // the FC is still responsible for — violating the opaque-leaf contract.
+  if (customElements.get(kept.localName)) return;
+
   // Children: recurse one level down, reusing reconcileChildren so identity-then-
   // positional matching applies at every depth — nested same-tag nodes (e.g. a
   // focused input) are reused in place, not rebuilt. Each node in the patched

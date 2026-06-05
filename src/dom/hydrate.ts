@@ -1,3 +1,5 @@
+import { reconcileChildren } from "./dom.ts";
+
 /**
  * Hydration runtime — M1: FC adopt-and-hydrate on `load` (no-knobs design).
  *
@@ -51,15 +53,27 @@ export function start(root?: ParentNode): void {
   }
 }
 
+// Like start(), but omits replaceChildren() so the FC's update() reconciles
+// onto existing server children — enabling patchNode to strip defer-hydration
+// from nested FCs as a surface-attribute sync rather than a child replacement.
+// Recurses into each hydrated FC so parent-before-child ordering is preserved.
+function startHydrate(root: ParentNode): void {
+  for (const el of scanUnits(root)) {
+    customElements.whenDefined(el.localName).then(() => {
+      el.update();
+      startHydrate(el);
+    });
+  }
+}
+
 /**
  * Whole-app page: re-run `render`, reconcile ONCE into `mount` (flash-free),
  * grafting handlers onto kept server nodes via the existing reconcile/patch
  * path. The reconcile stops at custom-element boundaries; each FC hydrates
- * itself. (M2)
+ * itself via `startHydrate`. (M2)
  */
-export function hydrateRoot(
-  _mount: Element,
-  _render: () => Node | Node[],
-): void {
-  throw new Error("hydrate.hydrateRoot: not implemented (M2)");
+export function hydrateRoot(mount: Element, render: () => Node | Node[]): void {
+  const fresh = [render()].flat() as Node[];
+  reconcileChildren(mount, fresh);
+  startHydrate(mount);
 }
