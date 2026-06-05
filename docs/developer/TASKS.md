@@ -1,8 +1,5 @@
 # Node Modernization Tasks
 
-- Hydration M2 — `hydrateRoot` whole-app reconcile-once + `defer-hydration`
-  ordering. See TASK-NOTES-hydration-m2.md.
-
 - Hydration M3 — internal serialized JSON data-prop channel. A page-level
   `<script type="application/json" id="__hydration">` payload carries each FC
   unit's data props (keyed by derived document-order position) from server to
