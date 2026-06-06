@@ -2,6 +2,9 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { PageDescriptor, PageModule } from "./ssg.ts";
 
+const SENTINEL = "page.ts";
+const SENTINEL_SUFFIX = `/${SENTINEL}`;
+
 /**
  * Scan `<rootDir>/<pagesDir>` recursively for `page.ts` sentinels.
  * Each sentinel becomes one PageDescriptor whose route is derived from the
@@ -28,22 +31,20 @@ export async function discoverPages(
     throw new Error(`No page.ts sentinels found in ${pagesDir}`);
   }
 
-  const staticSentinels: string[] = [];
-  const dynamicSentinels: string[] = [];
-  for (const s of sentinels) {
-    const relDir = s.slice(pagesRoot.length, -"/page.ts".length);
-    if (isDynamic(relDir)) {
-      dynamicSentinels.push(s);
-    } else {
-      staticSentinels.push(s);
-    }
+  type Sentinel = { path: string; relDir: string };
+  const staticSentinels: Sentinel[] = [];
+  const dynamicSentinels: Sentinel[] = [];
+  for (const path of sentinels) {
+    const relDir = path.slice(pagesRoot.length, -SENTINEL_SUFFIX.length);
+    (isDynamic(relDir) ? dynamicSentinels : staticSentinels).push({
+      path,
+      relDir,
+    });
   }
 
-  // Build static descriptors with collision detection.
   const routeToPath = new Map<string, string>();
   const staticDescriptors: PageDescriptor[] = await Promise.all(
-    staticSentinels.map(async (sentinelPath) => {
-      const relDir = sentinelPath.slice(pagesRoot.length, -"/page.ts".length);
+    staticSentinels.map(async ({ path: sentinelPath, relDir }) => {
       const route = deriveRoute(relDir);
       const prev = routeToPath.get(route);
       if (prev !== undefined) {
@@ -57,10 +58,8 @@ export async function discoverPages(
     }),
   );
 
-  // Expand dynamic sentinels.
   const dynamicDescriptors: PageDescriptor[] = [];
-  for (const sentinelPath of dynamicSentinels) {
-    const relDir = sentinelPath.slice(pagesRoot.length, -"/page.ts".length);
+  for (const { path: sentinelPath, relDir } of dynamicSentinels) {
     const routeTemplate = deriveRoute(relDir);
     const imported = (await import(sentinelPath)) as { default: PageModule };
     const originalModule = imported.default;
@@ -137,7 +136,7 @@ async function scan(dir: string, results: string[]): Promise<void> {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       await scan(fullPath, results);
-    } else if (entry.name === "page.ts") {
+    } else if (entry.name === SENTINEL) {
       results.push(fullPath);
     }
   }
