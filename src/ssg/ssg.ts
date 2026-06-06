@@ -4,10 +4,19 @@ import type { FileSystem } from "../fs.ts";
 
 /** Describes a page's default render function and optional metadata for the SSG build. */
 export interface PageModule {
-  default: () => Node | Node[] | Promise<Node | Node[]>;
-  head?: () => Node | Node[] | Promise<Node | Node[]>;
+  default: (
+    params?: Record<string, string>,
+  ) => Node | Node[] | Promise<Node | Node[]>;
+  head?: (
+    params?: Record<string, string>,
+  ) => Node | Node[] | Promise<Node | Node[]>;
   lang?: string;
   clientModules?: string[];
+  /**
+   * Enumerate concrete param sets for dynamic route segments.
+   * Required when any path segment is a [bracket] folder.
+   */
+  generateStaticParams?: () => Promise<Record<string, string>[]>;
 }
 
 /** Associates a URL route with its `PageModule` for the SSG build. */
