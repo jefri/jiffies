@@ -31,12 +31,10 @@ export async function bundleClientModules(
   if (allSpecs.size === 0) return new Map();
 
   // Resolve each specifier to an absolute disk path under rootDir.
+  // A leading "/" means "relative to rootDir", not the filesystem root.
   const specToPath = new Map<string, string>();
   for (const spec of allSpecs) {
-    const diskPath = spec.startsWith("/")
-      ? join(rootDir, spec)
-      : join(rootDir, spec);
-    specToPath.set(spec, diskPath);
+    specToPath.set(spec, join(rootDir, spec));
   }
 
   // Build slug -> spec mapping and Rollup input record.

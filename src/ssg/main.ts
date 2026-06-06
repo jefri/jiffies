@@ -38,6 +38,11 @@ interface BuildManifest {
   durationMs: number;
 }
 
+function htmlPathForRoute(route: string, outDir: string): string {
+  const segment = route.replace(/^\//, "");
+  return segment ? `${outDir}/${segment}/index.html` : `${outDir}/index.html`;
+}
+
 async function sizeEntry(absPath: string, outDir: string): Promise<AssetEntry> {
   const content = await readFile(absPath);
   return {
@@ -72,10 +77,7 @@ async function runBuild(values: CliValues): Promise<void> {
   if (specToUrl.size > 0) {
     for (const { route, module } of pages) {
       if (!module.clientModules?.length) continue;
-      const segment = route.replace(/^\//, "");
-      const htmlPath = segment
-        ? `${outDir}/${segment}/index.html`
-        : `${outDir}/index.html`;
+      const htmlPath = htmlPathForRoute(route, outDir);
       const original = await readFile(htmlPath, "utf-8");
       await writeFile(
         htmlPath,
@@ -86,10 +88,7 @@ async function runBuild(values: CliValues): Promise<void> {
   }
 
   // Collect sizes.
-  const htmlPaths = pages.map(({ route }) => {
-    const segment = route.replace(/^\//, "");
-    return segment ? `${outDir}/${segment}/index.html` : `${outDir}/index.html`;
-  });
+  const htmlPaths = pages.map(({ route }) => htmlPathForRoute(route, outDir));
 
   const assetsDir = join(outDir, "assets");
   let assetFiles: string[] = [];

@@ -24,6 +24,20 @@ export async function discoverPages(
     throw new Error(`No page.ts sentinels found in ${pagesDir}`);
   }
 
+  // Detect route collisions caused by group-folder stripping before importing.
+  const routeToPath = new Map<string, string>();
+  for (const sentinelPath of sentinels) {
+    const relDir = sentinelPath.slice(pagesRoot.length, -"/page.ts".length);
+    const route = deriveRoute(relDir);
+    const prev = routeToPath.get(route);
+    if (prev !== undefined) {
+      throw new Error(
+        `Route collision at "${route}": ${prev} and ${sentinelPath} both derive the same route`,
+      );
+    }
+    routeToPath.set(route, sentinelPath);
+  }
+
   const pages = await Promise.all(
     sentinels.map(async (sentinelPath) => {
       const relDir = sentinelPath.slice(pagesRoot.length, -"/page.ts".length);
@@ -32,18 +46,6 @@ export async function discoverPages(
       return { route, module: imported.default };
     }),
   );
-
-  // Detect route collisions caused by group-folder stripping.
-  const seen = new Map<string, string>();
-  for (const { route } of pages) {
-    const prev = seen.get(route);
-    if (prev !== undefined) {
-      throw new Error(
-        `Route collision at "${route}": ${prev} and another sentinel both derive the same route`,
-      );
-    }
-    seen.set(route, route);
-  }
 
   return pages;
 }
