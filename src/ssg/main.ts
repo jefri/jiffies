@@ -4,8 +4,9 @@
 
 import * as process from "node:process";
 import { parseArgs } from "node:util";
-import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { readFile, readdir, writeFile } from "node:fs/promises";
+import { join, relative, resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 import { NodeFileSystem } from "../fs_node.ts";
 import { build } from "./ssg.ts";
 import { bundleClientModules } from "./bundle.ts";
@@ -24,7 +25,34 @@ interface CliValues {
   "no-clean": boolean;
 }
 
+interface AssetEntry {
+  path: string;
+  rawBytes: number;
+  gzipBytes: number;
+}
+
+interface BuildManifest {
+  pages: AssetEntry[];
+  assets: AssetEntry[];
+  public: AssetEntry[];
+  durationMs: number;
+}
+
+async function sizeEntry(absPath: string, outDir: string): Promise<AssetEntry> {
+  const content = await readFile(absPath);
+  return {
+    path: relative(outDir, absPath),
+    rawBytes: content.byteLength,
+    gzipBytes: gzipSync(content).byteLength,
+  };
+}
+
+function fmtBytes(n: number): string {
+  return n >= 1024 ? `${(n / 1024).toFixed(1)} kB` : `${n} B`;
+}
+
 async function runBuild(values: CliValues): Promise<void> {
+  const start = Date.now();
   const rootDir = resolve(values.root);
   const outDir = resolve(values.out);
 
@@ -38,7 +66,7 @@ async function runBuild(values: CliValues): Promise<void> {
 
   const fs = new NodeFileSystem();
   await build({ pages, out: outDir, fs });
-  await copyPublic(rootDir, values.public, outDir);
+  const publicPaths = await copyPublic(rootDir, values.public, outDir);
 
   const specToUrl = await bundleClientModules(pages, rootDir, outDir);
   if (specToUrl.size > 0) {
@@ -55,6 +83,49 @@ async function runBuild(values: CliValues): Promise<void> {
         "utf-8",
       );
     }
+  }
+
+  // Collect sizes.
+  const htmlPaths = pages.map(({ route }) => {
+    const segment = route.replace(/^\//, "");
+    return segment ? `${outDir}/${segment}/index.html` : `${outDir}/index.html`;
+  });
+
+  const assetsDir = join(outDir, "assets");
+  let assetFiles: string[] = [];
+  try {
+    assetFiles = (await readdir(assetsDir)).map((f) => join(assetsDir, f));
+  } catch {
+    // no assets directory when no clientModules
+  }
+
+  const [pageEntries, assetEntries, publicEntries] = await Promise.all([
+    Promise.all(htmlPaths.map((p) => sizeEntry(p, outDir))),
+    Promise.all(assetFiles.map((p) => sizeEntry(p, outDir))),
+    Promise.all(publicPaths.map((p) => sizeEntry(p, outDir))),
+  ]);
+
+  const manifest: BuildManifest = {
+    pages: pageEntries,
+    assets: assetEntries,
+    public: publicEntries,
+    durationMs: Date.now() - start,
+  };
+
+  if (values.json) {
+    process.stdout.write(JSON.stringify(manifest, null, 2));
+  } else {
+    const all = [...pageEntries, ...assetEntries, ...publicEntries];
+    const maxPath = Math.max(...all.map((e) => e.path.length));
+    for (const entry of all) {
+      const padded = entry.path.padEnd(maxPath);
+      process.stderr.write(
+        `${padded}  ${fmtBytes(entry.rawBytes)} │ gzip: ${fmtBytes(entry.gzipBytes)}\n`,
+      );
+    }
+    process.stderr.write(
+      `✓ built ${pageEntries.length} pages, ${assetEntries.length} assets in ${manifest.durationMs}ms\n`,
+    );
   }
 }
 
