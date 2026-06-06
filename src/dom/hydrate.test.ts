@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { FileSystem, RecordFileSystemAdapter } from "../fs.ts";
+import { build, type PageModule } from "../ssg/ssg.ts";
 import { FC, type FCComponent, State } from "./fc.ts";
 import { button, div, form, input } from "./html.ts";
-import { hydrateRoot, start } from "./hydrate.ts";
+import {
+  buildPayload,
+  hydrateRoot,
+  installCaptureStub,
+  readPayload,
+  start,
+} from "./hydrate.ts";
 
 // The `load` policy hydrates "immediately after the scan"; flush a macrotask so
 // the test does not depend on whether `start()` adopts synchronously or after
@@ -149,6 +157,19 @@ describe("hydrate — M1: FC adopt-and-hydrate on `load`", () => {
   });
 });
 
+interface GreetProps {
+  name: string;
+  count?: number;
+}
+
+// An FC whose render fn echoes its props into text so tests can assert which
+// props reached the component without inspecting internal state symbols.
+const Greeter = FC<GreetProps>("hydrate-greeter", (_el, attrs) => {
+  const text = `Hello ${attrs.name ?? "?"} x${attrs.count ?? 0}`;
+  return div(text);
+});
+void Greeter;
+
 describe("hydrate — M2: hydrateRoot whole-app reconcile", () => {
   it("reconciles without detaching the shell: a focused input's node identity survives", (t) => {
     // Arrange — SERVER: a page with plain-DOM elements. A focused input simulates
@@ -273,6 +294,441 @@ describe("hydrate — M2: hydrateRoot whole-app reconcile", () => {
       (inner as FCComponent<object, CounterState>)[State]?.count,
       0,
       "inner FC's lifecycle ran after the outer FC released the defer-hydration gate",
+    );
+  });
+});
+
+describe("hydrate — M3: state channel (serialized JSON data-prop channel)", () => {
+  it("buildPayload serializes props by document-order index with XSS escaping", () => {
+    // Arrange — two units with different prop shapes, one containing characters
+    // that would break an inline <script> tag if unescaped.
+    const units: Record<string, unknown>[] = [
+      { name: "Alice", count: 3 },
+      { label: "</script><script>alert(1)</script>", flag: true },
+    ];
+
+    // Act — buildPayload(units) returns the JSON string that the server embeds
+    // inside the <script type="application/json" id="__hydration"> element.
+    const payload = buildPayload(units);
+
+    // Assert — the result round-trips: JSON.parse recovers the original values.
+    const parsed = JSON.parse(payload) as Record<string, unknown>[];
+    assert.deepEqual(parsed[0], { name: "Alice", count: 3 });
+    assert.deepEqual(parsed[1], {
+      label: "</script><script>alert(1)</script>",
+      flag: true,
+    });
+
+    // Assert — the raw string never contains a literal </script> sequence that
+    // would break the containing script element before the parser closes it.
+    assert.ok(
+      !payload.includes("</script>"),
+      "payload must not contain unescaped </script>",
+    );
+    // The injected unicode escape survives JSON.parse transparently.
+    assert.ok(
+      payload.includes("\\u003c") || payload.includes("<\\/script>"),
+      "payload escapes < or </ to prevent script injection",
+    );
+  });
+
+  it("readPayload parses the __hydration script tag from the document", () => {
+    // Arrange — insert the payload script that the server would have emitted.
+    const data = [{ name: "Bob" }, { count: 7 }];
+    const script = window.document.createElement("script");
+    script.type = "application/json";
+    script.id = "__hydration";
+    script.textContent = buildPayload(data);
+    window.document.head.appendChild(script);
+
+    // Act — readPayload() locates the script by id and returns the parsed array.
+    const result = readPayload();
+
+    // Assert — the values are recovered faithfully.
+    assert.deepEqual(result, data);
+
+    // Cleanup
+    script.remove();
+  });
+
+  it("position-indexed key maps each unit to its props by document order", () => {
+    // Arrange — two Greeter FCs in document order; the payload maps index 0 and
+    // index 1 to different props. readPayload returns an array so position IS the
+    // key — no author-chosen id.
+    const payload = buildPayload([
+      { name: "First", count: 1 },
+      { name: "Second", count: 2 },
+    ]);
+    const script = window.document.createElement("script");
+    script.type = "application/json";
+    script.id = "__hydration";
+    script.textContent = payload;
+    window.document.head.appendChild(script);
+
+    window.document.body.innerHTML = `
+      <hydrate-greeter></hydrate-greeter>
+      <hydrate-greeter></hydrate-greeter>
+    `;
+    const units = Array.from(
+      window.document.body.querySelectorAll("hydrate-greeter"),
+    );
+    assert.equal(units.length, 2, "precondition: two greeter units in DOM");
+
+    // Act — readPayload(), then verify index 0 -> first props, index 1 -> second.
+    const result = readPayload();
+    assert.deepEqual(result[0], { name: "First", count: 1 });
+    assert.deepEqual(result[1], { name: "Second", count: 2 });
+
+    // Cleanup
+    script.remove();
+    window.document.body.innerHTML = "";
+  });
+
+  it("start() reads the payload and passes props to each unit's update()", async (t) => {
+    // Arrange — server emitted two Greeter FCs; payload carries their props.
+    const script = window.document.createElement("script");
+    script.type = "application/json";
+    script.id = "__hydration";
+    script.textContent = buildPayload([
+      { name: "Carol", count: 5 },
+      { name: "Dave", count: 9 },
+    ]);
+    window.document.head.appendChild(script);
+
+    window.document.body.innerHTML = `
+      <hydrate-greeter><div>Hello ? x0</div></hydrate-greeter>
+      <hydrate-greeter><div>Hello ? x0</div></hydrate-greeter>
+    `;
+    t.after(() => {
+      script.remove();
+      window.document.body.innerHTML = "";
+    });
+
+    // Act — start() discovers the payload, passes indexed props to each unit.
+    start(window.document.body);
+    await tick();
+
+    // Assert — each FC's render fn received its props from the payload, so the
+    // text content reflects the server-supplied name and count values.
+    const greeters = Array.from(
+      window.document.body.querySelectorAll("hydrate-greeter"),
+    );
+    assert.equal(
+      greeters[0]?.textContent?.trim(),
+      "Hello Carol x5",
+      "first unit received its payload props",
+    );
+    assert.equal(
+      greeters[1]?.textContent?.trim(),
+      "Hello Dave x9",
+      "second unit received its payload props",
+    );
+  });
+});
+
+describe("hydrate — M4: event capture-and-replay", () => {
+  it("installCaptureStub queues an event dispatched on a child of an un-hydrated FC", (t) => {
+    // Arrange — SERVER: a hydrate-counter FC with a child div. The FC has not
+    // been hydrated yet (no start() called), so its subtree is inert server HTML.
+    // installCaptureStub installs capture-phase listeners on document for the
+    // standard event types; events targeting nodes inside un-hydrated FC units
+    // must land in the global queue rather than being lost.
+    window.document.body.innerHTML =
+      "<hydrate-counter><div>Count: 0</div></hydrate-counter>";
+    const fc = window.document.body.querySelector("hydrate-counter") as Element;
+    const serverChild = fc.querySelector("div") as HTMLElement;
+    assert.ok(fc, "precondition: server FC present");
+    assert.ok(serverChild, "precondition: server FC child present");
+    t.after(() => {
+      window.document.body.innerHTML = "";
+      // Reset the global queue between tests.
+      (window as unknown as Record<string, unknown>).__hydrateQueue = undefined;
+    });
+
+    // Act — install the capture stub, then dispatch a click on the server child
+    // before hydration. The stub intercepts it and enqueues a descriptor.
+    installCaptureStub();
+    serverChild.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    // Assert — the global queue has one entry whose unitEl is the FC boundary
+    // element and whose type is "click". The targetPath encodes the path from
+    // the FC element to the server child via childNodes indices.
+    const queue = (window as unknown as Record<string, unknown>)
+      .__hydrateQueue as Array<{
+      unitEl: Element;
+      type: string;
+      targetPath: number[];
+      init: Record<string, unknown>;
+    }>;
+    assert.ok(Array.isArray(queue), "global queue was created");
+    assert.equal(queue.length, 1, "one event was queued");
+    assert.strictEqual(queue[0].unitEl, fc, "unitEl is the FC boundary");
+    assert.equal(queue[0].type, "click", "event type is recorded");
+    assert.ok(
+      Array.isArray(queue[0].targetPath),
+      "targetPath is an array of childNode indices",
+    );
+  });
+
+  it("start() re-dispatches the queued event on the resolved live node after hydration", async (t) => {
+    // Arrange — SERVER: a hydrate-counter FC with a server child. A click event
+    // was queued before JS shipped (simulated by pre-populating __hydrateQueue
+    // with a descriptor that points to childNodes[0] of the FC). After start()
+    // hydrates the FC, the queue entry must be replayed onto the freshly-rendered
+    // live node that corresponds to that path.
+    window.document.body.innerHTML =
+      "<hydrate-counter><div>Count: 0</div></hydrate-counter>";
+    const fc = window.document.body.querySelector("hydrate-counter") as Element;
+    assert.ok(fc, "precondition: server FC present");
+
+    // Track whether a click was received on the live subtree after hydration.
+    let replayedClick = false;
+    t.after(() => {
+      window.document.body.innerHTML = "";
+      (window as unknown as Record<string, unknown>).__hydrateQueue = undefined;
+    });
+
+    // Pre-populate the queue with a descriptor targeting childNodes[0] of the
+    // FC (the server <div>). After hydration, start() must walk that path from
+    // the freshly-rendered FC element and dispatch a new click there.
+    installCaptureStub();
+    (window as unknown as Record<string, unknown>).__hydrateQueue = [
+      {
+        unitEl: fc,
+        type: "click",
+        targetPath: [0],
+        init: { bubbles: true, cancelable: true },
+      },
+    ];
+
+    // Act — start() hydrates the FC and drains the queue for this unit.
+    start(window.document.body);
+    // Attach a listener on the FC to catch the replayed event. Must be set up
+    // before tick() so it is present when the async drain fires.
+    fc.addEventListener("click", () => {
+      replayedClick = true;
+    });
+    await tick();
+
+    // Assert — the queued event was re-dispatched and bubbled up to the FC.
+    assert.ok(
+      replayedClick,
+      "start() replayed the queued click onto the live node after hydration",
+    );
+    // The queue entry must be consumed: the queue is empty or the entry removed.
+    const queue = (window as unknown as Record<string, unknown>)
+      .__hydrateQueue as Array<unknown>;
+    assert.equal(
+      queue.filter((e) => (e as { unitEl: Element }).unitEl === fc).length,
+      0,
+      "the queue entry for this unit was drained after hydration",
+    );
+  });
+
+  it("an unresolved path (element no longer in the rebuilt tree) is dropped with console.warn", async (t) => {
+    // Arrange — SERVER: a hydrate-counter FC. The queue holds an entry with a
+    // targetPath that cannot be resolved in the rebuilt subtree (e.g., index [5]
+    // when the FC renders only a single child). start() must not throw; it must
+    // emit a console.warn and silently drop the entry.
+    window.document.body.innerHTML =
+      "<hydrate-counter><div>Count: 0</div></hydrate-counter>";
+    const fc = window.document.body.querySelector("hydrate-counter") as Element;
+    assert.ok(fc, "precondition: server FC present");
+
+    let warnCalled = false;
+    const originalWarn = console.warn;
+    console.warn = (..._args: unknown[]) => {
+      warnCalled = true;
+    };
+    t.after(() => {
+      console.warn = originalWarn;
+      window.document.body.innerHTML = "";
+      (window as unknown as Record<string, unknown>).__hydrateQueue = undefined;
+    });
+
+    // Pre-populate the queue with an unresolvable targetPath: index 5 is far
+    // beyond any child the FC will render (it renders a single <div>).
+    installCaptureStub();
+    (window as unknown as Record<string, unknown>).__hydrateQueue = [
+      {
+        unitEl: fc,
+        type: "click",
+        targetPath: [5],
+        init: { bubbles: true, cancelable: true },
+      },
+    ];
+
+    // Act — start() hydrates and attempts to drain the queue.
+    start(window.document.body);
+    await tick();
+
+    // Assert — no throw, console.warn was called, and the entry was dropped.
+    assert.ok(
+      warnCalled,
+      "console.warn was called for the unresolvable targetPath",
+    );
+    const queue = (window as unknown as Record<string, unknown>)
+      .__hydrateQueue as Array<unknown>;
+    assert.equal(
+      queue.filter((e) => (e as { unitEl: Element }).unitEl === fc).length,
+      0,
+      "the unresolvable queue entry was dropped",
+    );
+  });
+});
+
+// M5 — Build / serving integration (SSG hydration pass)
+//
+// build() does not yet inject hydration artifacts; these tests define the
+// acceptance criteria and are expected to fail until M5 is implemented.
+
+// A simple FC whose render fn uses a prop so the server HTML carries attrs.
+const Builder = FC<{ label: string }>("hydrate-builder", (_el, attrs) =>
+  div(attrs.label ?? ""),
+);
+void Builder;
+
+// An outer FC that nests Builder — used to verify defer-hydration injection
+// on nested custom elements in the SSG output.
+const BuilderWrapper = FC<object>("hydrate-builder-wrapper", (_el) =>
+  Builder({ label: "nested" }),
+);
+void BuilderWrapper;
+
+function makeMemFS(): { fs: FileSystem; files: Record<string, string> } {
+  const files: Record<string, string> = {};
+  const adapter = new RecordFileSystemAdapter(files);
+  const fs = new FileSystem(adapter);
+  return { fs, files };
+}
+
+describe("hydrate — M5: build integration", () => {
+  it("build() injects the __hydration script tag when FC units have props", async () => {
+    // Arrange — a page whose body contains a single FC unit with props.
+    // After build() runs, the written HTML must contain a
+    // <script type="application/json" id="__hydration"> element in <head>
+    // whose content is the JSON-encoded props payload for that unit.
+    const { fs, files } = makeMemFS();
+    const label = "Hello M5";
+    const page: PageModule = {
+      default: () => Builder({ label }),
+    };
+
+    // Act
+    await build({
+      pages: [{ route: "/", module: page }],
+      out: "/dist",
+      fs,
+    });
+
+    const html = files["/dist/index.html"] ?? "";
+
+    // Assert — a hydration payload script is present in the output.
+    assert.ok(
+      html.includes('id="__hydration"'),
+      'output HTML must contain <script id="__hydration">',
+    );
+    assert.ok(html.includes('"label"'), "payload must include the prop key");
+    assert.ok(html.includes(label), "payload must include the prop value");
+  });
+
+  it("build() adds defer-hydration to nested custom elements in the output HTML", async () => {
+    // Arrange — a page whose body contains an outer FC (BuilderWrapper) that
+    // renders an inner FC (Builder). The serializer must emit defer-hydration
+    // on the inner custom element so client-side start() does not attempt to
+    // hydrate it before the outer FC has settled.
+    const { fs, files } = makeMemFS();
+    const page: PageModule = {
+      default: () => BuilderWrapper({}),
+    };
+
+    // Act
+    await build({
+      pages: [{ route: "/", module: page }],
+      out: "/dist",
+      fs,
+    });
+
+    const html = files["/dist/index.html"] ?? "";
+
+    // Assert — the inner FC element carries defer-hydration in the output.
+    assert.ok(
+      html.includes("defer-hydration"),
+      "nested custom element must carry defer-hydration attribute in SSG output",
+    );
+    // The outer FC must NOT carry defer-hydration — only nested ones do.
+    const outerMatch = html.match(/<hydrate-builder-wrapper([^>]*)>/);
+    assert.ok(outerMatch, "outer FC element must be present in output");
+    assert.ok(
+      !outerMatch[1].includes("defer-hydration"),
+      "outer (top-level) FC must not carry defer-hydration",
+    );
+  });
+
+  it("build() injects the capture stub inline script before </body>", async () => {
+    // Arrange — a page with clientModules triggers the hydration pass and the
+    // capture stub. A fully static page (no FC units, no clientModules) does
+    // not need the stub; here we use clientModules to force the injection so
+    // the test is self-contained without defining a real custom element.
+    const { fs, files } = makeMemFS();
+    const page: PageModule = {
+      default: () => div("static"),
+      clientModules: ["/app/entry.js"],
+    };
+
+    // Act
+    await build({
+      pages: [{ route: "/", module: page }],
+      out: "/dist",
+      fs,
+    });
+
+    const html = files["/dist/index.html"] ?? "";
+
+    // Assert — an inline script appears before </body>.
+    const scriptBeforeBody = html.match(
+      /<script[^>]*>[\s\S]*?<\/script>\s*<\/body>/,
+    );
+    assert.ok(
+      scriptBeforeBody,
+      "an inline <script> must appear immediately before </body>",
+    );
+    // The stub must reference __hydrateQueue so it can capture events.
+    assert.ok(
+      html.includes("__hydrateQueue"),
+      "capture stub script must reference __hydrateQueue",
+    );
+  });
+
+  it("build() injects a deferred client-entry module script when clientModules is set", async () => {
+    // Arrange — a PageModule extended with clientModules. build() must emit a
+    // <script type="module" defer> that imports the listed client entry points
+    // and calls start() so the client bundle hydrates the page after load.
+    const { fs, files } = makeMemFS();
+    const clientEntry = "/app/client.js";
+    const page: PageModule & { clientModules?: string[] } = {
+      default: () => div("content"),
+      clientModules: [clientEntry],
+    };
+
+    // Act
+    await build({
+      pages: [{ route: "/", module: page as PageModule }],
+      out: "/dist",
+      fs,
+    });
+
+    const html = files["/dist/index.html"] ?? "";
+
+    // Assert — a <script type="module" defer> is present that references the
+    // client entry module.
+    assert.ok(
+      html.includes('type="module"'),
+      'output HTML must contain a <script type="module">',
+    );
+    assert.ok(
+      html.includes(clientEntry),
+      "the client entry path must appear in the module script",
     );
   });
 });

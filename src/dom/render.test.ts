@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { FileSystem, RecordFileSystemAdapter } from "../fs.ts";
+import { build } from "../ssg/ssg.ts";
 import { FC } from "./fc.ts";
 import { br, div, h1, input, meta, p, title } from "./html.ts";
-import { circle, svg } from "./svg.ts";
 import { renderDocument, renderToString } from "./render.ts";
-import { build } from "./ssg.ts";
+import { circle, svg } from "./svg.ts";
 
 const Greeting = FC<{ name: string }>("x-offline-greeting", (_el, attrs) =>
   p(`Hello, ${attrs.name}!`),
