@@ -4,11 +4,14 @@
 
 import * as process from "node:process";
 import { parseArgs } from "node:util";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { NodeFileSystem } from "../fs_node.ts";
 import { build } from "./ssg.ts";
+import { bundleClientModules } from "./bundle.ts";
 import { copyPublic } from "./copy-public.ts";
 import { discoverPages } from "./discover.ts";
+import { rewriteClientSpecifiers } from "./rewrite.ts";
 
 interface CliValues {
   help: boolean | undefined;
@@ -36,6 +39,23 @@ async function runBuild(values: CliValues): Promise<void> {
   const fs = new NodeFileSystem();
   await build({ pages, out: outDir, fs });
   await copyPublic(rootDir, values.public, outDir);
+
+  const specToUrl = await bundleClientModules(pages, rootDir, outDir);
+  if (specToUrl.size > 0) {
+    for (const { route, module } of pages) {
+      if (!module.clientModules?.length) continue;
+      const segment = route.replace(/^\//, "");
+      const htmlPath = segment
+        ? `${outDir}/${segment}/index.html`
+        : `${outDir}/index.html`;
+      const original = await readFile(htmlPath, "utf-8");
+      await writeFile(
+        htmlPath,
+        rewriteClientSpecifiers(original, specToUrl),
+        "utf-8",
+      );
+    }
+  }
 }
 
 try {

@@ -33,7 +33,9 @@
     "@types/node": "^22.19.19"
   },
   "dependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "jsdom": "^27.4.0",
+    "rollup": "^4.61.1",
     "ts-blank-space": "^0.7.0",
     "typescript": "^5.9.3"
   }
