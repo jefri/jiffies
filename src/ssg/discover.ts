@@ -94,7 +94,7 @@ export async function discoverPages(
       const wrappedModule: PageModule = {
         ...originalModule,
         default: () => originalModule.default(params),
-        head: originalHead ? () => originalHead(params) : undefined,
+        ...(originalHead ? { head: () => originalHead(params) } : {}),
       };
 
       dynamicDescriptors.push({ route, module: wrappedModule });
