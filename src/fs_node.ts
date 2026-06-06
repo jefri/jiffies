@@ -34,8 +34,8 @@ export class NodeFileSystemAdapter implements FileSystemAdapter {
   readdir(path: string): Promise<string[]> {
     return readdir(path);
   }
-  mkdir(path: string): Promise<void> {
-    return mkdir(path);
+  async mkdir(path: string): Promise<void> {
+    await mkdir(path, { recursive: true });
   }
   async scandir(path: string): Promise<Stats[]> {
     return Promise.all(

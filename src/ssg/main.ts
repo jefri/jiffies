@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+// CLI entry point for `ssg build`. All diagnostics go to stderr.
+// stdout is reserved exclusively for --json output.
+
+import * as process from "node:process";
+import { parseArgs } from "node:util";
+import { stat } from "node:fs/promises";
+import { resolve, join } from "node:path";
+import { NodeFileSystem } from "../fs_node.ts";
+import { build } from "./ssg.ts";
+
+interface CliValues {
+  help: boolean | undefined;
+  version: boolean | undefined;
+  root: string;
+  out: string;
+  pages: string;
+  public: string;
+  json: boolean;
+  "no-clean": boolean;
+}
+
+async function runBuild(values: CliValues): Promise<void> {
+  const rootDir = resolve(values.root);
+  const pagesDir = join(rootDir, values.pages);
+  const outDir = resolve(values.out);
+
+  try {
+    const s = await stat(pagesDir);
+    if (!s.isDirectory()) {
+      process.stderr.write(
+        `Error: ${values.pages} is not a directory: ${pagesDir}\n`,
+      );
+      process.exit(1);
+    }
+  } catch {
+    process.stderr.write(`Error: pages directory not found: ${pagesDir}\n`);
+    process.exit(1);
+  }
+
+  const fs = new NodeFileSystem();
+  await build({ pages: [], out: outDir, fs });
+}
+
+try {
+  const { values, positionals } = parseArgs({
+    strict: true,
+    allowPositionals: true,
+    options: {
+      help: { type: "boolean", short: "h" },
+      version: { type: "boolean", short: "v" },
+      root: { type: "string", default: "." },
+      out: { type: "string", default: "dist" },
+      pages: { type: "string", default: "pages" },
+      public: { type: "string", default: "public" },
+      json: { type: "boolean", default: false },
+      "no-clean": { type: "boolean", default: false },
+    },
+  });
+
+  if (values.help) {
+    process.stderr.write("Usage: ssg build [--root <dir>] [--out <dir>]\n");
+    process.exit(0);
+  }
+
+  if (values.version) {
+    process.stderr.write("ssg 0.1.0\n");
+    process.exit(0);
+  }
+
+  const cmd = positionals[0];
+  if (cmd !== undefined && cmd !== "build") {
+    process.stderr.write(`Unknown command: ${cmd}\n`);
+    process.exit(1);
+  }
+
+  await runBuild(values as CliValues);
+} catch (e) {
+  process.stderr.write(`${(e as Error).message ?? String(e)}\n`);
+  process.exit(1);
+}

@@ -110,7 +110,9 @@ export async function build({ pages, out, fs }: BuildOptions): Promise<void> {
     const html = `<!doctype html><html lang="${lang}"><head>${headStr}</head><body>${bodyStr}</body></html>`;
 
     const segment = route.replace(/^\//, "");
-    const path = segment ? `${out}/${segment}/index.html` : `${out}/index.html`;
+    const dir = segment ? `${out}/${segment}` : out;
+    const path = `${dir}/index.html`;
+    await fs.mkdir(dir);
     await fs.writeFile(path, html);
   }
 }
