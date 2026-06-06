@@ -97,6 +97,11 @@ const MyPage = () => [
 ];
 ```
 
-## Pico CSS
+## jiffies-css
 
-Including [Pico.css](https://picocss.com/) provides a high-quality semantic HTML base to begin styling from.
+Including [jiffies-css](https://www.npmjs.com/package/@davidsouther/jiffies-css)
+provides a semantic HTML base that styles by element type and ARIA role rather
+than class names. Load it with `jiffiesCssLink()` and build pages from the typed
+component functions in [`dom/components`](./components/index.ts) (`Card`, `Alert`,
+`Nav`, ...), which emit the exact structures jiffies-css targets — no manual class
+annotation.

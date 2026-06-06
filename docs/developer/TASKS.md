@@ -41,4 +41,14 @@
   path in `inline_edit.ts` / `virtual_scroll.ts`. See
   TASK-NOTES-keyed-reconcile.md.
 
+- form.ts typing cleanup — `src/dom/form/form.ts`. Two pre-existing smells
+  surfaced during the jiffies-css refactor pass and deferred as out-of-topic:
+  `Input` (line ~33) carries a `@ts-expect-error` on the `input(attrs)` cast —
+  resolve the underlying attrs typing rather than suppress it; and `Dropdown`
+  (~line 87) forwards options through a convoluted indirection worth
+  simplifying. Both predate the components work; do as a focused form-typing pass.
 
+- jiffies-css follow-ons (out of scope for the components topic, queue if a real
+  use case appears): a theme-switcher UI (themes are a `data-theme` attribute on
+  `<html>`; no helper was warranted yet) and SSG integration beyond the
+  `jiffiesCssLink()` head helper.

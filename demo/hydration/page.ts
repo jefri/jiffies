@@ -1,3 +1,4 @@
+import { jiffiesCssLink } from "../../src/dom/components/index.ts";
 import {
   article,
   aside,
@@ -7,7 +8,6 @@ import {
   header,
   kbd,
   li,
-  link,
   main,
   meta,
   p,
@@ -25,10 +25,7 @@ function pageHead(): Node[] {
     meta({ charset: "utf-8" }),
     meta({ name: "viewport", content: "width=device-width, initial-scale=1" }),
     title("Jiffies Hydration Demo"),
-    link({
-      rel: "stylesheet",
-      href: "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css",
-    }),
+    jiffiesCssLink(),
   ];
 }
 

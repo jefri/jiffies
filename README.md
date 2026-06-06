@@ -12,7 +12,6 @@ JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulle
 Jiffies also includes several microframeworks.
 
 - `dom` - a tiny DOM functional library.
-- `pico` - a copy of [PicoCSS](pico.css).
 - `scope` - JavaScript testing microframework.
 - `server` - Node HTTP Server & middleware.
 
