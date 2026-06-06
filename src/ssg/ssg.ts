@@ -2,6 +2,10 @@ import { buildPayload, captureStubSource } from "../dom/hydrate.ts";
 import { renderToString } from "../dom/render.ts";
 import type { FileSystem } from "../fs.ts";
 
+export type HtmlAttributes = Partial<
+  Record<"lang" | "dir" | "class" | `data-${string}`, string>
+>;
+
 /** Describes a page's default render function and optional metadata for the SSG build. */
 export interface PageModule {
   default: (
@@ -10,8 +14,7 @@ export interface PageModule {
   head?: (
     params?: Record<string, string>,
   ) => Node | Node[] | Promise<Node | Node[]>;
-  lang?: string;
-  htmlAttributes?: Record<string, string>;
+  htmlAttributes?: HtmlAttributes;
   clientModules?: string[];
   /**
    * Enumerate concrete param sets for dynamic route segments.
@@ -116,11 +119,11 @@ export async function build({ pages, out, fs }: BuildOptions): Promise<void> {
       bodyStr = `${bodyStr}<script type="module" defer>\n${imports}\n</script>`;
     }
 
-    const lang = module.lang ?? "en";
-    const extraAttrs = Object.entries(module.htmlAttributes ?? {})
+    const attrs = { lang: "en", ...module.htmlAttributes };
+    const attrsStr = Object.entries(attrs)
       .map(([k, v]) => ` ${k}="${v}"`)
       .join("");
-    const html = `<!doctype html><html lang="${lang}"${extraAttrs}><head>${headStr}</head><body>${bodyStr}</body></html>`;
+    const html = `<!doctype html><html${attrsStr}><head>${headStr}</head><body>${bodyStr}</body></html>`;
 
     const segment = route.replace(/^\//, "");
     const dir = segment ? `${out}/${segment}` : out;

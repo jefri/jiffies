@@ -90,7 +90,12 @@ describe("ssg/build — route to file path", () => {
   it("uses the page module lang override", async () => {
     const { fs, files } = makeFS();
     await build({
-      pages: [{ route: "/", module: { default: () => p("hola"), lang: "es" } }],
+      pages: [
+        {
+          route: "/",
+          module: { default: () => p("hola"), htmlAttributes: { lang: "es" } },
+        },
+      ],
       out: "/out",
       fs,
     });
