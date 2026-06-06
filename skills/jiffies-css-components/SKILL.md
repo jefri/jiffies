@@ -12,7 +12,8 @@ styles by DOM hierarchy and ARIA role. Each function emits the exact structure t
 framework targets, so you never hand-build wrapper elements or annotate classes.
 
 Load this skill when writing jiffies DOM code. When writing raw HTML instead, load
-`jiffies-css-semantic-html` — both encode the same structural contract, expressed in
+[`jiffies-css-semantic-html`](https://github.com/jefri/jiffies-css/tree/main/skills/jiffies-css-semantic-html)
+(in the jiffies-css repo) — both encode the same structural contract, expressed in
 their respective language.
 
 ## When to use the module
