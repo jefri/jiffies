@@ -61,6 +61,32 @@ describe("ssg/build — route to file path", () => {
     assert.ok(html.includes("<body>"), "body element present");
   });
 
+  it("applies htmlAttributes to the <html> element", async () => {
+    const { fs, files } = makeFS();
+    await build({
+      pages: [
+        {
+          route: "/",
+          module: {
+            default: () => p("content"),
+            htmlAttributes: {
+              "data-theme": "dark",
+              "data-color-scheme": "auto",
+            },
+          },
+        },
+      ],
+      out: "/out",
+      fs,
+    });
+    const html = files["/out/index.html"] ?? "";
+    assert.ok(html.includes('data-theme="dark"'), "data-theme on <html>");
+    assert.ok(
+      html.includes('data-color-scheme="auto"'),
+      "data-color-scheme on <html>",
+    );
+  });
+
   it("uses the page module lang override", async () => {
     const { fs, files } = makeFS();
     await build({

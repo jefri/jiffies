@@ -11,6 +11,7 @@ export interface PageModule {
     params?: Record<string, string>,
   ) => Node | Node[] | Promise<Node | Node[]>;
   lang?: string;
+  htmlAttributes?: Record<string, string>;
   clientModules?: string[];
   /**
    * Enumerate concrete param sets for dynamic route segments.
@@ -116,7 +117,10 @@ export async function build({ pages, out, fs }: BuildOptions): Promise<void> {
     }
 
     const lang = module.lang ?? "en";
-    const html = `<!doctype html><html lang="${lang}"><head>${headStr}</head><body>${bodyStr}</body></html>`;
+    const extraAttrs = Object.entries(module.htmlAttributes ?? {})
+      .map(([k, v]) => ` ${k}="${v}"`)
+      .join("");
+    const html = `<!doctype html><html lang="${lang}"${extraAttrs}><head>${headStr}</head><body>${bodyStr}</body></html>`;
 
     const segment = route.replace(/^\//, "");
     const dir = segment ? `${out}/${segment}` : out;
