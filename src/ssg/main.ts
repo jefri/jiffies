@@ -4,10 +4,11 @@
 
 import * as process from "node:process";
 import { parseArgs } from "node:util";
-import { stat } from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { resolve } from "node:path";
 import { NodeFileSystem } from "../fs_node.ts";
 import { build } from "./ssg.ts";
+import { copyPublic } from "./copy-public.ts";
+import { discoverPages } from "./discover.ts";
 
 interface CliValues {
   help: boolean | undefined;
@@ -22,24 +23,19 @@ interface CliValues {
 
 async function runBuild(values: CliValues): Promise<void> {
   const rootDir = resolve(values.root);
-  const pagesDir = join(rootDir, values.pages);
   const outDir = resolve(values.out);
 
+  let pages: Awaited<ReturnType<typeof discoverPages>>;
   try {
-    const s = await stat(pagesDir);
-    if (!s.isDirectory()) {
-      process.stderr.write(
-        `Error: ${values.pages} is not a directory: ${pagesDir}\n`,
-      );
-      process.exit(1);
-    }
-  } catch {
-    process.stderr.write(`Error: pages directory not found: ${pagesDir}\n`);
+    pages = await discoverPages(rootDir, values.pages);
+  } catch (e) {
+    process.stderr.write(`Error: ${(e as Error).message}\n`);
     process.exit(1);
   }
 
   const fs = new NodeFileSystem();
-  await build({ pages: [], out: outDir, fs });
+  await build({ pages, out: outDir, fs });
+  await copyPublic(rootDir, values.public, outDir);
 }
 
 try {
