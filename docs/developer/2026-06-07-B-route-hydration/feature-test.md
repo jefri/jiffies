@@ -38,16 +38,17 @@ interceptor — funnelling them into the already-verified `navigate()` core.
 
 ## Test environment note
 
-jsdom has no Navigation API (`"navigation" in window` is false), so the runtime
-installs the **click + `popstate` fallback** (design §8) — the path this test
-drives. The fallback interceptor needs a *real origin* (it resolves the clicked
-anchor's href, decides same-origin against `location.origin`, and calls
-`history.pushState`), which jsdom's default about:blank window cannot provide. The
-suite therefore boots its own real-URL window (`https://example.test/a`) and
+The **Navigation API is the sole interception mechanism** (design §2/§8): the
+runtime registers one `navigate` listener and claims a navigation via
+`event.intercept`. jsdom ships neither the Navigation API nor a real origin, so the
+suite supplies both. It boots its own real-URL window (`https://example.test/a`) —
+the core builds absolute URLs from `window.location.href` and the destination is
+resolved from the clicked anchor's href, which about:blank cannot base — and
 installs it as the global before `FC(...)` defines the island, so the element
-registry, hydration, and runtime share one consistent window. (The M1-core test
-sidestepped this by driving `navigate()` with absolute URLs; the interceptor
-cannot, because it derives the URL from the DOM.)
+registry, hydration, and runtime share one consistent window. It also installs a
+minimal `window.navigation` stub that records the `navigate` listener, so the test
+can emit the navigate event a real browser would synthesise from the link click
+(jsdom does not) and then run the handler the browser would await.
 
 ## Expected initial state
 
@@ -58,21 +59,20 @@ done for this cycle.
 ## Deliberately out of scope (deferred to this cycle's plan / inner-loop unit tests)
 
 The feature test encodes the single happy-path user story. The remaining-M1 edge
-and failure paths the user selected belong in the plan's unit-test steps, not this
-end-to-end test:
+and failure paths belong in the plan's unit-test steps, not this end-to-end test:
 
 - **Non-2xx / network-error full-load fallback** — `fetch` failure aborts the
   same-document path and falls back to `location.assign(url)` (the live `// TODO`
   in `fetchDocument`, design "Failure modes"). Awkward to assert end-to-end in
   jsdom (it does not navigate); a focused unit test stubs `location.assign`.
-- **`popstate` / back-forward** — the fallback re-runs the core for the current
-  location on back/forward (design §8). Unit-tested against constructed history.
-- **Decline guards** — cross-origin, download, `target=_blank`, modifier-key /
-  non-primary-button, hash-only-within-document, non-GET (design §2): the
-  interceptor must let the browser handle these natively (no `preventDefault`, no
-  core run).
-- **Navigation API primary path** — not reachable under jsdom; covered by the
-  fallback here and exercised manually (design "Verification → Manual").
+- **Decline checks** — the `navigate` listener declines (no `event.intercept`, no
+  core run) when `!canIntercept` (cross-origin, etc.), `hashChange`,
+  `downloadRequest`, or `formData` is set (design §2). Triangulated by unit tests
+  that emit a `navigate` event with each field set.
+- **No-Navigation-API browsers** — `installInterceptor` is a no-op; links perform
+  normal full-document navigations. The minimal alternative, no fallback runtime.
+- **Back/forward** — handled by the same `navigate` listener (the Navigation API
+  fires `navigate` with `navigationType: "traverse"`); no separate `popstate` path.
 - **`onFirstLoad` registered after first load** fires immediately with the
   retained context (design §1).
 

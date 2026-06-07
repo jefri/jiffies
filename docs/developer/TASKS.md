@@ -32,7 +32,8 @@
   Navigation API interceptor; auto-bootstrap on import (`start()` of the initial
   page + the `onFirstLoad` hook); the non-2xx/network-error full-load fallback
   (currently a TODO in `fetchDocument`); inner-loop unit tests for the core's edge
-  cases. **Then** M2 (click/`popstate` fallback sharing the core + View Transitions),
+  cases. **Then** M2 (View Transitions for the same-document swap; the click/`popstate`
+  fallback was dropped — Navigation-API-only, evergreen browsers, see `plan.md`),
   M3 (build integration: `discoverShell`/`pages/shell.ts`, auto-inject the runtime,
   `data-shell` tagging, remove old `src/dom/router`), M4 (consumer migration of
   `page-head.ts` → `shell.head` + `shell.clientModule` + metadata-only `pageHead()`).
@@ -47,6 +48,14 @@
   milestones land: `developer:refactor` then `general:review` over the
   interceptor + fallback, build integration, and consumer migration before
   calling the topic done with `developer:cleanup`.
+
+- Drop the `@types/dom-navigation` dev dependency — added for `window.navigation` /
+  `NavigateEvent` typing in `src/dom/navigation/index.ts` (the route-hydration
+  interceptor), because TypeScript 5.9's bundled `lib.dom.d.ts` has no Navigation API
+  types. TypeScript folds them into `lib.dom.d.ts` as of **TS 6.0**
+  (per the package header; tracking issue microsoft/TypeScript-DOM-lib-generator#1531).
+  When this project upgrades to TS 6.0+, remove the dependency and confirm `tsc` is
+  still clean.
 
 - Continue form controls topic — `docs/developer/2026-06-06-C-form-typing/`.
   Design refined to cover a **demo page** (`form.app.ts` as a `PageModule`
