@@ -100,6 +100,42 @@ function reconcileHead(destHead: HTMLHeadElement): void {
 }
 
 /**
+ * Replace the live `<body>` children with `destBody`'s children, adopted via
+ * `document.importNode`. New element instances replace the old ones — a child
+ * replacement, not an in-place patch — so the destination's island is a fresh
+ * node. Any `<script type="module">` rides along inert: a script inserted via
+ * the DOM never executes on its own, which is why `importPageModules` imports it
+ * explicitly. (`destBody` is typed `HTMLElement` because `Document.body` is.)
+ */
+function swapBody(destBody: HTMLElement): void {
+  const adopted = [...destBody.childNodes].map((node) =>
+    window.document.importNode(node, true),
+  );
+  window.document.body.replaceChildren(...adopted);
+}
+
+/** Matches each inline `import "<spec>";` statement, capturing the specifier. */
+const IMPORT_STATEMENT = /import\s+["']([^"']+)["']\s*;?/g;
+
+/**
+ * Extract every `import "<spec>";` specifier from `root`'s
+ * `<script type="module">` elements and dynamically import each, awaiting all.
+ * The build emits inline `import` statements (not `src` attributes, matching
+ * src/ssg/rewrite.ts), and a script node inserted via the DOM never executes on
+ * its own, so the runtime imports the specifiers itself. The ES module cache
+ * dedupes chunks already loaded this session.
+ */
+async function importPageModules(root: ParentNode): Promise<void> {
+  const specifiers: string[] = [];
+  for (const script of root.querySelectorAll('script[type="module"]')) {
+    for (const match of (script.textContent ?? "").matchAll(IMPORT_STATEMENT)) {
+      specifiers.push(match[1]);
+    }
+  }
+  await Promise.all(specifiers.map((spec) => import(spec)));
+}
+
+/**
  * The shared same-document core that both the Navigation API interceptor and the
  * click/`popstate` fallback funnel into (design §8). Fetches the destination's
  * built HTML, reconciles `<head>`, swaps `<body>`, imports the destination's page
@@ -110,6 +146,7 @@ export async function navigate(url: string | URL): Promise<void> {
   const target = new URL(url, window.location.href);
   const destination = await fetchDocument(target);
   reconcileHead(destination.head);
-  // Steps 4–5: swap <body>, import the destination's page modules, hydrate,
-  // then fire onNavigate.
+  swapBody(destination.body);
+  await importPageModules(window.document.body);
+  // Step 5: hydrate the swapped body, then fire onNavigate.
 }
