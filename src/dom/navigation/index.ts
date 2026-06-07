@@ -1,5 +1,7 @@
 "use client"; // The navigation runtime drives same-document transitions client side.
 
+import { start } from "../hydrate.ts";
+
 /**
  * Context describing a completed navigation, handed to every `onNavigate` hook
  * (e.g. an analytics pageview). Built by `navigate()` after the head reconcile,
@@ -148,5 +150,17 @@ export async function navigate(url: string | URL): Promise<void> {
   reconcileHead(destination.head);
   swapBody(destination.body);
   await importPageModules(window.document.body);
-  // Step 5: hydrate the swapped body, then fire onNavigate.
+
+  // Hydrate the swapped-in body: start() reads the destination #__hydration
+  // payload (placed by reconcileHead) and schedules each island's update().
+  start(window.document.body);
+
+  // Report the completed navigation. title reflects the reconciled <head>; url
+  // is the absolute target. Hooks fire once each, in registration order.
+  const context: NavigationContext = {
+    url: target,
+    title: window.document.title,
+    type: "push",
+  };
+  for (const cb of navigateCallbacks) cb(context);
 }
