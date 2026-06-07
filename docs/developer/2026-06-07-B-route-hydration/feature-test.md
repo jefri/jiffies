@@ -1,59 +1,83 @@
-# Route Hydration — Feature Test
+# Feature Test: Route Hydration — remaining M1 (auto-bootstrap + interceptor)
 
-Encodes the M1 runtime-core user story from
-[design.md](./design.md) (§2 Navigation lifecycle, §3 Head reconciliation, §4
-Hydration contract, and the Metrics "Run-once" / "Navigation correctness"
-criteria).
+**Test file:** [`src/dom/navigation/interceptor.test.ts`](../../../src/dom/navigation/interceptor.test.ts)
+
+**Design:** [`design.md`](./design.md) §1 (navigation runtime / bootstrap),
+§2 (lifecycle), §8 (browser support floor and fallback).
+
+This is the second feature-test cycle of the route-hydration topic. The first
+(M1 same-document core — `navigate(url)`: fetch → head-reconcile → body-swap →
+import → `start()` → `onNavigate`) is built and green; its artifacts are archived
+as [`feature-test-m1-core.md`](./feature-test-m1-core.md) and
+[`plan-m1-core.md`](./plan-m1-core.md), and its test is
+[`navigation.test.ts`](../../../src/dom/navigation/navigation.test.ts).
 
 ## User Story
 
-**Given** a visitor on one built page (`/`) of a multi-page SSG site — its
-one-time `data-shell` `<head>` node (theme picker) is in place, its island is
-hydrated, and its per-page `<title>`/`<meta>`/`__hydration` describe the home
-page —
+**Given** a built multi-page site has loaded its first page (page A) — server
+markup, not yet hydrated — with an in-app link to page B,
 
-**When** they follow an in-app link to a second built page (`/b`),
+**When** the runtime bootstraps and the visitor then clicks the in-app link,
 
-**Then** the transition is *same-document*: the destination's already-built HTML
-is fetched, its `<head>` is reconciled (the `data-shell` node is preserved by
-identity — never re-inserted or re-run — while `<title>`, `<meta>`, and the
-`__hydration` payload are replaced with the destination's), its `<body>` is
-swapped in, its module script is imported, and its island hydrates with the
-destination's props and responds to input — all without a full document reload,
-and the navigation is reported exactly once.
+**Then** bootstrap hydrates the initial page and reports the first load
+(`onFirstLoad` fires once with `type: "first"`, the page-A URL and title), and the
+link click is *intercepted* — the browser's full-page load is cancelled, a history
+entry for the destination is pushed, and the shared same-document core swaps in
+page B's head metadata and body, imports its module, hydrates its island, and
+reports the navigation (`onNavigate` fires once with page B's URL and title) — all
+without a document reload.
 
-This is the run-once payoff: because the one-time shell node is preserved across
-the swap, a real inline theme script in it never re-runs (no color flip) and an
-analytics bootstrap loads once, while each navigation still updates the title
-and reports a virtual pageview through the `onNavigate` hook.
+## Why this story
 
-## What the test drives
+It is the headline user-facing behavior that "remaining M1" adds on top of the
+proven core: the visitor clicks links and gets smooth same-document transitions
+instead of full reloads, and shell hooks observe both the initial load and each
+navigation. It exercises every remaining-M1 surface that is cleanly testable under
+jsdom — the auto-bootstrap entry, the `onFirstLoad` hook, and the click
+interceptor — funnelling them into the already-verified `navigate()` core.
 
-The runtime auto-bootstraps on import in a browser, but jsdom has no Navigation
-API to dispatch a real `navigate` event through. The test therefore drives the
-**shared same-document core** the design defines — `navigate(url)`, which both
-the Navigation API interceptor and the click/`popstate` fallback funnel into
-(design §8) — and asserts the user-observable outcome directly:
+## Test environment note
 
-- the destination HTML was fetched;
-- the `[data-shell]` node is the *same object* afterward and is the only one (the
-  destination's equivalent was not appended) — the run-once guarantee;
-- `document.title` and `<meta name="description">` are the destination's;
-- the destination's `import "<spec>";` was extracted and `import()`d (proved by a
-  data: URL module that records its own execution);
-- page A's island is gone, page B's island is present, hydrated with page B's
-  payload, and a click runs its live handler;
-- `onNavigate` fired exactly once with the destination URL and title.
+jsdom has no Navigation API (`"navigation" in window` is false), so the runtime
+installs the **click + `popstate` fallback** (design §8) — the path this test
+drives. The fallback interceptor needs a *real origin* (it resolves the clicked
+anchor's href, decides same-origin against `location.origin`, and calls
+`history.pushState`), which jsdom's default about:blank window cannot provide. The
+suite therefore boots its own real-URL window (`https://example.test/a`) and
+installs it as the global before `FC(...)` defines the island, so the element
+registry, hydration, and runtime share one consistent window. (The M1-core test
+sidestepped this by driving `navigate()` with absolute URLs; the interceptor
+cannot, because it derives the URL from the DOM.)
 
-The island is defined once at module load, modelling a shared client chunk
-already in the ES module cache (the common case). The distinct "navigating to a
-page whose component is **not yet defined** imports its chunk and defines the
-element before hydration" case is an M1 inner-loop unit test per the design's
-Verification section, not this end-to-end story.
+## Expected initial state
 
-## Test file
+Red: the suite fails to load because `index.ts` does not yet export `bootstrap`
+or `onFirstLoad`, and no interceptor is installed. Passing it is the definition of
+done for this cycle.
 
-[`src/dom/navigation/navigation.test.ts`](../../../src/dom/navigation/navigation.test.ts)
+## Deliberately out of scope (deferred to this cycle's plan / inner-loop unit tests)
 
-It fails at the start: `./index.ts` does not exist, so the file fails to load
-until the M1 runtime ships.
+The feature test encodes the single happy-path user story. The remaining-M1 edge
+and failure paths the user selected belong in the plan's unit-test steps, not this
+end-to-end test:
+
+- **Non-2xx / network-error full-load fallback** — `fetch` failure aborts the
+  same-document path and falls back to `location.assign(url)` (the live `// TODO`
+  in `fetchDocument`, design "Failure modes"). Awkward to assert end-to-end in
+  jsdom (it does not navigate); a focused unit test stubs `location.assign`.
+- **`popstate` / back-forward** — the fallback re-runs the core for the current
+  location on back/forward (design §8). Unit-tested against constructed history.
+- **Decline guards** — cross-origin, download, `target=_blank`, modifier-key /
+  non-primary-button, hash-only-within-document, non-GET (design §2): the
+  interceptor must let the browser handle these natively (no `preventDefault`, no
+  core run).
+- **Navigation API primary path** — not reachable under jsdom; covered by the
+  fallback here and exercised manually (design "Verification → Manual").
+- **`onFirstLoad` registered after first load** fires immediately with the
+  retained context (design §1).
+
+## Final refactor + review
+
+The topic-closing `developer:refactor` + `general:review` pass is already tracked
+in `docs/developer/TASKS.md` ("Final refactor + review for route hydration"),
+to run once the remaining milestones land.

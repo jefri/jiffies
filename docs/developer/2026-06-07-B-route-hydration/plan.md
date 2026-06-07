@@ -1,210 +1,215 @@
-# Implementation Plan: Route Hydration — M1 same-document navigation core
+# Implementation Plan: Route Hydration — remaining M1 (auto-bootstrap + interceptor)
 
-**Feature test:** `src/dom/navigation/navigation.test.ts`
-**User story:** Following an in-app link from one built page to another is a
-same-document transition — the destination's HTML is fetched, its `<head>` is
-reconciled (the `data-shell` node preserved by identity, per-page metadata and
-the `__hydration` payload replaced), its `<body>` is swapped in, its module
-script is imported, its island hydrates with the destination's props and responds
-to input, and the navigation is reported exactly once.
+**Feature test:** `src/dom/navigation/interceptor.test.ts`
+
+**User story:** A built page loads server-rendered; the runtime bootstraps (hydrates
+the initial page and fires `onFirstLoad` once), and a same-origin link click is
+intercepted into a same-document navigation (history pushed, head + body swapped,
+module imported, island hydrated, `onNavigate` fired) with no full reload.
 
 **Steps:**
-- [ ] Step 1: Module skeleton — exports, types, registry (test file loads)
-- [ ] Step 2: Fetch + parse the destination document
-- [ ] Step 3: Head reconciliation (preserve shell, replace per-page nodes)
-- [ ] Step 4: Body swap + page-module import
-- [ ] Step 5: Hydrate the swapped body + fire `onNavigate`
+- [ ] Step 1: `onFirstLoad` hook + retained first-load context
+- [ ] Step 2: `bootstrap()` — hydrate initial page + fire `onFirstLoad`
+- [ ] Step 3: Interceptor install + click fallback claim — **feature test passes here**
+- [ ] Step 4: Decline guards (unit tests)
+- [ ] Step 5: `popstate` back/forward (unit test)
+- [ ] Step 6: `fetch`-failure full-load fallback (unit tests)
 
-## Scope
+## Step 0: Domain model — not needed
 
-This plan covers only what the feature test drives: the shared same-document core
-`navigate(url)` (design §2 steps 1–7) and the `onNavigate` hook (design §1).
+This cycle introduces no new domain objects. The two new exports (`onFirstLoad`,
+`bootstrap`) are functions, and both reuse the existing `NavigationContext`
+interface (already carrying the `"first"` variant of `type`). No new entity, value
+object, or service is required, so there is no Step 0.
 
-**Deliberately out of scope for this test** (no assertion exercises them; deferred
-to the rest of M1's inner-loop unit tests and to M2 per the design's Build
-sequence):
+## Invariants preserved across every step
 
-- Auto-bootstrap on import (`start()` of the initial page + `onFirstLoad`). The
-  test arranges page A and calls `start()` itself. **Invariant for Step 1:**
-  importing `./index.ts` must be side-effect-free under jsdom — it must not
-  hydrate, must not install listeners, must not call `start()`. The bootstrap is
-  wired in a later (non-test-bearing) M1 step / M2.
-- The Navigation API interceptor and the click/`popstate` fallback (design §2,
-  §8). jsdom has no Navigation API; the test drives `navigate(url)` directly.
-- `onFirstLoad` and the retained-context replay behavior (design §1).
+These hold before this cycle and must still hold after each step (existing tests
+guard them; do not regress):
 
-No new domain objects. `NavigationContext` is a plain internal interface
-describing a completed navigation, not a domain entity.
+- **Import is side-effect-free.** Importing `./index.ts` installs no listeners,
+  touches no DOM, and never calls `start()` (see the module comment, commit
+  `6023427`). All side effects live inside the explicit `bootstrap()` entry. This is
+  why the feature test can import the module, arrange page A's DOM and the `fetch`
+  stub, register hooks, and only *then* call `bootstrap()`.
+- **The shared core is reused unchanged.** `navigate(url)` already does fetch →
+  `reconcileHead` → `swapBody` → `importPageModules` → `start()` → `onNavigate`.
+  Steps below add only the entry layer around it; they must not change its signature
+  or duplicate its body.
+- **History bookkeeping lives in the fallback, not the core.** `navigate()` does not
+  call `history.pushState`. The click handler pushes (Step 3); `popstate` re-runs the
+  core without pushing (Step 5). Keeping the core pushState-free is what lets both
+  paths share it.
 
-## Step 1: Module skeleton — exports, types, registry
+A note on "auto-bootstrap": the entry is the explicit `bootstrap()` function.
+*Automatic* invocation on a real document load is M3's concern (the injected runtime
+entry calls `bootstrap()`); the runtime itself stays import-side-effect-free so tests
+and the M3 injector decide when it runs.
 
-**Enables:** `import { navigate, onNavigate } from "./index.ts"` resolves, so the
-test file loads instead of failing with `ERR_MODULE_NOT_FOUND`. No assertion
-passes yet (every assertion still fails or the act still throws), but the rest of
-the suite is unaffected and `check`/`test` run.
+## Step 1: `onFirstLoad` hook + retained first-load context
 
-Create `src/dom/navigation/index.ts` with the public surface and an internal
-callback registry. No fetch, no DOM work yet — `navigate` is an awaitable stub.
+**Enables:** the `onFirstLoad` name in the suite's `import { bootstrap, onFirstLoad,
+onNavigate }` (the module still fails to load until Step 2 adds `bootstrap`, but this
+is the first half of resolving that import), and the deferred "registered after first
+load fires immediately with the retained context" behavior (design §1).
+
+Add the registration API and the retained-context mechanism. Module-level state only —
+no listeners, no DOM, no `start()` at import time.
+
+```ts
+/** A hook registered through `onFirstLoad`, run once when the initial page hydrates. */
+type FirstLoadCallback = (ctx: NavigationContext) => void;
+
+/** Hooks awaiting the first load, fired once during bootstrap in registration order. */
+const firstLoadCallbacks: FirstLoadCallback[] = [];
+
+/**
+ * The first-load context, set by `bootstrap()` once the initial page hydrates.
+ * `undefined` until then. Retained so an `onFirstLoad` registered AFTER first load
+ * (e.g. a shell module that imports the runtime lazily) still receives the event.
+ */
+let firstLoadContext: NavigationContext | undefined;
+
+/**
+ * Register `cb` to run once, when the initial page hydrates on first document load.
+ * Invariant: if registered BEFORE bootstrap, `cb` is queued and fired during
+ * bootstrap with the first-load context (`type: "first"`). If registered AFTER first
+ * load, `cb` is invoked immediately with the retained context, so a late
+ * registration never drops the initial event (design §1). Registering installs no
+ * listeners and touches no DOM (import-side-effect-free invariant).
+ */
+export function onFirstLoad(cb: FirstLoadCallback): void;
+```
+
+Unit angle (inner loop): registering before "first load" queues; registering after a
+simulated first-load context fires immediately with that context. Existing tests
+(`navigation.test.ts`) keep passing — no change to `navigate`/`onNavigate`.
+
+## Step 2: `bootstrap()` — hydrate initial page + fire `onFirstLoad`
+
+**Enables:** the suite now *loads* (both `bootstrap` and `onFirstLoad` exported), and
+the first block of feature-test assertions passes — page A's island responds to a
+click after `await bootstrap()` ("Hello A-home (1)"), and `onFirstLoad` fired exactly
+once with `type: "first"`, `url.href === "https://example.test/a"`, `title === "Page
+A"`. The test still fails at Act 2 (`clickEvent.defaultPrevented` is `false` — no
+interceptor yet).
 
 ```ts
 /**
- * Context describing a completed navigation, handed to every `onNavigate` hook
- * (e.g. an analytics pageview). Built by `navigate()` after the head reconcile,
- * so `title` reflects the destination and `url` is absolute.
+ * Bootstrap route hydration for the initial document. Explicit entry — NOT run at
+ * import time (the module stays side-effect-free; tests and the M3 injected entry
+ * decide when this runs). On call it:
+ *   1. `start(window.document.body)` — hydrate the server-rendered initial islands
+ *      in place (reads the initial `#__hydration` payload already in <head>).
+ *   2. Build the first-load `NavigationContext`: `url` from `window.location.href`,
+ *      `title` from `document.title`, `type: "first"`. Store it in `firstLoadContext`.
+ *   3. Fire every queued `onFirstLoad` callback once, in registration order.
+ * (Step 3 inserts interceptor installation between (1) and (3), per design §1.)
+ * Invariant: `onFirstLoad` fires exactly once per bootstrap.
  */
-export interface NavigationContext {
-  /** Absolute destination URL of the navigation. */
-  url: URL;
-  /** document.title after the head reconcile for this navigation. */
-  title: string;
-  /**
-   * "first" on initial load; "push" | "traverse" | "replace" thereafter.
-   * Present for shell hooks that distinguish entry kinds; the M1 core always
-   * reports "push" for a programmatic `navigate()`.
-   */
-  type: "first" | "push" | "traverse" | "replace";
-}
-
-/**
- * Register `cb` to run after every in-app navigation completes (body swapped and
- * hydration scheduled). Invariant: callbacks fire exactly once per navigation,
- * in registration order, with the navigation's `NavigationContext`. Used by
- * shell code such as a GA `page_view`.
- */
-export function onNavigate(cb: (ctx: NavigationContext) => void): void;
-
-/**
- * The shared same-document core that both the Navigation API interceptor and the
- * click/`popstate` fallback funnel into (design §8). Fetches the destination's
- * built HTML, reconciles `<head>`, swaps `<body>`, imports the destination's page
- * modules, hydrates, then fires `onNavigate`. Resolves when hydration has been
- * scheduled and hooks have fired. Implemented incrementally across steps 2–5.
- */
-export function navigate(url: string | URL): Promise<void>;
+export async function bootstrap(): Promise<void>;
 ```
 
-## Step 2: Fetch + parse the destination document
+Existing tests keep passing. `start` is the unchanged `src/dom/hydrate.ts` export
+(`start(root?: ParentNode): void`).
 
-**Enables:** the assertion `fetchedUrl?.endsWith("/b")` — `navigate()` performs
-the network fetch the test's stub records.
+## Step 3: Interceptor install + click fallback claim
 
-`navigate(url)` resolves `url` to an absolute `URL`, `fetch`es it, reads the
-response text, and parses it into a detached `Document` with `DOMParser`. Both
-`fetch` and `DOMParser` are resolved as globals (the test stubs `fetch` and shims
-`globalThis.DOMParser` from `window`, mirroring how `dom.ts` hoists DOM globals).
+**Enables:** the rest of the feature test — Act 2 and everything after. After the
+link click: `clickEvent.defaultPrevented === true`, `window.location.href ===
+"https://example.test/b"` (history pushed); then the already-built core runs and the
+async assertions pass (fetched `/b`, shell node preserved by identity, `document.title
+=== "Page B"`, meta description swapped, `__pageBModuleRan === true`, body swapped +
+destination island hydrated and interactive, `onNavigate` fired once with page B's url
+and title). **The feature test passes at the end of this step.**
 
-Document the contract that the parsed document is detached (not yet adopted into
-the live document) and that a later step adopts nodes via `document.importNode`.
-A non-2xx / network-error fallback to a full load is a design failure-mode but is
-**not** exercised by this test; leave a documented TODO rather than implementing
-the fallback (it belongs with the interceptor wiring).
+Add the interceptor selection and the fallback click handler, wired into `bootstrap()`.
 
 ```ts
 /**
- * Fetch `url` and parse its body text into a detached Document via the global
- * DOMParser. Returns the parsed document; the caller reconciles head and body
- * out of it. Invariant: the returned document is detached — its nodes must be
- * adopted with `document.importNode` before insertion into the live document.
+ * Install the navigation interceptor for the current environment. Chooses the
+ * Navigation API path when `"navigation" in window` (the primary path — exercised
+ * manually, not reachable under jsdom), otherwise the click + `popstate` fallback
+ * (design §8). Called by `bootstrap()` after `start()` and before firing `onFirstLoad`.
  */
-declare function fetchDocument(url: URL): Promise<Document>;
+function installInterceptor(): void;
 ```
 
-## Step 3: Head reconciliation (preserve shell, replace per-page nodes)
+Fallback click handler — a single delegated `click` listener on `document`:
 
-**Enables:** the run-once and navigation-correctness head assertions —
+- Resolve the clicked anchor (walk up from `event.target`); if none, ignore.
+- Claim a same-origin, primary-button, unmodified, non-download anchor click:
+  `event.preventDefault()`, `history.pushState(null, "", url)`, then `navigate(url)`.
+  (`navigate` already resolves the URL, fetches, reconciles, swaps, imports, hydrates,
+  and fires `onNavigate`.)
+- Otherwise return without `preventDefault` so the browser navigates natively. The
+  full decline matrix is triangulated in Step 4 — this step implements only enough to
+  claim the feature test's plain same-origin click.
 
-- `querySelectorAll("[data-shell]").length === 1` and the live shell node is the
-  *same object* (`strictEqual`): preserved by identity, the destination's copy not
-  appended;
-- `document.title === "Page B"`;
-- `meta[name="description"]` content is the destination's.
+Wire `installInterceptor()` into `bootstrap()` between step (1) `start()` and step (3)
+`onFirstLoad` firing. The listener is added only inside `installInterceptor`, never at
+module top level — import stays side-effect-free.
 
-Implement a head-specific reconciler that diffs the live `<head>` against the
-detached document's `<head>` as two groups (design §3):
+## Step 4: Decline guards (unit tests)
 
-- **Shell nodes** (`[data-shell]`) — left untouched. Never removed, re-inserted,
-  or re-executed. The destination's shell nodes are dropped (the live ones already
-  cover them). **Invariant:** the live shell node's identity is preserved, which
-  is the whole run-once guarantee.
-- **Per-page nodes** (everything else: `<title>`, `<meta>`, the `#__hydration`
-  payload script) — replaced with the destination's non-shell head nodes (adopted
-  via `importNode`). `<title>` is applied through `document.title` so it takes
-  effect immediately. **Invariant:** the destination's `#__hydration` script is in
-  the document *before* `start()` runs (Step 5), so islands hydrate with the
-  destination's props.
+**Enables:** the deferred "Decline guards" behaviors. The single happy-path feature
+test cannot force these (claiming every click would still pass it), so triangulate
+each decline with a focused unit test asserting the interceptor does **not**
+`preventDefault` and does **not** run the core (e.g. `fetch` was never called). The
+guards (design §2):
 
-`<html lang>` is updated from the destination when it differs (design §3).
-Structural matching of metadata (tag + `name`/`property`/`rel`) is an optimization,
-not a correctness requirement — a replace-the-set strategy is acceptable for M1.
+- **cross-origin** — anchor href on another origin.
+- **download** — anchor carries a `download` attribute.
+- **`target="_blank"`** — any non-default target.
+- **modifier / non-primary button** — `ctrl`/`meta`/`shift`/`alt` held, or
+  `button !== 0`.
+- **hash-only within the current document** — same path, only the `#fragment` differs;
+  let the browser scroll natively.
+- **non-GET** — anchor clicks are GET, so this guard records that the handler claims
+  only anchor navigations and never form submissions (forms are out of scope per the
+  design Summary); assert a non-anchor / form target is not claimed.
+
+Implementation: harden the Step 3 handler's claim condition to apply each guard. Feature
+test stays green throughout.
+
+## Step 5: `popstate` back/forward (unit test)
+
+**Enables:** the deferred "`popstate` / back-forward" behavior (design §8). The
+fallback installs a `popstate` listener that re-runs the shared core for the current
+location on back/forward.
 
 ```ts
-/**
- * Reconcile the live `<head>` against `destHead`. Preserves every existing
- * `[data-shell]` node by identity; replaces all non-shell live nodes with
- * `destHead`'s non-shell nodes (adopted into the live document). Applies the
- * destination `<title>` via `document.title`. Leaves the destination
- * `#__hydration` payload in place for the subsequent `start()`.
- */
-declare function reconcileHead(destHead: HTMLHeadElement): void;
+// popstate listener (installed by installInterceptor alongside the click handler in
+// the fallback path): on back/forward, run navigate(window.location.href) — re-render
+// the document for the entry the browser restored. No history.pushState here: the
+// browser already moved the entry, and the core is pushState-free (see invariants).
 ```
 
-## Step 4: Body swap + page-module import
+Unit test against constructed history: arrange a current location, dispatch a
+`popstate` event, assert the core ran for the restored location (fetched it, swapped
+body). Feature test stays green.
 
-**Enables:** the body-swap and module-import assertions —
+## Step 6: `fetch`-failure full-load fallback (unit tests)
 
-- exactly one `route-greeting` after the swap, and it is **not** `pageAIsland`
-  (the body was replaced, not patched in place);
-- `globalThis.__pageBModuleRan === true` — the destination's inline
-  `import "<spec>";` was extracted and `import()`d.
-
-Two parts:
-
-1. **Swap `<body>`.** Replace the live `<body>`'s children with the destination
-   body's children, adopted via `document.importNode(node, true)`. **Invariant:**
-   new element instances replace the old ones (the test asserts
-   `notStrictEqual(island, pageAIsland)`), so this is a child replacement, not an
-   in-place patch. The `<script type="module">` node is carried over inert — a
-   `<script>` inserted via DOM does not execute (research §3), which is exactly why
-   part 2 imports it explicitly.
-2. **Import page modules.** Parse the `import "<spec>";` specifiers out of the
-   destination body's `<script type="module">` text (the build emits inline
-   `import` statements, not `src` attributes — design §2.5, matching
-   `src/ssg/rewrite.ts`), and `import()` each, awaiting all. The ES module cache
-   dedupes already-loaded chunks. **Invariant:** modules are imported before
-   hydration so a not-yet-defined element is defined before `start()` (here the
-   element is already defined; the test proves the import ran via the data: URL's
-   side effect).
+**Enables:** the deferred "non-2xx / network-error full-load fallback" — the live
+`// TODO(interceptor wiring)` in `fetchDocument` (design "Failure modes"). On a non-2xx
+response or a network error, abort the same-document path and fall back to a full load.
 
 ```ts
-/** Replace the live <body> children with `destBody`'s children, adopted via
- *  document.importNode. Returns nothing; mutates the live document. */
-declare function swapBody(destBody: HTMLBodyElement): void;
-
-/** Extract every `import "<spec>";` specifier from `root`'s
- *  `<script type="module">` elements and dynamically import each, awaiting all.
- *  Inert script nodes inserted via DOM never execute on their own. */
-declare function importPageModules(root: ParentNode): Promise<void>;
+// In fetchDocument / navigate: if (!response.ok) OR fetch rejects → window.location
+// .assign(url) and abort — do NOT parse, reconcile, swap, or fire onNavigate. The
+// destination becomes a normal full document load (no broken intermediate state).
 ```
 
-## Step 5: Hydrate the swapped body + fire `onNavigate`
+Unit tests (stub `location.assign`, which does not navigate under jsdom): a non-2xx
+status (e.g. 500) calls `location.assign(url)` and performs no body swap; a rejected
+`fetch` (network error) likewise calls `location.assign(url)`. Removes the `// TODO`.
+Feature test stays green.
 
-**Enables:** the remaining assertions, making the feature test pass —
+## Definition of done for this cycle
 
-- the destination island hydrates with the destination payload
-  (`textContent === "Hello B-about (0)"`) and a click runs its live handler
-  (`"Hello B-about (1)"`);
-- `onNavigate` fired exactly once, with `ctx.title === "Page B"` and
-  `ctx.url.href === "https://example.test/b"`.
-
-After the body swap and module import, call the existing `start()`
-(`src/dom/hydrate.ts`) to hydrate the swapped-in body. It reads the destination
-`#__hydration` payload (placed by Step 3) and hydrates each island in place;
-`start()` schedules hydration on a `whenDefined` microtask, which the test flushes
-with a macrotask `tick()`.
-
-Then build the `NavigationContext` (`url` absolute, `title` = `document.title`
-after the reconcile, `type: "push"`) and invoke every registered `onNavigate`
-callback once, in registration order. **Invariant:** exactly one `onNavigate`
-call per `navigate()`; hooks observe the destination title and URL. Order within
-`navigate()`: reconcile head → swap body → import modules → `start()` →
-`onNavigate`.
+`src/dom/navigation/interceptor.test.ts` passes (Step 3), and every behavior the
+feature-test deferred to the plan is covered by a unit test and implemented (Steps
+4–6). The topic-closing `developer:refactor` + `general:review` pass over the
+interceptor + fallback is already tracked in `docs/developer/TASKS.md` and runs once
+the later milestones (M2–M4) land.
