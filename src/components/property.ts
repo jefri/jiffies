@@ -18,7 +18,8 @@ export type PropertySheetProps = {
 // Why: jiffies-css targets dl > dt + dd for aligned label/value rows; a table or
 // div grid is unstyled.
 // Invariant: exactly one <dt> (the label) and one <dd> (the value) per entry, in
-// entry order; emits no class attribute.
+// entry order; emits no class of its own, but forwards caller-supplied attrs
+// (class, lang, ...) to the <dl>.
 export function PropertySheet({
   entries,
   ...attrs

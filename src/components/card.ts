@@ -35,7 +35,8 @@ function cardLike(
 // must always be wrapped in <main>, never placed as a bare article child.
 // Invariants: <main> is always emitted (even with no parts); <header> only when
 // parts.header is set; <footer> only when parts.footer is set; child order is
-// always header, main, footer; emits no class attribute.
+// always header, main, footer; emits no class of its own, but forwards
+// caller-supplied attrs (class, lang, ...) to the wrapper element.
 export function Card(
   parts: CardProps,
   ...children: DenormChildren[]

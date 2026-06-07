@@ -13,7 +13,8 @@ export type FormGroupProps = {
 // Why: jiffies-css targets fieldset[role=group] to lay grouped controls out as a
 // row; role is set with setAttribute since "group" is outside the typed role surface.
 
-// Invariant: <legend> is the first child; role="group"; emits no class attribute.
+// Invariant: <legend> is the first child; role="group"; emits no class of its own,
+// but forwards caller-supplied attrs (class, lang, ...) to the <fieldset>.
 export function FormGroup(
   { legend: legendLabel, ...attrs }: FormGroupProps,
   ...children: DenormChildren[]

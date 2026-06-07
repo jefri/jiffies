@@ -23,7 +23,8 @@ const ALERT_ROLE: Record<AlertVariant, "alert" | "status"> = {
 // data-variant are not in the typed attrs surface (role is constrained, data-* is
 // not a property), so they are set with setAttribute.
 // Invariant: warning|error => role="alert"; info|success|neutral => role="status";
-// data-variant always equals the variant; emits no class attribute.
+// data-variant always equals the variant; emits no class of its own, but
+// forwards a caller-supplied class (and other attrs) to the <aside>.
 export function Alert(
   { variant, ...attrs }: AlertProps,
   ...children: DenormChildren[]

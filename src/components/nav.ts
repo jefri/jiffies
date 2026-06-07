@@ -28,7 +28,8 @@ function navList(items: NavItem[]): HTMLElement {
 // Nav emits nav > ol > li > a, one <li> per item.
 // Why: jiffies-css targets the nav > ol > li > a chain; a bare ul > li > a is unstyled.
 // Invariants: every item is an <a> inside an <li> inside the single <ol>; an item
-// with current:true gets aria-current="page" on its <a>; emits no class attribute.
+// with current:true gets aria-current="page" on its <a>; emits no class of its own,
+// but forwards caller-supplied attrs (class, lang, ...) to the <nav>.
 export function Nav({ items, ...attrs }: NavProps): HTMLElement {
   return nav(attrs, navList(items));
 }
