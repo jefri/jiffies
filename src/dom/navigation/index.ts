@@ -44,6 +44,35 @@ export function onNavigate(cb: NavigateCallback): void {
   navigateCallbacks.push(cb);
 }
 
+/** A hook registered through `onFirstLoad`, run once when the initial page hydrates. */
+type FirstLoadCallback = (ctx: NavigationContext) => void;
+
+/** Hooks awaiting the first load, fired once during bootstrap in registration order. */
+const firstLoadCallbacks: FirstLoadCallback[] = [];
+
+/**
+ * The first-load context, set by `bootstrap()` once the initial page hydrates.
+ * `undefined` until then. Retained so an `onFirstLoad` registered AFTER first load
+ * (e.g. a shell module that imports the runtime lazily) still receives the event.
+ */
+let firstLoadContext: NavigationContext | undefined;
+
+/**
+ * Register `cb` to run once, when the initial page hydrates on first document load.
+ * Invariant: if registered BEFORE bootstrap, `cb` is queued and fired during
+ * bootstrap with the first-load context (`type: "first"`). If registered AFTER first
+ * load, `cb` is invoked immediately with the retained context, so a late
+ * registration never drops the initial event (design §1). Registering installs no
+ * listeners and touches no DOM (import-side-effect-free invariant).
+ */
+export function onFirstLoad(cb: FirstLoadCallback): void {
+  if (firstLoadContext) {
+    cb(firstLoadContext);
+    return;
+  }
+  firstLoadCallbacks.push(cb);
+}
+
 /**
  * Attribute marking a one-time "shell" node in `<head>` (a theme bootstrap, an
  * analytics tag): the build emits it, and the head reconciler preserves any node
@@ -166,4 +195,37 @@ export async function navigate(url: string | URL): Promise<void> {
     type: "push",
   };
   for (const cb of navigateCallbacks) cb(context);
+}
+
+/**
+ * Bootstrap route hydration for the initial document. Explicit entry — NOT run at
+ * import time (the module stays side-effect-free; tests and the M3 injected entry
+ * decide when this runs). On call it:
+ *   1. `start(window.document.body)` — hydrate the server-rendered initial islands
+ *      in place (reads the initial `#__hydration` payload already in <head>).
+ *   2. Build the first-load `NavigationContext`: `url` from `window.location.href`,
+ *      `title` from `document.title`, `type: "first"`. Store it in `firstLoadContext`.
+ *   3. Fire every queued `onFirstLoad` callback once, in registration order.
+ * (Step 3 inserts interceptor installation between (1) and (3), per design §1.)
+ * Invariant: `onFirstLoad` fires exactly once per bootstrap.
+ */
+export async function bootstrap(): Promise<void> {
+  // 1. Hydrate the server-rendered initial islands in place. start() reads the
+  // initial #__hydration payload already in <head> and schedules each update().
+  start(window.document.body);
+
+  // 2. Build and retain the first-load context (design §1). url is the initial
+  // location, title the current document title, type "first".
+  firstLoadContext = {
+    url: new URL(window.location.href),
+    title: window.document.title,
+    type: "first",
+  };
+
+  // 3. Fire every queued onFirstLoad callback once, in registration order, then
+  // clear the queue so the event fires exactly once per bootstrap. A callback
+  // registered AFTER this point fires immediately against firstLoadContext (see
+  // onFirstLoad), so a late registration never drops the initial event.
+  for (const cb of firstLoadCallbacks) cb(firstLoadContext);
+  firstLoadCallbacks.length = 0;
 }
