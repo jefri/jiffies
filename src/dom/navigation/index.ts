@@ -40,6 +40,18 @@ export function onNavigate(cb: NavigateCallback): void {
 }
 
 /**
+ * Attribute marking a one-time "shell" node in `<head>` (a theme bootstrap, an
+ * analytics tag): the build emits it, and the head reconciler preserves any node
+ * carrying it by identity across navigations so its inline script never re-runs.
+ */
+const SHELL_ATTR = "data-shell";
+
+/** True for a head node the reconciler must preserve in place across navigations. */
+function isShell(node: ChildNode): boolean {
+  return node instanceof Element && node.hasAttribute(SHELL_ATTR);
+}
+
+/**
  * Fetch `url` and parse its body text into a detached Document via the global
  * DOMParser. Returns the parsed document; the caller reconciles head and body
  * out of it. Invariant: the returned document is detached — its nodes must be
@@ -55,6 +67,39 @@ async function fetchDocument(url: URL): Promise<Document> {
 }
 
 /**
+ * Reconcile the live `<head>` against `destHead`. Preserves every existing
+ * `[data-shell]` node by identity; replaces all non-shell live nodes with
+ * `destHead`'s non-shell nodes (adopted into the live document). Applies the
+ * destination `<title>` via `document.title` and mirrors `<html lang>`. Leaves
+ * the destination `#__hydration` payload in place for the subsequent `start()`.
+ */
+function reconcileHead(destHead: HTMLHeadElement): void {
+  const liveHead = window.document.head;
+
+  // Drop every live per-page node, leaving the [data-shell] nodes untouched —
+  // preserved by identity so their inline scripts (theme, analytics) never re-run.
+  for (const node of [...liveHead.childNodes]) {
+    if (!isShell(node)) node.remove();
+  }
+
+  // Adopt the destination's per-page nodes (title, metadata, the #__hydration
+  // payload) and append them. The destination's own shell nodes are dropped —
+  // the live ones already cover them.
+  for (const node of [...destHead.childNodes]) {
+    if (isShell(node)) continue;
+    liveHead.appendChild(window.document.importNode(node, true));
+  }
+
+  // Apply <title> through document.title so it takes effect immediately, and
+  // mirror <html lang> from the destination when it differs.
+  const destRoot = destHead.ownerDocument.documentElement;
+  window.document.title = destHead.ownerDocument.title;
+  if (destRoot.lang && destRoot.lang !== window.document.documentElement.lang) {
+    window.document.documentElement.lang = destRoot.lang;
+  }
+}
+
+/**
  * The shared same-document core that both the Navigation API interceptor and the
  * click/`popstate` fallback funnel into (design §8). Fetches the destination's
  * built HTML, reconciles `<head>`, swaps `<body>`, imports the destination's page
@@ -64,7 +109,7 @@ async function fetchDocument(url: URL): Promise<Document> {
 export async function navigate(url: string | URL): Promise<void> {
   const target = new URL(url, window.location.href);
   const destination = await fetchDocument(target);
-  // Steps 3–5 consume `destination`: reconcile <head>, swap <body>, import the
-  // destination's page modules, hydrate, then fire onNavigate.
-  void destination;
+  reconcileHead(destination.head);
+  // Steps 4–5: swap <body>, import the destination's page modules, hydrate,
+  // then fire onNavigate.
 }
