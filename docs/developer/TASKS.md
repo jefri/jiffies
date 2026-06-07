@@ -19,6 +19,35 @@
   path in `inline_edit.ts` / `virtual_scroll.ts`. See
   TASK-NOTES-keyed-reconcile.md.
 
+- SSG typed params ergonomics — `DynamicPageModule<P>` generic that ties
+  `generateStaticParams` return type to `default`/`head` params. Deferred from
+  dynamic-routes (design D); useful for large projects, pure DX improvement.
+
+- Continue route hydration topic — `docs/developer/2026-06-07-B-route-hydration/`.
+  **M1 runtime core landed and reviewed:** `src/dom/navigation/index.ts` —
+  `navigate(url)` does fetch → head-reconcile (preserve `data-shell` by identity,
+  swap per-page metadata + `__hydration`) → body-swap → inline-module import →
+  `start()`, plus the `onNavigate` hook — passing its feature test
+  (`src/dom/navigation/navigation.test.ts`) end-to-end. **Remaining M1:** the
+  Navigation API interceptor; auto-bootstrap on import (`start()` of the initial
+  page + the `onFirstLoad` hook); the non-2xx/network-error full-load fallback
+  (currently a TODO in `fetchDocument`); inner-loop unit tests for the core's edge
+  cases. **Then** M2 (click/`popstate` fallback sharing the core + View Transitions),
+  M3 (build integration: `discoverShell`/`pages/shell.ts`, auto-inject the runtime,
+  `data-shell` tagging, remove old `src/dom/router`), M4 (consumer migration of
+  `page-head.ts` → `shell.head` + `shell.clientModule` + metadata-only `pageHead()`).
+  Build sequence + deferred decisions in `design.md` (§ "Build sequence"). Run
+  `developer:ailly` to resume; design + feature-test + plan gates are all cleared, so
+  the next milestone starts a fresh design/feature-test/plan cycle for its scope.
+  Research: `docs/research/2026-06-07-B-route-hydration/`.
+
+- Final refactor + review for route hydration — the M1 runtime core was already
+  refactored (`developer:refactor`, no smells) and reviewed (`general:review`, no
+  blockers) this session. Run the topic-closing pass once the remaining
+  milestones land: `developer:refactor` then `general:review` over the
+  interceptor + fallback, build integration, and consumer migration before
+  calling the topic done with `developer:cleanup`.
+
 - Continue form controls topic — `docs/developer/2026-06-06-C-form-typing/`.
   Design refined to cover a **demo page** (`form.app.ts` as a `PageModule`
   showcasing every control), a **feature test** (`form.feature.test.ts`)
