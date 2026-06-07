@@ -39,7 +39,7 @@ describe("jiffiesCssLink", () => {
   });
 
   it("uses a caller-supplied href for local bundling", () => {
-    const el = jiffiesCssLink("/assets/jiffies-css.css");
+    const el = jiffiesCssLink({ href: "/assets/jiffies-css.css" });
 
     assert.strictEqual(el.getAttribute("href"), "/assets/jiffies-css.css");
     assert.strictEqual(el.getAttribute("rel"), "stylesheet");
@@ -108,7 +108,7 @@ describe("Panel", () => {
 describe("Alert", () => {
   it("maps destructive variants (warning, error) to role=alert", () => {
     for (const variant of ["warning", "error"] as const) {
-      const el = Alert(variant, "message");
+      const el = Alert({ variant }, "message");
       assert.strictEqual(el.tagName, "ASIDE");
       assert.strictEqual(el.getAttribute("role"), "alert");
       assert.strictEqual(el.getAttribute("data-variant"), variant);
@@ -117,14 +117,14 @@ describe("Alert", () => {
 
   it("maps informational variants (info, success, neutral) to role=status", () => {
     for (const variant of ["info", "success", "neutral"] as const) {
-      const el = Alert(variant, "message");
+      const el = Alert({ variant }, "message");
       assert.strictEqual(el.getAttribute("role"), "status");
       assert.strictEqual(el.getAttribute("data-variant"), variant);
     }
   });
 
   it("carries its children as the message and emits no class", () => {
-    const el = Alert("error", "Disk full", p(" detail"));
+    const el = Alert({ variant: "error" }, "Disk full", p(" detail"));
 
     assert.match(el.textContent ?? "", /Disk full/);
     assert.match(el.textContent ?? "", /detail/);
@@ -134,7 +134,7 @@ describe("Alert", () => {
 
 describe("Chip", () => {
   it("emits small[data-variant] with no role and no class", () => {
-    const el = Chip("warning", "beta");
+    const el = Chip({ variant: "warning" }, "beta");
 
     assert.strictEqual(el.tagName, "SMALL");
     assert.strictEqual(el.getAttribute("data-variant"), "warning");
@@ -146,10 +146,12 @@ describe("Chip", () => {
 
 describe("Nav", () => {
   it("emits nav > ol > li > a with one li per item and marks the current item", () => {
-    const el = Nav([
-      { label: "Home", href: "/" },
-      { label: "Docs", href: "/docs", current: true },
-    ]);
+    const el = Nav({
+      items: [
+        { label: "Home", href: "/" },
+        { label: "Docs", href: "/docs", current: true },
+      ],
+    });
 
     assert.strictEqual(el.tagName, "NAV");
     const links = [...el.querySelectorAll("nav > ol > li > a")];
@@ -164,7 +166,7 @@ describe("Nav", () => {
   });
 
   it("omits href on an item that has none", () => {
-    const el = Nav([{ label: "Plain" }]);
+    const el = Nav({ items: [{ label: "Plain" }] });
 
     const link = el.querySelector("a");
     assert.strictEqual(link?.getAttribute("href"), null);
@@ -174,10 +176,12 @@ describe("Nav", () => {
 
 describe("Breadcrumb", () => {
   it("wraps the nav > ol > li chain in a span", () => {
-    const el = Breadcrumb([
-      { label: "Home", href: "/" },
-      { label: "Here", current: true },
-    ]);
+    const el = Breadcrumb({
+      items: [
+        { label: "Home", href: "/" },
+        { label: "Here", current: true },
+      ],
+    });
 
     assert.strictEqual(el.tagName, "SPAN");
     const links = [...el.querySelectorAll("span > nav > ol > li > a")];
@@ -192,7 +196,7 @@ describe("Breadcrumb", () => {
 
 describe("Accordion", () => {
   it("emits details > summary + body with summary first", () => {
-    const acc = Accordion("Details", p("hidden body"));
+    const acc = Accordion({ summary: "Details" }, p("hidden body"));
 
     assert.strictEqual(acc.tagName, "DETAILS");
     assert.strictEqual(acc.children[0]?.tagName, "SUMMARY");
@@ -215,10 +219,12 @@ describe("Modal", () => {
 
 describe("PropertySheet", () => {
   it("emits dl > (dt + dd)* one pair per entry, value may be a node", () => {
-    const sheet = PropertySheet(
-      { label: "Name", value: "Ada" },
-      { label: "Role", value: strong("Admin") },
-    );
+    const sheet = PropertySheet({
+      entries: [
+        { label: "Name", value: "Ada" },
+        { label: "Role", value: strong("Admin") },
+      ],
+    });
 
     assert.strictEqual(sheet.tagName, "DL");
     assert.deepStrictEqual(
@@ -237,7 +243,10 @@ describe("PropertySheet", () => {
 
 describe("FormGroup", () => {
   it("emits fieldset[role=group] > legend + children", () => {
-    const group = FormGroup("Pick one", input({ type: "radio", name: "x" }));
+    const group = FormGroup(
+      { legend: "Pick one" },
+      input({ type: "radio", name: "x" }),
+    );
 
     assert.strictEqual(group.tagName, "FIELDSET");
     assert.strictEqual(group.getAttribute("role"), "group");
@@ -250,15 +259,17 @@ describe("FormGroup", () => {
 describe("TabList", () => {
   it("emits div[role=tablist] > button[role=tab], marks selected and wires onSelect", () => {
     let clicked = 0;
-    const tabs = TabList(
-      { label: "One", selected: true },
-      {
-        label: "Two",
-        onSelect: () => {
-          clicked += 1;
+    const tabs = TabList({
+      tabs: [
+        { label: "One", selected: true },
+        {
+          label: "Two",
+          onSelect: () => {
+            clicked += 1;
+          },
         },
-      },
-    );
+      ],
+    });
 
     assert.strictEqual(tabs.getAttribute("role"), "tablist");
     const buttons = [...tabs.querySelectorAll("button[role=tab]")];
@@ -273,11 +284,13 @@ describe("TabList", () => {
 
 describe("StaticTabList", () => {
   it("emits grouped radio + label[role=tab] pairs with id/for and defaultChecked", () => {
-    const tabs = StaticTabList(
-      "view",
-      { id: "a", label: "Alpha", selected: true },
-      { id: "b", label: "Beta" },
-    );
+    const tabs = StaticTabList({
+      name: "view",
+      tabs: [
+        { id: "a", label: "Alpha", selected: true },
+        { id: "b", label: "Beta" },
+      ],
+    });
 
     assert.strictEqual(tabs.getAttribute("role"), "tablist");
     const radios = [
@@ -293,4 +306,51 @@ describe("StaticTabList", () => {
     assert.match(labels[0]?.textContent ?? "", /Alpha/);
     assertNoClass(tabs);
   });
+});
+
+// Every component takes a leading config object that may carry DOM attrs (class,
+// lang, ...) alongside its domain inputs; those attrs are applied to the component's
+// own outermost element. One case per component, each building with the same
+// { class, lang } and asserting both landed on the returned root.
+describe("attrs fall through to the outermost element", () => {
+  const cases: Array<
+    [string, (attrs: { class: string; lang: string }) => Element]
+  > = [
+    ["Card", (a) => Card({ ...a }, p("body"))],
+    ["Panel", (a) => Panel({ ...a }, p("body"))],
+    ["Alert", (a) => Alert({ variant: "info", ...a }, "msg")],
+    ["Chip", (a) => Chip({ variant: "info", ...a }, "msg")],
+    ["Nav", (a) => Nav({ items: [{ label: "Home" }], ...a })],
+    ["Breadcrumb", (a) => Breadcrumb({ items: [{ label: "Home" }], ...a })],
+    ["Accordion", (a) => Accordion({ summary: "S", ...a }, p("body"))],
+    ["Modal", (a) => Modal({ ...a }, p("body"))],
+    [
+      "PropertySheet",
+      (a) => PropertySheet({ entries: [{ label: "L", value: "V" }], ...a }),
+    ],
+    ["FormGroup", (a) => FormGroup({ legend: "L", ...a }, input())],
+    ["TabList", (a) => TabList({ tabs: [{ label: "T" }], ...a })],
+    [
+      "StaticTabList",
+      (a) =>
+        StaticTabList({ name: "n", tabs: [{ id: "x", label: "X" }], ...a }),
+    ],
+    ["jiffiesCssLink", (a) => jiffiesCssLink({ ...a })],
+  ];
+
+  for (const [name, build] of cases) {
+    it(`${name} applies class and lang to its root`, () => {
+      const root = build({ class: "fancy", lang: "en" });
+
+      assert.ok(
+        root.classList.contains("fancy"),
+        `${name} root should carry the caller's class`,
+      );
+      assert.strictEqual(
+        root.getAttribute("lang"),
+        "en",
+        `${name} root should carry the caller's lang`,
+      );
+    });
+  }
 });

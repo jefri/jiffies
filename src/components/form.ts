@@ -1,5 +1,11 @@
-import type { DenormChildren } from "../dom/dom.ts";
+import type { Attrs, DenormChildren } from "../dom/dom.ts";
 import { fieldset, legend } from "../dom/html.ts";
+
+// FormGroup props: the legend label plus any DOM attrs (class, lang, ...) to apply
+// to the outermost <fieldset>.
+export type FormGroupProps = {
+  legend: DenormChildren;
+} & Attrs<HTMLFieldSetElement>;
 
 // FormGroup emits fieldset[role=group] > legend + children — the jiffies-css
 // grouped-controls pattern. This is the structural form group; the richer form
@@ -9,10 +15,10 @@ import { fieldset, legend } from "../dom/html.ts";
 
 // Invariant: <legend> is the first child; role="group"; emits no class attribute.
 export function FormGroup(
-  legendLabel: DenormChildren,
+  { legend: legendLabel, ...attrs }: FormGroupProps,
   ...children: DenormChildren[]
 ): HTMLFieldSetElement {
-  const group = fieldset(legend(legendLabel), ...children);
+  const group = fieldset(attrs, legend(legendLabel), ...children);
   group.setAttribute("role", "group");
   return group;
 }

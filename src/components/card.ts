@@ -1,4 +1,4 @@
-import type { DenormChildren } from "../dom/dom.ts";
+import type { Attrs, DenormChildren } from "../dom/dom.ts";
 import { article, footer, header, main, section } from "../dom/html.ts";
 import { toChildren } from "./children.ts";
 
@@ -7,23 +7,27 @@ export interface CardParts {
   footer?: DenormChildren | DenormChildren[];
 }
 
+// Card/Panel props: the structured header/footer slots plus any DOM attrs
+// (class, lang, style, ...) to apply to the outermost wrapper element.
+export type CardProps = CardParts & Attrs<HTMLElement>;
+
 // Build the shared header? / main / footer? sequence. `root` is the wrapper
 // element builder (article for Card, section for Panel); the only difference
 // between the two components is which wrapper they use.
 function cardLike(
   root: typeof article,
-  parts: CardParts,
+  { header: headerPart, footer: footerPart, ...attrs }: CardProps,
   children: DenormChildren[],
 ): HTMLElement {
   const sections: DenormChildren[] = [];
-  if (parts.header !== undefined) {
-    sections.push(header(...toChildren(parts.header)));
+  if (headerPart !== undefined) {
+    sections.push(header(...toChildren(headerPart)));
   }
   sections.push(main(...children));
-  if (parts.footer !== undefined) {
-    sections.push(footer(...toChildren(parts.footer)));
+  if (footerPart !== undefined) {
+    sections.push(footer(...toChildren(footerPart)));
   }
-  return root(...sections);
+  return root(attrs, ...sections);
 }
 
 // Card emits the jiffies-css elevated-card structure: article > header? / main / footer?.
@@ -33,7 +37,7 @@ function cardLike(
 // parts.header is set; <footer> only when parts.footer is set; child order is
 // always header, main, footer; emits no class attribute.
 export function Card(
-  parts: CardParts,
+  parts: CardProps,
   ...children: DenormChildren[]
 ): HTMLElement {
   return cardLike(article, parts, children);
@@ -42,7 +46,7 @@ export function Card(
 // Panel is the flat variant: section > header? / main / footer?. Same contract as
 // Card with `section` in place of `article`. Not exercised by the feature test.
 export function Panel(
-  parts: CardParts,
+  parts: CardProps,
   ...children: DenormChildren[]
 ): HTMLElement {
   return cardLike(section, parts, children);

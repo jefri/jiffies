@@ -15,13 +15,15 @@ describe("jiffies-css components feature", () => {
     const stylesheet = jiffiesCssLink();
 
     const view = main(
-      Nav([
-        { label: "Home", href: "/" },
-        { label: "Settings", href: "/settings", current: true },
-      ]),
+      Nav({
+        items: [
+          { label: "Home", href: "/" },
+          { label: "Settings", href: "/settings", current: true },
+        ],
+      }),
       Card(
         { header: h2("Profile"), footer: small("Last saved 2m ago") },
-        Alert("error", "Your session is about to expire."),
+        Alert({ variant: "error" }, "Your session is about to expire."),
         p("Update your profile details."),
       ),
     );
