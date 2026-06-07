@@ -1,5 +1,5 @@
-import type { DenormChildren } from "../dom.ts";
-import { article, footer, header, main, section } from "../html.ts";
+import type { DenormChildren } from "../dom/dom.ts";
+import { article, footer, header, main, section } from "../dom/html.ts";
 import { toChildren } from "./children.ts";
 
 export interface CardParts {

@@ -1,5 +1,5 @@
-import type { DenormChildren } from "../dom.ts";
-import { dd, dl, dt } from "../html.ts";
+import type { DenormChildren } from "../dom/dom.ts";
+import { dd, dl, dt } from "../dom/html.ts";
 import { toChildren } from "./children.ts";
 
 export interface PropertyEntry {

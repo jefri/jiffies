@@ -1,4 +1,4 @@
-import type { DenormChildren } from "../dom.ts";
+import type { DenormChildren } from "../dom/dom";
 
 // Normalize a "one child or many" part-slot to a flat children array. Several
 // components accept either a single child or an array in the same position

@@ -1,4 +1,4 @@
-import { a, li, nav, ol, span } from "../html.ts";
+import { a } from "../dom/html";
 
 export interface NavItem {
   label: string;

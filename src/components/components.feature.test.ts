@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { h2, main, p, small } from "../html.ts";
 import { Alert, Card, jiffiesCssLink, Nav } from "./index.ts";
 
 // Feature: a page author composes a jiffies-css page from the components module.

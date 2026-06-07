@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { h2, input, p, small, strong } from "../html.ts";
 import {
   Accordion,
   Alert,
