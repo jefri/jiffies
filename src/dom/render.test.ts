@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { FileSystem, RecordFileSystemAdapter } from "../fs.ts";
-import { build } from "../ssg/ssg.ts";
 import { FC } from "./fc.ts";
-import { br, div, h1, input, meta, p, title } from "./html.ts";
+import { br, div, input, meta, p, title } from "./html.ts";
 import { renderDocument, renderToString } from "./render.ts";
 import { circle, svg } from "./svg.ts";
 
@@ -96,106 +94,6 @@ describe("renderDocument", () => {
     assert.equal(
       renderDocument({ body: p("hola"), lang: "es" }),
       '<!doctype html><html lang="es"><head></head><body><p>hola</p></body></html>',
-    );
-  });
-});
-
-// --- build (SSG) ---
-
-describe("build", () => {
-  it("writes index.html for a root page", async () => {
-    const store: Record<string, string> = {};
-    const fs = new FileSystem(new RecordFileSystemAdapter(store));
-
-    await build({
-      pages: [{ route: "/", module: { default: () => h1("Home") } }],
-      out: "/out",
-      fs,
-    });
-
-    assert.equal(
-      store["/out/index.html"],
-      '<!doctype html><html lang="en"><head></head><body><h1>Home</h1></body></html>',
-    );
-  });
-
-  it("writes <route>/index.html for a nested page", async () => {
-    const store: Record<string, string> = {};
-    const fs = new FileSystem(new RecordFileSystemAdapter(store));
-
-    await build({
-      pages: [{ route: "/about", module: { default: () => p("About") } }],
-      out: "/out",
-      fs,
-    });
-
-    assert.equal(
-      store["/out/about/index.html"],
-      '<!doctype html><html lang="en"><head></head><body><p>About</p></body></html>',
-    );
-  });
-
-  it("supports an async default export", async () => {
-    const store: Record<string, string> = {};
-    const fs = new FileSystem(new RecordFileSystemAdapter(store));
-
-    await build({
-      pages: [{ route: "/", module: { default: async () => p("lazy") } }],
-      out: "/out",
-      fs,
-    });
-
-    assert.equal(
-      store["/out/index.html"],
-      '<!doctype html><html lang="en"><head></head><body><p>lazy</p></body></html>',
-    );
-  });
-
-  it("uses the page module's lang override", async () => {
-    const store: Record<string, string> = {};
-    const fs = new FileSystem(new RecordFileSystemAdapter(store));
-
-    await build({
-      pages: [
-        {
-          route: "/about",
-          module: {
-            default: () => p("À propos"),
-            htmlAttributes: { lang: "fr" },
-          },
-        },
-      ],
-      out: "/out",
-      fs,
-    });
-
-    assert.equal(
-      store["/out/about/index.html"],
-      '<!doctype html><html lang="fr"><head></head><body><p>À propos</p></body></html>',
-    );
-  });
-
-  it("renders head from an async head export", async () => {
-    const store: Record<string, string> = {};
-    const fs = new FileSystem(new RecordFileSystemAdapter(store));
-
-    await build({
-      pages: [
-        {
-          route: "/",
-          module: {
-            default: () => p("hello"),
-            head: async () => title("Hello Page"),
-          },
-        },
-      ],
-      out: "/out",
-      fs,
-    });
-
-    assert.equal(
-      store["/out/index.html"],
-      '<!doctype html><html lang="en"><head><title>Hello Page</title></head><body><p>hello</p></body></html>',
     );
   });
 });

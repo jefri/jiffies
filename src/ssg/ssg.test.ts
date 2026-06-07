@@ -126,6 +126,42 @@ describe("ssg/build — route to file path", () => {
       "head node in <head>",
     );
   });
+
+  it("awaits an async default export", async () => {
+    const { fs, files } = makeFS();
+    await build({
+      pages: [{ route: "/", module: { default: async () => p("lazy") } }],
+      out: "/out",
+      fs,
+    });
+    assert.ok(
+      (files["/out/index.html"] ?? "").includes("<body><p>lazy</p></body>"),
+      "async default body rendered",
+    );
+  });
+
+  it("awaits an async head export", async () => {
+    const { fs, files } = makeFS();
+    await build({
+      pages: [
+        {
+          route: "/",
+          module: {
+            default: () => p("hello"),
+            head: async () => h1("Hello Page"),
+          },
+        },
+      ],
+      out: "/out",
+      fs,
+    });
+    assert.ok(
+      (files["/out/index.html"] ?? "").includes(
+        "<head><h1>Hello Page</h1></head>",
+      ),
+      "async head node in <head>",
+    );
+  });
 });
 
 describe("ssg/build — hydration payload", () => {
