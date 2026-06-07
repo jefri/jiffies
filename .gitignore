@@ -6,3 +6,4 @@ lib/
 .parcel-cache
 jefri-jiffies-*.tgz
 package-lock.json
+.claude/
