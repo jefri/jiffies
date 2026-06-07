@@ -159,7 +159,10 @@ describe("build", () => {
       pages: [
         {
           route: "/about",
-          module: { default: () => p("À propos"), lang: "fr" },
+          module: {
+            default: () => p("À propos"),
+            htmlAttributes: { lang: "fr" },
+          },
         },
       ],
       out: "/out",
