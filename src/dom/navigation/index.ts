@@ -25,9 +25,12 @@ type NavigateCallback = (ctx: NavigationContext) => void;
 
 /**
  * Registered `onNavigate` hooks, fired in registration order after every
- * completed navigation. Module-level state only: declaring this module installs
- * no listeners and touches no DOM, so importing `./index.ts` is side-effect-free
- * (M1 plan Step 1 invariant).
+ * completed navigation. Module-level state only: this module installs no
+ * listeners, touches no DOM, and never hydrates or calls `start()` at import
+ * time (M1 plan Step 1 invariant). The static `../hydrate.ts` import does pull
+ * in `../dom.ts`, whose jsdom bootstrap runs only in windowless Node and is
+ * skipped under a browser or jsdom where `window` already exists — so importing
+ * `./index.ts` is side-effect-free in those environments.
  */
 const navigateCallbacks: NavigateCallback[] = [];
 
