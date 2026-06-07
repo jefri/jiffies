@@ -25,7 +25,13 @@ export const CLEAR = Symbol("Clear children");
 const ELEMENT_NODE = 1;
 
 export type EventHandler = EventListenerOrEventListenerObject;
-export type DenormChildren = Node | string | typeof CLEAR;
+export type DenormChildren =
+  | Node
+  | string
+  | typeof CLEAR
+  | null
+  | undefined
+  | false;
 
 export type DOMElement = Element & ElementCSSInlineStyle;
 
@@ -85,7 +91,13 @@ export function normalizeArguments<E extends Element>(
     }
     attributes = defaultAttrs;
   }
-  return [attributes, children.flat()];
+  // Drop conditional/absent children (React's `{cond && <X/>}` idiom): null,
+  // undefined, and false. `0` and `""` are kept — they are legitimate text
+  // nodes, and dropping them would reintroduce the React `0`-renders-nothing bug.
+  return [
+    attributes,
+    children.flat().filter((c) => c != null && c !== false),
+  ];
 }
 
 export function up<E extends Element>(
