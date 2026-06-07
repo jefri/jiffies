@@ -2,9 +2,9 @@
 // Why: jiffies-css targets details > summary; the summary must be the first child
 // and the disclosed body follows it.
 
-import type { DenormChildren } from "../dom/dom";
-import { details, summary } from "../dom/html";
-import { toChildren } from "./children";
+import type { DenormChildren } from "../dom/dom.ts";
+import { details, summary } from "../dom/html.ts";
+import { toChildren } from "./children.ts";
 
 // Invariant: <summary> is always the first child; remaining children form the body.
 export function Accordion(

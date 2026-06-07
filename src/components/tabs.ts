@@ -1,5 +1,5 @@
-import type { DenormChildren } from "../dom/dom";
-import { button, div, input, label } from "../dom/html";
+import type { DenormChildren } from "../dom/dom.ts";
+import { button, div, input, label } from "../dom/html.ts";
 
 // Shared tablist container: div[role=tablist] holding the supplied tab controls.
 // Both tab variants emit the same container; this is the one place the role string

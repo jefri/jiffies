@@ -1,5 +1,5 @@
-import type { DenormChildren } from "../dom/dom";
-import { fieldset, legend } from "../dom/html";
+import type { DenormChildren } from "../dom/dom.ts";
+import { fieldset, legend } from "../dom/html.ts";
 
 // FormGroup emits fieldset[role=group] > legend + children — the jiffies-css
 // grouped-controls pattern. This is the structural form group; the richer form

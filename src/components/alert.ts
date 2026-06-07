@@ -1,5 +1,5 @@
-import type { DenormChildren } from "../dom/dom";
-import { aside, small } from "../dom/html";
+import type { DenormChildren } from "../dom/dom.ts";
+import { aside, small } from "../dom/html.ts";
 
 export type AlertVariant = "warning" | "error" | "info" | "success" | "neutral";
 

@@ -1,4 +1,4 @@
-import { link } from "../dom/html";
+import { link } from "../dom/html.ts";
 
 const JIFFIES_CSS_CDN =
   "https://unpkg.com/@davidsouther/jiffies-css/dist/index.css";
