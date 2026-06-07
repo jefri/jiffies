@@ -198,15 +198,53 @@ export async function navigate(url: string | URL): Promise<void> {
 }
 
 /**
+ * Install the navigation interceptor. The Navigation API is the sole interception
+ * mechanism: it delivers one `navigate` event for every same-document candidate —
+ * link click, programmatic navigation, and back/forward — so a single listener
+ * replaces a click handler plus a `popstate` listener, and the API owns history
+ * and scroll restoration (so the core stays `history.pushState`-free).
+ *
+ * The Navigation API is Baseline as of Jan 2026; this project targets evergreen
+ * browsers. Where it is absent there is NO interception: links perform normal
+ * full-document navigations — degraded (no shared-runtime hydration) but never
+ * broken. That minimal alternative is the entire fallback.
+ *
+ * Called by `bootstrap()` after `start()` and before firing `onFirstLoad`. The
+ * listener is added only here, never at module top level, so importing this module
+ * stays side-effect-free. Types come from `@types/dom-navigation` (folded into
+ * lib.dom as of TS 6.0); see the tracking task in `docs/developer/TASKS.md`.
+ */
+function installInterceptor(): void {
+  if (!("navigation" in window)) return;
+
+  window.navigation.addEventListener("navigate", (event) => {
+    // Decline (let the browser navigate natively) when the API cannot intercept
+    // — cross-origin, etc. — or for a hash-only, download, or non-GET (form)
+    // navigation. Form submissions are out of scope (design §2, Summary).
+    if (!event.canIntercept) return;
+    if (event.hashChange) return;
+    if (event.downloadRequest !== null) return;
+    if (event.formData !== null) return;
+
+    // Claim the navigation: run the shared core as the same-document transition.
+    // navigate() fetches, reconciles <head>, swaps <body>, imports the page
+    // module, hydrates, and fires onNavigate. The API commits the history entry.
+    const { url } = event.destination;
+    event.intercept({ handler: () => navigate(url) });
+  });
+}
+
+/**
  * Bootstrap route hydration for the initial document. Explicit entry — NOT run at
  * import time (the module stays side-effect-free; tests and the M3 injected entry
  * decide when this runs). On call it:
  *   1. `start(window.document.body)` — hydrate the server-rendered initial islands
  *      in place (reads the initial `#__hydration` payload already in <head>).
- *   2. Build the first-load `NavigationContext`: `url` from `window.location.href`,
+ *   2. `installInterceptor()` — capture subsequent in-app navigations (Navigation
+ *      API or the click/`popstate` fallback), between `start()` and `onFirstLoad`.
+ *   3. Build the first-load `NavigationContext`: `url` from `window.location.href`,
  *      `title` from `document.title`, `type: "first"`. Store it in `firstLoadContext`.
- *   3. Fire every queued `onFirstLoad` callback once, in registration order.
- * (Step 3 inserts interceptor installation between (1) and (3), per design §1.)
+ *   4. Fire every queued `onFirstLoad` callback once, in registration order.
  * Invariant: `onFirstLoad` fires exactly once per bootstrap.
  */
 export async function bootstrap(): Promise<void> {
@@ -214,7 +252,12 @@ export async function bootstrap(): Promise<void> {
   // initial #__hydration payload already in <head> and schedules each update().
   start(window.document.body);
 
-  // 2. Build and retain the first-load context (design §1). url is the initial
+  // 2. Install the interceptor (Navigation API or click/popstate fallback) so
+  // subsequent in-app navigations are captured. Between start() and firing
+  // onFirstLoad, per design §1.
+  installInterceptor();
+
+  // 3. Build and retain the first-load context (design §1). url is the initial
   // location, title the current document title, type "first".
   firstLoadContext = {
     url: new URL(window.location.href),
@@ -222,7 +265,7 @@ export async function bootstrap(): Promise<void> {
     type: "first",
   };
 
-  // 3. Fire every queued onFirstLoad callback once, in registration order, then
+  // 4. Fire every queued onFirstLoad callback once, in registration order, then
   // clear the queue so the event fires exactly once per bootstrap. A callback
   // registered AFTER this point fires immediately against firstLoadContext (see
   // onFirstLoad), so a late registration never drops the initial event.

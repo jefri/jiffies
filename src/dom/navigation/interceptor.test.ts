@@ -2,30 +2,40 @@ import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
 // ----------------------------------------------------------------------------
-// Real-origin DOM environment.
+// Real-origin DOM environment + Navigation API stub.
 //
-// This suite exercises the same-document FALLBACK interceptor (design §8). jsdom
-// has no Navigation API (`"navigation" in window` is false), so the runtime
-// installs the click + `popstate` fallback — the path this test drives. Unlike
-// the M1-core feature test (navigation.test.ts), which drove `navigate()` with
-// absolute URLs against jsdom's default about:blank window, the interceptor needs
-// a *real origin*: it derives the destination from the clicked anchor's resolved
-// href, decides same-origin against `location.origin`, and calls
-// `history.pushState`. about:blank supports none of that (origin "null", no base
-// for relative hrefs, no usable history).
+// The Navigation API is the sole interception mechanism (design §2/§8): the
+// runtime registers ONE `navigate` listener that fires for every same-document
+// candidate (link click, programmatic nav, back/forward) and claims it via
+// `event.intercept`. jsdom ships neither a real origin nor the Navigation API, so
+// this suite supplies both:
 //
-// So this suite boots its own real-URL window and installs it as the global.
-// Importing `../fc.ts` below still triggers dom.ts's windowless bootstrap (ESM
-// evaluates imports before this top-level code runs), creating a throwaway
-// about:blank window — but the reassignment here replaces it BEFORE `FC(...)`
-// defines the island, so the custom-element registry, `start()` hydration, and
-// the runtime all share this one real-URL window. (Verified: define + hydrate +
-// pushState + popstate + delegated click all behave under this setup.)
+//   * a real-URL window (https://example.test/a) — the core builds absolute URLs
+//     from `window.location.href` and the destination is resolved from the
+//     clicked anchor's href, which about:blank cannot base; and
+//   * a minimal `window.navigation` stub recording the `navigate` listener, so the
+//     test can emit the navigate event a real browser would synthesise from the
+//     link click (jsdom does not), then run the handler the browser would await.
+//
+// Both are installed as globals BEFORE importing `../fc.ts` (whose evaluation
+// triggers dom.ts's windowless bootstrap) and BEFORE `FC(...)` defines the island,
+// so the registry, hydration, and runtime all share this one window.
 // ----------------------------------------------------------------------------
 const jsdom = new JSDOM(
   `<!doctype html><html lang="en"><head></head><body></body></html>`,
   { url: "https://example.test/a" },
 );
+
+// Minimal Navigation API stub. The runtime only ever calls
+// `navigation.addEventListener("navigate", listener)`; record those listeners so
+// the test can drive them. `emitNavigate` below plays the browser's role.
+const navigateListeners: Array<(event: NavigateEvent) => void> = [];
+const navigationStub = {
+  addEventListener(type: string, listener: (event: NavigateEvent) => void) {
+    if (type === "navigate") navigateListeners.push(listener);
+  },
+};
+
 const g = globalThis as unknown as Record<string, unknown>;
 g.window = jsdom.window;
 g.HTMLElement = jsdom.window.HTMLElement;
@@ -33,17 +43,18 @@ g.customElements = jsdom.window.customElements;
 g.Event = jsdom.window.Event;
 g.MouseEvent = jsdom.window.MouseEvent;
 g.Element = jsdom.window.Element;
-g.PopStateEvent = jsdom.window.PopStateEvent;
 g.DOMParser = jsdom.window.DOMParser;
+(jsdom.window as unknown as Record<string, unknown>).navigation =
+  navigationStub;
 
 import { describe, it } from "node:test";
-import { type FCComponent, FC, State } from "../fc.ts";
+import { FC, type FCComponent, State } from "../fc.ts";
 import { div } from "../html.ts";
 import { buildPayload } from "../hydrate.ts";
 // The route-hydration runtime. `bootstrap` and `onFirstLoad` do NOT exist yet:
 // the remaining-M1 step adds the auto-bootstrap entry (hydrate the initial page +
-// install the interceptor + fire `onFirstLoad`) and the click/`popstate`
-// fallback. Until then this named import is unresolved and the whole suite fails
+// install the interceptor + fire `onFirstLoad`) and the Navigation API navigate
+// listener. Until then this named import is unresolved and the whole suite fails
 // to load — the required initial red.
 import { bootstrap, onFirstLoad, onNavigate } from "./index.ts";
 
@@ -51,6 +62,28 @@ import { bootstrap, onFirstLoad, onNavigate } from "./index.ts";
 // microtask, so a parsed-but-not-yet-hydrated island settles one task later.
 // Flush a macrotask before asserting on hydrated DOM, exactly as hydrate.test.ts.
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+/**
+ * Play the browser's role: emit the `navigate` event it would synthesise for a
+ * same-origin in-app navigation to `url`, and return the handler the runtime
+ * registered through `event.intercept` (undefined if the runtime declined). The
+ * caller awaits the handler exactly as the browser awaits the intercept promise.
+ */
+function emitNavigate(url: string): (() => void | Promise<void>) | undefined {
+  let interceptHandler: (() => void | Promise<void>) | undefined;
+  const event = {
+    canIntercept: true,
+    hashChange: false,
+    downloadRequest: null,
+    formData: null,
+    destination: { url },
+    intercept(options: { handler: () => void | Promise<void> }) {
+      interceptHandler = options.handler;
+    },
+  } as unknown as NavigateEvent;
+  for (const listener of navigateListeners) listener(event);
+  return interceptHandler;
+}
 
 interface GreetingProps {
   name: string;
@@ -110,8 +143,8 @@ const PAGE_B_HTML = `<!doctype html>
 </body>
 </html>`;
 
-describe("route hydration — remaining M1: auto-bootstrap + click interception", () => {
-  it("hydrates the first page and fires onFirstLoad, then intercepts an in-app link click as a same-document navigation (no full load)", async (t) => {
+describe("route hydration — remaining M1: auto-bootstrap + navigation interception", () => {
+  it("hydrates the first page and fires onFirstLoad, then intercepts an in-app navigation as a same-document transition (no full load)", async (t) => {
     const doc = window.document;
     const win = globalThis as unknown as Record<string, unknown>;
 
@@ -162,14 +195,9 @@ describe("route hydration — remaining M1: auto-bootstrap + click interception"
 
     let navigations = 0;
     let navCtx: { url: URL; title: string } | undefined;
-    let resolveNav!: () => void;
-    const navDone = new Promise<void>((resolve) => {
-      resolveNav = resolve;
-    });
     onNavigate((ctx) => {
       navigations += 1;
       navCtx = ctx;
-      resolveNav();
     });
 
     t.after(() => {
@@ -179,8 +207,7 @@ describe("route hydration — remaining M1: auto-bootstrap + click interception"
     });
 
     // Act 1 — the site loads. The runtime bootstraps: hydrate the initial page,
-    // install the interceptor (the fallback path, since no Navigation API), and
-    // fire `onFirstLoad`.
+    // install the Navigation API `navigate` listener, and fire `onFirstLoad`.
     await bootstrap();
     await tick();
 
@@ -215,35 +242,26 @@ describe("route hydration — remaining M1: auto-bootstrap + click interception"
       "first-load context carries the initial page title",
     );
 
-    // Act 2 — the visitor clicks the in-app link to /b. A same-origin, primary-
-    // button, unmodified link click is exactly what the interceptor must claim.
-    const link = doc.getElementById("to-b");
+    // Act 2 — the visitor clicks the in-app link to /b. A real browser turns that
+    // click into a `navigate` event on `window.navigation`; jsdom does not, so the
+    // suite emits it for the link's resolved href. The interceptor must CLAIM it
+    // (call `event.intercept`), which is what cancels the browser's full-page load.
+    const link = doc.getElementById("to-b") as HTMLAnchorElement | null;
     assert.ok(link, "page A renders an in-app link to the destination");
-    const clickEvent = new window.MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-    });
-    link.dispatchEvent(clickEvent);
-
-    // Assert (synchronous) — the interceptor CLAIMED the click: it cancelled the
-    // browser's full-page navigation and pushed a history entry for the
-    // destination, so back/forward works and no document reload occurs.
-    assert.equal(
-      clickEvent.defaultPrevented,
-      true,
-      "the interceptor prevented the browser's full-page navigation",
-    );
-    assert.equal(
+    const destination = new URL(
+      link.getAttribute("href") ?? "",
       window.location.href,
-      "https://example.test/b",
-      "the interceptor pushed a history entry for the destination URL",
+    ).href;
+    const interceptHandler = emitNavigate(destination);
+    assert.ok(
+      interceptHandler,
+      "the interceptor claimed the navigation via event.intercept (no full load)",
     );
 
-    // The same-document core runs asynchronously inside the click handler
-    // (fetch → reconcile <head> → swap <body> → import module → start() →
-    // onNavigate). Wait for it to report completion, then flush hydration.
-    await navDone;
+    // The same-document core runs inside the intercept handler (fetch → reconcile
+    // <head> → swap <body> → import module → start() → onNavigate). The browser
+    // awaits this promise; so does the test. Then flush hydration microtasks.
+    await interceptHandler();
     await tick();
 
     // Assert — the interceptor drove the shared core: it fetched the destination.
