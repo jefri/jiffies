@@ -219,7 +219,13 @@ describe("route hydration — M2: View Transitions on same-document navigation",
 
     t.after(() => {
       globalThis.fetch = originalFetch;
-      docWithVT.startViewTransition = originalStartViewTransition;
+      // Restore the stub. jsdom has no startViewTransition, so the original is
+      // undefined; delete rather than assign undefined (exactOptionalPropertyTypes).
+      if (originalStartViewTransition) {
+        docWithVT.startViewTransition = originalStartViewTransition;
+      } else {
+        delete docWithVT.startViewTransition;
+      }
       win.__pageBModuleRan = undefined;
       win.__hydrateQueue = undefined;
     });
