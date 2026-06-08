@@ -94,10 +94,7 @@ export function normalizeArguments<E extends Element>(
   // Drop conditional/absent children (React's `{cond && <X/>}` idiom): null,
   // undefined, and false. `0` and `""` are kept — they are legitimate text
   // nodes, and dropping them would reintroduce the React `0`-renders-nothing bug.
-  return [
-    attributes,
-    children.flat().filter((c) => c != null && c !== false),
-  ];
+  return [attributes, children.flat().filter((c) => c != null && c !== false)];
 }
 
 export function up<E extends Element>(

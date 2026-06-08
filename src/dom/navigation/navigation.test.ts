@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { type FCComponent, FC, State } from "../fc.ts";
+import { FC, type FCComponent, State } from "../fc.ts";
 import { div } from "../html.ts";
 import { buildPayload, start } from "../hydrate.ts";
 // The route-hydration runtime. Importing it does not exist yet, so this whole

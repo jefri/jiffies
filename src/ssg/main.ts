@@ -1,18 +1,19 @@
 #!/usr/bin/env node
+
 // CLI entry point for `ssg build`. All diagnostics go to stderr.
 // stdout is reserved exclusively for --json output.
 
+import { readdir, readFile, writeFile } from "node:fs/promises";
+import { join, relative, resolve } from "node:path";
 import * as process from "node:process";
 import { parseArgs } from "node:util";
-import { readFile, readdir, writeFile } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { NodeFileSystem } from "../fs_node.ts";
-import { build } from "./ssg.ts";
 import { bundleClientModules } from "./bundle.ts";
 import { copyPublic } from "./copy-public.ts";
 import { discoverPages } from "./discover.ts";
 import { rewriteClientSpecifiers } from "./rewrite.ts";
+import { build } from "./ssg.ts";
 
 interface CliValues {
   help: boolean | undefined;
