@@ -37,16 +37,26 @@
   `src/dom/navigation/interceptor.test.ts` (Navigation API stubbed under jsdom) +
   unit tests `interceptor.unit.test.ts` (onFirstLoad-after, decline matrix,
   fetch-failure) green; M1-core test still `navigation.test.ts`. Added
-  `@types/dom-navigation` dev dep (see its own TASKS entry). **Next: M2** — View
-  Transitions for the same-document body swap (`document.startViewTransition` when
-  present and `event.hasUAVisualTransition` is false; `NavigationContext.type` could
-  also start reflecting the event's `navigationType` instead of always `"push"`).
-  **Then** M3 (build integration: `discoverShell`/`pages/shell.ts`, auto-inject the
-  runtime, `data-shell` tagging, remove old `src/dom/router`), M4 (consumer migration
-  of `page-head.ts` → `shell.head` + `shell.clientModule` + metadata-only `pageHead()`).
-  Build sequence + deferred decisions in `design.md` (§ "Build sequence"). Run
-  `developer:ailly` to resume; M2 starts a fresh design/feature-test/plan cycle for
-  its scope. Research: `docs/research/2026-06-07-B-route-hydration/`.
+  `@types/dom-navigation` dev dep (see its own TASKS entry). **M2 IN PROGRESS** —
+  View Transitions (fallback half dropped by the Navigation-API-only pivot, so M2 is
+  View-Transitions-only): wrap the same-document body swap in
+  `document.startViewTransition` when present and `event.hasUAVisualTransition` is
+  false, else swap directly; optional secondary — `NavigationContext.type` reflecting
+  the event's `navigationType` instead of always `"push"`. Design was already settled
+  (`design.md` §2 step 4), so this cycle entered at feature-test. **Feature test
+  written and at the draft gate**: `src/dom/navigation/view-transitions.test.ts` +
+  `feature-test.md` (*Draft*). Remaining-M1 artifacts archived to `*-remaining-m1.md`.
+  **Resume:** clear the `feature-test.md` draft marker, then run `developer:ailly`
+  (or `developer:planning`) to enter the planning step. The plan should cover the
+  unit-level branches deferred from the feature test (UA-transition guard, VT-absent
+  fallback, `type` reflection) and extract a shared `interceptor.testenv.ts`
+  (Three-Strikes, per `refactor-plan-remaining-m1.md`). **Then** M3 (build
+  integration: `discoverShell`/`pages/shell.ts`, auto-inject the runtime, `data-shell`
+  tagging, remove old `src/dom/router`), M4 (consumer migration of `page-head.ts` →
+  `shell.head` + `shell.clientModule` + metadata-only `pageHead()`). Build sequence +
+  deferred decisions in `design.md` (§ "Build sequence"). Note: the design's
+  build-sequence still labels M2 "Fallback + View Transitions" — reconcile that stale
+  wording at topic close. Research: `docs/research/2026-06-07-B-route-hydration/`.
 
 - Final refactor + review for route hydration — the M1 runtime core was already
   refactored (`developer:refactor`, no smells) and reviewed (`general:review`, no
