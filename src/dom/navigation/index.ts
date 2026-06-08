@@ -86,28 +86,33 @@ function isShell(node: ChildNode): boolean {
 }
 
 /**
+ * Abandon the same-document path for an ordinary full document load of `url`
+ * (design "Failure modes"). Returns `null` so a fetch caller can `return fullLoad(url)`
+ * to both trigger the load and signal "stop here" — the destination becomes a normal
+ * navigation, never a broken intermediate state.
+ */
+function fullLoad(url: URL): null {
+  window.location.assign(url.href);
+  return null;
+}
+
+/**
  * Fetch `url` and parse its body text into a detached Document via the global
  * DOMParser. Returns the parsed document, or `null` when the same-document path
  * must be abandoned for a full load: a non-2xx response or a network error falls
- * back to `window.location.assign(url)` and returns `null` so the caller aborts
- * before reconciling — the destination becomes a normal full document load, never
- * a broken intermediate state (design "Failure modes"). Invariant: a returned
- * document is detached — its nodes must be adopted with `document.importNode`
- * before insertion into the live document.
+ * back to `fullLoad(url)` so the caller aborts before reconciling. Invariant: a
+ * returned document is detached — its nodes must be adopted with
+ * `document.importNode` before insertion into the live document.
  */
 async function fetchDocument(url: URL): Promise<Document | null> {
   let response: Response;
   try {
     response = await fetch(url);
   } catch {
-    // Network error: abandon the same-document path for a full load.
-    window.location.assign(url.href);
-    return null;
+    return fullLoad(url); // network error
   }
   if (!response.ok) {
-    // Non-2xx: same.
-    window.location.assign(url.href);
-    return null;
+    return fullLoad(url); // non-2xx
   }
   const html = await response.text();
   return new DOMParser().parseFromString(html, "text/html");
@@ -255,8 +260,8 @@ function installInterceptor(): void {
  * decide when this runs). On call it:
  *   1. `start(window.document.body)` — hydrate the server-rendered initial islands
  *      in place (reads the initial `#__hydration` payload already in <head>).
- *   2. `installInterceptor()` — capture subsequent in-app navigations (Navigation
- *      API or the click/`popstate` fallback), between `start()` and `onFirstLoad`.
+ *   2. `installInterceptor()` — register the Navigation API `navigate` listener to
+ *      capture subsequent in-app navigations, between `start()` and `onFirstLoad`.
  *   3. Build the first-load `NavigationContext`: `url` from `window.location.href`,
  *      `title` from `document.title`, `type: "first"`. Store it in `firstLoadContext`.
  *   4. Fire every queued `onFirstLoad` callback once, in registration order.
@@ -267,9 +272,8 @@ export async function bootstrap(): Promise<void> {
   // initial #__hydration payload already in <head> and schedules each update().
   start(window.document.body);
 
-  // 2. Install the interceptor (Navigation API or click/popstate fallback) so
-  // subsequent in-app navigations are captured. Between start() and firing
-  // onFirstLoad, per design §1.
+  // 2. Register the Navigation API interceptor so subsequent in-app navigations
+  // are captured. Between start() and firing onFirstLoad, per design §1.
   installInterceptor();
 
   // 3. Build and retain the first-load context (design §1). url is the initial
