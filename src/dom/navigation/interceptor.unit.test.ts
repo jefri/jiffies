@@ -37,7 +37,7 @@ g.DOMParser = jsdom.window.DOMParser;
   navigationStub;
 
 import { before, describe, it } from "node:test";
-import { bootstrap, onFirstLoad } from "./index.ts";
+import { bootstrap, navigate, onFirstLoad, onNavigate } from "./index.ts";
 
 /**
  * Play the browser: dispatch the `navigate` event it would synthesise, with the
@@ -65,6 +65,49 @@ function emitNavigate(fields: {
   } as unknown as NavigateEvent;
   for (const listener of navigateListeners) listener(event);
   return claimed;
+}
+
+/**
+ * Drive `navigate("/b")` against a failing `fetch` and report the full-load
+ * fallback's observable effects: the URLs passed to `location.assign` and whether
+ * `onNavigate` fired.
+ *
+ * jsdom's real `location.assign` is an own, non-configurable, non-writable method
+ * that cannot be spied. But on the failure path `navigate()` aborts before any DOM
+ * work — it touches only `window.location.href`, `window.location.assign`, and the
+ * global `fetch` — so the helper swaps the global `window` for a minimal stub whose
+ * `location.assign` records its argument, then restores it. The runtime reads the
+ * global `window` at call time, so the swap is transparent.
+ */
+async function runFailingNavigate(
+  fetchImpl: () => Promise<Response>,
+): Promise<{ assigned: string[]; navigations: number }> {
+  const realWindow = g.window;
+  const assigned: string[] = [];
+  g.window = {
+    location: {
+      href: "https://example.test/a",
+      assign: (url: string | URL) => {
+        assigned.push(String(url));
+      },
+    },
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchImpl as typeof fetch;
+
+  let navigations = 0;
+  onNavigate(() => {
+    navigations += 1;
+  });
+
+  try {
+    await navigate("/b");
+  } finally {
+    globalThis.fetch = originalFetch;
+    g.window = realWindow;
+  }
+  return { assigned, navigations };
 }
 
 describe("route hydration — remaining M1 unit tests", () => {
@@ -152,6 +195,43 @@ describe("route hydration — remaining M1 unit tests", () => {
         emitNavigate({ formData: {} as FormData }),
         false,
         "a form submission is left to the browser (forms are out of scope)",
+      );
+    });
+  });
+
+  describe("fetch-failure full-load fallback (design 'Failure modes')", () => {
+    // On a non-2xx response or a network error the same-document path is abandoned:
+    // location.assign(url) performs a normal full load and the core does not run
+    // (no reconcile, no body swap, no onNavigate) — never a broken intermediate.
+    it("falls back to a full load on a non-2xx response", async () => {
+      const result = await runFailingNavigate(() =>
+        Promise.resolve(new Response("error", { status: 500 })),
+      );
+      assert.deepEqual(
+        result.assigned,
+        ["https://example.test/b"],
+        "a non-2xx response triggers a full load to the destination",
+      );
+      assert.equal(
+        result.navigations,
+        0,
+        "no onNavigate fires on the aborted same-document path",
+      );
+    });
+
+    it("falls back to a full load on a network error (fetch rejects)", async () => {
+      const result = await runFailingNavigate(() =>
+        Promise.reject(new Error("network down")),
+      );
+      assert.deepEqual(
+        result.assigned,
+        ["https://example.test/b"],
+        "a network error triggers a full load to the destination",
+      );
+      assert.equal(
+        result.navigations,
+        0,
+        "no onNavigate fires on the aborted same-document path",
       );
     });
   });

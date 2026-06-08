@@ -87,16 +87,29 @@ function isShell(node: ChildNode): boolean {
 
 /**
  * Fetch `url` and parse its body text into a detached Document via the global
- * DOMParser. Returns the parsed document; the caller reconciles head and body
- * out of it. Invariant: the returned document is detached — its nodes must be
- * adopted with `document.importNode` before insertion into the live document.
+ * DOMParser. Returns the parsed document, or `null` when the same-document path
+ * must be abandoned for a full load: a non-2xx response or a network error falls
+ * back to `window.location.assign(url)` and returns `null` so the caller aborts
+ * before reconciling — the destination becomes a normal full document load, never
+ * a broken intermediate state (design "Failure modes"). Invariant: a returned
+ * document is detached — its nodes must be adopted with `document.importNode`
+ * before insertion into the live document.
  */
-async function fetchDocument(url: URL): Promise<Document> {
-  const response = await fetch(url);
+async function fetchDocument(url: URL): Promise<Document | null> {
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch {
+    // Network error: abandon the same-document path for a full load.
+    window.location.assign(url.href);
+    return null;
+  }
+  if (!response.ok) {
+    // Non-2xx: same.
+    window.location.assign(url.href);
+    return null;
+  }
   const html = await response.text();
-  // TODO(interceptor wiring): a non-2xx / network-error response should fall
-  // back to a full document load. The M1 feature test never exercises that path,
-  // so it is deferred to the interceptor + click/popstate fallback step.
   return new DOMParser().parseFromString(html, "text/html");
 }
 
@@ -170,15 +183,17 @@ async function importPageModules(root: ParentNode): Promise<void> {
 }
 
 /**
- * The shared same-document core that both the Navigation API interceptor and the
- * click/`popstate` fallback funnel into (design §8). Fetches the destination's
- * built HTML, reconciles `<head>`, swaps `<body>`, imports the destination's page
- * modules, hydrates, then fires `onNavigate`. Resolves when hydration has been
- * scheduled and hooks have fired. Implemented incrementally across steps 2–5.
+ * The shared same-document core the Navigation API interceptor funnels into
+ * (design §2). Fetches the destination's built HTML, reconciles `<head>`, swaps
+ * `<body>`, imports the destination's page modules, hydrates, then fires
+ * `onNavigate`. Resolves when hydration has been scheduled and hooks have fired.
+ * If `fetchDocument` fell back to a full load (non-2xx or network error), it
+ * returns `null` and this aborts without reconciling, swapping, or firing hooks.
  */
 export async function navigate(url: string | URL): Promise<void> {
   const target = new URL(url, window.location.href);
   const destination = await fetchDocument(target);
+  if (destination === null) return; // fell back to a full document load
   reconcileHead(destination.head);
   swapBody(destination.body);
   await importPageModules(window.document.body);
