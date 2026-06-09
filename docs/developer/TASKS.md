@@ -56,3 +56,21 @@
   to `string`, drop the `@ts-expect-error`/casts, simplify `Dropdown`). Design is
   `*DRAFT*` again pending re-review; clear the marker, then run `developer:ailly`
   to resume at the feature-test step.
+
+- Access-log status + response-time capture. `prettyLogFormatter` (in
+  `src/log.ts`, landed on `main`) renders an access line `GET /trips/hvar
+  127.0.0.1` and already prints a colored `status` and `<n>ms` segment **if those
+  fields are present** — but `src/server/http/index.ts` `log(req)` does not
+  capture them. Hook `res.on("finish")` to record `res.statusCode` and elapsed
+  time, then add `status`/`ms` to the `info("Request", …)` payload. Follow-up from
+  the log-formatter work (its out-of-scope list).
+
+- Demote per-page "Adding to sitemap" from `info` to `debug`
+  (`src/server/http/sitemap.ts`). It fires once per page (×20), drowning the
+  genuinely useful `Server listening …:8080` line; demoting keeps the default
+  `info` stream signal-dense. Follow-up from the log-formatter work. Emit-site
+  change, not a formatter change.
+
+- ASCII glyph fallback for the pretty logger. `prettyLogFormatter` uses the
+  unicode glyphs `ℹ ⚠ ✖ ·`; add an ASCII-safe fallback for non-UTF terminals if
+  one ever surfaces. Deferred from the log-formatter work.
