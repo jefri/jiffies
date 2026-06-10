@@ -5,21 +5,24 @@
   "displayName": "JEFRi Jiffies",
   "type": "module",
   "exports": {
-    "./*.ts": "./src/*.ts"
+    "./*.ts": {
+      "types": "./lib/esm/*.d.ts",
+      "default": "./lib/esm/*.js"
+    }
   },
   "files": [
-    "src",
-    "!src/**/*.test.ts",
+    "lib",
     "LICENSE",
     "package.json",
-    "README.md",
-    "tsconfig.json"
+    "README.md"
   ],
   "engines": {
     "node": ">=22.18.0"
   },
   "scripts": {
     "start": "node ./src/server/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "test": "node --test --test-reporter=tap",
     "ci": "node --test --test-reporter=junit",
     "format": "biome format --write",
@@ -27,7 +30,8 @@
     "check:format": "biome format",
     "check:lint": "biome check",
     "all": "npm run check:lint && npm run test",
-    "stamp": "node scripts/stamp.ts"
+    "prepublish": "npm run build",
+    "publish": "node scripts/stamp.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
