@@ -9,6 +9,7 @@
   },
   "files": [
     "src",
+    "!src/**/*.test.ts",
     "LICENSE",
     "package.json",
     "README.md",
