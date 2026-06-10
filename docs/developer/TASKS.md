@@ -24,22 +24,39 @@
   dynamic-routes (design D); useful for large projects, pure DX improvement.
 
 - Continue route hydration topic — `docs/developer/2026-06-07-B-route-hydration/`.
-  **M1 runtime core landed and reviewed:** `src/dom/navigation/index.ts` —
-  `navigate(url)` does fetch → head-reconcile (preserve `data-shell` by identity,
-  swap per-page metadata + `__hydration`) → body-swap → inline-module import →
-  `start()`, plus the `onNavigate` hook — passing its feature test
-  (`src/dom/navigation/navigation.test.ts`) end-to-end. **Remaining M1:** the
-  Navigation API interceptor; auto-bootstrap on import (`start()` of the initial
-  page + the `onFirstLoad` hook); the non-2xx/network-error full-load fallback
-  (currently a TODO in `fetchDocument`); inner-loop unit tests for the core's edge
-  cases. **Then** M2 (click/`popstate` fallback sharing the core + View Transitions),
-  M3 (build integration: `discoverShell`/`pages/shell.ts`, auto-inject the runtime,
-  `data-shell` tagging, remove old `src/dom/router`), M4 (consumer migration of
-  `page-head.ts` → `shell.head` + `shell.clientModule` + metadata-only `pageHead()`).
-  Build sequence + deferred decisions in `design.md` (§ "Build sequence"). Run
-  `developer:ailly` to resume; design + feature-test + plan gates are all cleared, so
-  the next milestone starts a fresh design/feature-test/plan cycle for its scope.
-  Research: `docs/research/2026-06-07-B-route-hydration/`.
+  **M1 landed and green** in `src/dom/navigation/index.ts`: the runtime core
+  (`navigate(url)` does fetch → head-reconcile, preserving `data-shell` by identity,
+  swap per-page metadata + `__hydration` → body-swap → inline-module import →
+  `start()`, plus `onNavigate`), AND remaining-M1 — `bootstrap()` (import-side-effect-
+  free entry: hydrate the initial page, install the interceptor, fire `onFirstLoad`
+  with a retained first-load context), the **Navigation-API-only** interceptor
+  (`installInterceptor` registers one `navigate` listener: decline on
+  `!canIntercept`/`hashChange`/`downloadRequest`/`formData`, else `intercept` →
+  `navigate`; a no-op where the API is absent — evergreen-only, no click/`popstate`
+  shim), and the non-2xx/network-error `fullLoad` fallback. Feature test
+  `src/dom/navigation/interceptor.test.ts` (Navigation API stubbed under jsdom) +
+  unit tests `interceptor.unit.test.ts` (onFirstLoad-after, decline matrix,
+  fetch-failure) green; M1-core test still `navigation.test.ts`. Added
+  `@types/dom-navigation` dev dep (see its own TASKS entry). **M2 IN PROGRESS** —
+  View Transitions (fallback half dropped by the Navigation-API-only pivot, so M2 is
+  View-Transitions-only): wrap the same-document body swap in
+  `document.startViewTransition` when present and `event.hasUAVisualTransition` is
+  false, else swap directly; optional secondary — `NavigationContext.type` reflecting
+  the event's `navigationType` instead of always `"push"`. Design was already settled
+  (`design.md` §2 step 4), so this cycle entered at feature-test. **Feature test
+  written and at the draft gate**: `src/dom/navigation/view-transitions.test.ts` +
+  `feature-test.md` (*Draft*). Remaining-M1 artifacts archived to `*-remaining-m1.md`.
+  **Resume:** clear the `feature-test.md` draft marker, then run `developer:ailly`
+  (or `developer:planning`) to enter the planning step. The plan should cover the
+  unit-level branches deferred from the feature test (UA-transition guard, VT-absent
+  fallback, `type` reflection) and extract a shared `interceptor.testenv.ts`
+  (Three-Strikes, per `refactor-plan-remaining-m1.md`). **Then** M3 (build
+  integration: `discoverShell`/`pages/shell.ts`, auto-inject the runtime, `data-shell`
+  tagging, remove old `src/dom/router`), M4 (consumer migration of `page-head.ts` →
+  `shell.head` + `shell.clientModule` + metadata-only `pageHead()`). Build sequence +
+  deferred decisions in `design.md` (§ "Build sequence"). Note: the design's
+  build-sequence still labels M2 "Fallback + View Transitions" — reconcile that stale
+  wording at topic close. Research: `docs/research/2026-06-07-B-route-hydration/`.
 
 - Final refactor + review for route hydration — the M1 runtime core was already
   refactored (`developer:refactor`, no smells) and reviewed (`general:review`, no
@@ -47,6 +64,14 @@
   milestones land: `developer:refactor` then `general:review` over the
   interceptor + fallback, build integration, and consumer migration before
   calling the topic done with `developer:cleanup`.
+
+- Drop the `@types/dom-navigation` dev dependency — added for `window.navigation` /
+  `NavigateEvent` typing in `src/dom/navigation/index.ts` (the route-hydration
+  interceptor), because TypeScript 5.9's bundled `lib.dom.d.ts` has no Navigation API
+  types. TypeScript folds them into `lib.dom.d.ts` as of **TS 6.0**
+  (per the package header; tracking issue microsoft/TypeScript-DOM-lib-generator#1531).
+  When this project upgrades to TS 6.0+, remove the dependency and confirm `tsc` is
+  still clean.
 
 - Continue form controls topic — `docs/developer/2026-06-06-C-form-typing/`.
   Design refined to cover a **demo page** (`form.app.ts` as a `PageModule`

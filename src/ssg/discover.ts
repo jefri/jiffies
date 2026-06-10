@@ -127,7 +127,7 @@ function fillTemplate(
 function deriveRoute(relDir: string): string {
   const segments = relDir.split("/").filter(Boolean);
   const stripped = segments.filter((s) => !/^\(.*\)$/.test(s));
-  return "/" + stripped.join("/");
+  return `/${stripped.join("/")}`;
 }
 
 async function scan(dir: string, results: string[]): Promise<void> {

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
+import { assertExists } from "../assert.ts";
 import { renderToString } from "../dom/render.ts";
 import { discoverPages } from "./discover.ts";
 
@@ -39,7 +40,7 @@ describe("ssg/discover — dynamic route expansion", () => {
 
     // And: each descriptor's default() returns content that reflects its param.
     for (const { route, module } of descriptors) {
-      const id = route.split("/").at(-1)!;
+      const id = assertExists(route.split("/").at(-1), "last route path");
       const node = await module.default();
       const html = renderToString(node);
       assert.match(
