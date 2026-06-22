@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { FileSystem, RecordFileSystemAdapter } from "../fs.ts";
 import { build, type PageModule } from "../ssg/ssg.ts";
-import { FC, type FCComponent, State } from "./fc.ts";
-import { button, div, form, input } from "./html.ts";
+import { FC, FCC, type FCComponent, State } from "./fc.ts";
+import { button, div, form, input, span } from "./html.ts";
 import {
   buildPayload,
   hydrateRoot,
@@ -169,6 +169,20 @@ const Greeter = FC<GreetProps>("hydrate-greeter", (_el, attrs) => {
   return div(text);
 });
 void Greeter;
+
+// An FCC (host-free, `data-fc` boundary) whose child echoes a prop. Used to test
+// that hydration carries props to both component forms, and as a nested unit.
+const Badge = FCC<{ label: string }>("hydrate-badge", div, (_el, attrs) =>
+  span(`[${attrs.label ?? "?"}]`),
+);
+void Badge;
+
+// An FC containing a Badge: the Badge is a NESTED unit, so the server payload
+// lists it between two top-level units in document order.
+const Panel = FC<{ who: string }>("hydrate-panel", (_el, attrs) =>
+  div(Badge({ label: attrs.who ?? "?" })),
+);
+void Panel;
 
 describe("hydrate — M2: hydrateRoot whole-app reconcile", () => {
   it("reconciles without detaching the shell: a focused input's node identity survives", (t) => {
@@ -729,6 +743,92 @@ describe("hydrate — M5: build integration", () => {
     assert.ok(
       html.includes(clientEntry),
       "the client entry path must appear in the module script",
+    );
+  });
+});
+
+describe("hydrate — M6: props survive hydration", () => {
+  it("hydrateRoot re-renders an FC with its server attributes as props", async (t) => {
+    // Arrange — SERVER: an FC with props baked into its attributes and a stale
+    // child. hydrateRoot does not read the #__hydration payload; the only source
+    // of props for a kept server unit is the attributes the reconcile pass syncs
+    // onto it from the freshly rendered tree.
+    window.document.body.innerHTML = `<hydrate-greeter name="Ada" count="3"><div>stale</div></hydrate-greeter>`;
+    t.after(() => {
+      window.document.body.innerHTML = "";
+    });
+
+    // Act — reconcile the same render onto the live shell, then hydrate.
+    hydrateRoot(window.document.body, () => [
+      Greeter({ name: "Ada", count: 3 }),
+    ]);
+    await tick();
+
+    // Assert — the re-render saw the props, not an empty object.
+    const fc = window.document.body.querySelector("hydrate-greeter");
+    assert.equal(
+      fc?.textContent,
+      "Hello Ada x3",
+      "hydrateRoot passed the server attributes to the FC's update()",
+    );
+  });
+
+  it("hydrateRoot carries props into a host-free FCC boundary", async (t) => {
+    // Arrange — a server-rendered FCC <div data-fc> with its prop in an attribute.
+    window.document.body.innerHTML = `<div data-fc="hydrate-badge" label="Live"><span>stale</span></div>`;
+    t.after(() => {
+      window.document.body.innerHTML = "";
+    });
+
+    // Act
+    hydrateRoot(window.document.body, () => [Badge({ label: "Live" })]);
+    await tick();
+
+    // Assert — the FCC re-rendered from its server attribute, not empty props.
+    const badge = window.document.body.querySelector(
+      "[data-fc='hydrate-badge']",
+    );
+    assert.equal(
+      badge?.querySelector("span")?.textContent,
+      "[Live]",
+      "hydrateRoot passed the server attribute to the FCC's update()",
+    );
+  });
+
+  it("start() gives each top-level unit its own payload entry across a nested unit", async (t) => {
+    // Arrange — the server builds the payload from a DESCENDING scan, so a nested
+    // unit's props sit between the two top-level units in document order.
+    const script = window.document.createElement("script");
+    script.type = "application/json";
+    script.id = "__hydration";
+    script.textContent = buildPayload([
+      { who: "A" }, // hydrate-panel (top-level)
+      { label: "nested" }, // hydrate-badge inside the panel
+      { label: "B" }, // hydrate-badge (top-level)
+    ]);
+    window.document.head.appendChild(script);
+
+    const container = window.document.createElement("div");
+    container.innerHTML =
+      `<hydrate-panel who="A"><div><div data-fc="hydrate-badge"><span>x</span></div></div></hydrate-panel>` +
+      `<div data-fc="hydrate-badge"><span>y</span></div>`;
+    window.document.body.append(container);
+    t.after(() => {
+      script.remove();
+      container.remove();
+    });
+
+    // Act
+    start(container);
+    await tick();
+
+    // Assert — the second top-level unit got payload[2] ("B"), not the nested
+    // unit's payload[1] ("nested").
+    const topBadge = container.children[1];
+    assert.equal(
+      topBadge.querySelector("span")?.textContent,
+      "[B]",
+      "top-level badge hydrated from its own payload entry across the nested unit",
     );
   });
 });

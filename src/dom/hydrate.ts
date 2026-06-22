@@ -1,6 +1,13 @@
 "use client"; // Hydrate runs entirely client side.
 
-import { reconcileChildren } from "./dom.ts";
+import {
+  isNested,
+  isUnit,
+  propsFromElement,
+  reconcileChildren,
+  scanAllUnits,
+} from "./dom.ts";
+import { attach, getFCC } from "./fc.ts";
 
 /**
  * Self-contained IIFE source for the capture stub. Embedded inline by the SSG
@@ -15,7 +22,7 @@ export const captureStubSource = `(function(){
     var unitEl = null;
     for (var i = 0; i < path.length; i++) {
       var node = path[i];
-      if (node instanceof Element && customElements.get(node.localName)) {
+      if (node instanceof Element && (customElements.get(node.localName) || node.getAttribute("data-fc"))) {
         unitEl = node;
         break;
       }
@@ -70,7 +77,7 @@ function scanUnits(root: ParentNode): Element[] {
   const stack: Element[] = [...root.children].reverse();
   while (stack.length > 0) {
     const el = stack.pop() as Element;
-    if (customElements.get(el.localName)) {
+    if (isUnit(el)) {
       results.push(el);
     } else {
       for (let i = el.children.length - 1; i >= 0; i--) {
@@ -82,33 +89,66 @@ function scanUnits(root: ParentNode): Element[] {
 }
 
 /**
- * Scan `root` for registered custom elements and schedule each for hydration.
- * `customElements.whenDefined` resolves as a microtask even when the element
- * is already defined. The callback clears server-rendered children then runs
- * `el.update()`, which re-executes the element's render function and rebuilds
- * its subtree. `root` defaults to `window.document.body`.
+ * Scan `root` for units and schedule each for hydration. `customElements.whenDefined`
+ * resolves as a microtask even when the element is already defined. The callback
+ * clears server-rendered children then runs `el.update()`, which re-executes the
+ * element's render function and rebuilds its subtree. `root` defaults to
+ * `window.document.body`.
+ *
+ * Units are enumerated with `scanAllUnits` — the SAME descending, document-order
+ * walk the server used to build the `#__hydration` payload — so `payload[index]`
+ * lines up with each unit even past nested ones. A nested unit is skipped here:
+ * its parent's re-render rebuilds it from fresh props, so a direct payload read
+ * would be redundant (and the enumeration only descends to keep indices aligned).
  */
 export function start(root?: ParentNode): void {
   const r = root ?? window.document.body;
-  const units = scanUnits(r);
+  const units = scanAllUnits(r);
   const payload = readPayload();
   units.forEach((el, index) => {
-    customElements.whenDefined(el.localName).then(() => {
-      el.replaceChildren();
-      el.update(payload[index]);
-      drainQueue(el);
-    });
+    if (isNested(el, units)) return;
+    // A data-fc boundary is never upgraded by the platform, so re-wire its
+    // behavior from the registry instead of waiting on customElements.
+    const fc = el.getAttribute("data-fc");
+    if (fc !== null) {
+      const update = getFCC(fc);
+      if (update) {
+        attach(el, update);
+        el.replaceChildren();
+        el.update(payload[index]);
+        drainQueue(el);
+      }
+    } else {
+      customElements.whenDefined(el.localName).then(() => {
+        el.replaceChildren();
+        el.update(payload[index]);
+        drainQueue(el);
+      });
+    }
   });
 }
 
-// Hydrate custom elements inside `root` without clearing their server-rendered
-// children first. `el.update()` reconciles onto the existing DOM so attributes
-// and listeners are grafted in place. Recurses after each element hydrates so
-// parents are always processed before their nested custom elements.
+// Hydrate units inside `root` without clearing their server-rendered children
+// first. `el.update(props)` reconciles onto the existing DOM so attributes and
+// listeners are grafted in place. Props are read back from the element's own
+// attributes (`propsFromElement`) — `hydrateRoot` reads no payload, and the
+// reconcile pass has already synced the fresh tree's attributes onto the kept
+// server node, so the attributes ARE the unit's props. Recurses after each
+// element hydrates so parents are always processed before their nested units.
 function startHydrate(root: ParentNode): void {
   for (const el of scanUnits(root)) {
+    const fc = el.getAttribute("data-fc");
+    if (fc !== null) {
+      const update = getFCC(fc);
+      if (update) {
+        attach(el, update);
+        el.update(propsFromElement(el));
+        startHydrate(el);
+      }
+      continue;
+    }
     customElements.whenDefined(el.localName).then(() => {
-      el.update();
+      el.update(propsFromElement(el));
       startHydrate(el);
     });
   }
@@ -139,7 +179,7 @@ export function installCaptureStub(): void {
     const path = event.composedPath() as Node[];
     let unitEl: Element | null = null;
     for (const node of path) {
-      if (node instanceof Element && customElements.get(node.localName)) {
+      if (node instanceof Element && isUnit(node)) {
         unitEl = node;
         break;
       }

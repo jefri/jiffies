@@ -1,3 +1,4 @@
+import { isNested, propsFromElement, scanAllUnits } from "../dom/dom.ts";
 import { buildPayload, captureStubSource } from "../dom/hydrate.ts";
 import { renderToString } from "../dom/render.ts";
 import type { FileSystem } from "../fs.ts";
@@ -36,50 +37,6 @@ export interface BuildOptions {
   fs: FileSystem;
 }
 
-/**
- * Walk `root` depth-first and return every element whose localName is a
- * defined custom element, in document order including nested ones. Descends
- * into matched elements so the full set of custom elements is returned.
- */
-function scanAllUnits(root: ParentNode): Element[] {
-  const results: Element[] = [];
-  const stack: Element[] = [...root.children].reverse() as Element[];
-  while (stack.length > 0) {
-    const el = stack.pop() as Element;
-    if (customElements.get(el.localName)) {
-      results.push(el);
-    }
-    // Always descend — nested custom elements are included in the full set.
-    for (let i = el.children.length - 1; i >= 0; i--) {
-      stack.push(el.children[i] as Element);
-    }
-  }
-  return results;
-}
-
-/**
- * Return true if el has a custom-element ancestor in the given units list.
- */
-function isNested(el: Element, allUnits: Element[]): boolean {
-  let parent = el.parentElement;
-  while (parent !== null) {
-    if (allUnits.includes(parent)) return true;
-    parent = parent.parentElement;
-  }
-  return false;
-}
-
-/**
- * Extract a Record<string,unknown> from an element's attribute list.
- */
-function attrsToProps(el: Element): Record<string, unknown> {
-  const props: Record<string, unknown> = {};
-  for (const attr of el.attributes) {
-    props[attr.name] = attr.value;
-  }
-  return props;
-}
-
 export async function build({ pages, out, fs }: BuildOptions): Promise<void> {
   for (const { route, module } of pages) {
     const body = await module.default();
@@ -91,7 +48,7 @@ export async function build({ pages, out, fs }: BuildOptions): Promise<void> {
     const template = window.document.createElement("template");
     template.innerHTML = bodyStr;
     const allUnits = scanAllUnits(template.content);
-    const props = allUnits.map(attrsToProps);
+    const props = allUnits.map(propsFromElement);
 
     if (props.length > 0) {
       const payload = buildPayload(props);
