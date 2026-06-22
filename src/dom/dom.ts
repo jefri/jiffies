@@ -292,6 +292,58 @@ function findUnclaimedNodes(
   return { mountedSet, unclaimed };
 }
 
+/**
+ * A unit boundary the reconcile, hydration, and SSG passes treat as opaque: a
+ * registered custom element (FC), or any element carrying `data-fc` (FCC). Both
+ * own their own subtree, so a parent's reconcile must not descend into them.
+ */
+export function isUnit(el: Element): boolean {
+  return customElements.get(el.localName) != null || el.hasAttribute("data-fc");
+}
+
+/**
+ * Walk `root` depth-first and return every unit (`isUnit`) in document order,
+ * descending INTO units so nested units are included. The server payload build
+ * and the client hydration scan must enumerate units in the same order, or a
+ * payload index will not line up.
+ */
+export function scanAllUnits(root: ParentNode): Element[] {
+  const results: Element[] = [];
+  const stack: Element[] = [...root.children].reverse() as Element[];
+  while (stack.length > 0) {
+    const el = stack.pop() as Element;
+    if (isUnit(el)) {
+      results.push(el);
+    }
+    for (let i = el.children.length - 1; i >= 0; i--) {
+      stack.push(el.children[i] as Element);
+    }
+  }
+  return results;
+}
+
+/** True if `el` has a unit ancestor (i.e. it is a nested unit). */
+export function isNested(el: Element, units: Element[]): boolean {
+  let parent = el.parentElement;
+  while (parent !== null) {
+    if (units.includes(parent)) return true;
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
+/**
+ * Reconstruct a unit's props from its attributes, skipping the `data-fc` marker.
+ */
+export function propsFromElement(el: Element): Record<string, unknown> {
+  const props: Record<string, unknown> = {};
+  for (const attr of el.attributes) {
+    if (attr.name === "data-fc") continue;
+    props[attr.name] = attr.value;
+  }
+  return props;
+}
+
 export function patchNode(kept: Element, fresh: Element): void {
   assert(kept.nodeName === fresh.nodeName, "patching nodes of different types");
 
@@ -320,8 +372,8 @@ export function patchNode(kept: Element, fresh: Element): void {
     setListener(kept, keptEvents, type, handler);
   }
 
-  // Custom elements rebuild their own subtrees
-  if (customElements.get(kept.localName)) return;
+  // Unit boundaries rebuild their own subtrees
+  if (isUnit(kept)) return;
 
   reconcileChildren(kept, Array.from(fresh.childNodes));
 }
