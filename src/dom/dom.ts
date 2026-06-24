@@ -35,8 +35,7 @@ export type DenormChildren =
 
 export type DOMElement = Element & ElementCSSInlineStyle;
 
-// WAI-ARIA 1.2 role tokens. The DOM lib does not ship an `AriaRole` type (it is
-// a React-only export), so the constrained set is named here.
+// WAI-ARIA 1.2 role tokens. The DOM lib does not ship an `AriaRole` type.
 export type AriaRole =
   | "alert"
   | "alertdialog"
@@ -118,12 +117,9 @@ export type DomAttrs = {
 };
 
 /**
- * Universal attributes valid on any HTML/SVG element that are NOT named on an
- * element's own DOM-property type (or whose attribute name differs from the
- * property name): the open-ended `data-*`/`aria-*` families, plus `for` (the
- * label association attribute — the DOM property is `htmlFor`). Folded into
- * every `Attrs` so the common case needs no supplemental `S` and no cast; the
- * engine writes each key verbatim with `setAttribute`.
+ * Jiffies intrinsic DataSet attributes.
+ * 
+ * DOM types don't include data- and aria- properties, they come from JSX intrinsics.
  */
 export type GlobalAttrs = {
   [key: `data-${string}`]: string | number | boolean;
@@ -135,9 +131,7 @@ export type GlobalAttrs = {
  * Attributes accepted by a builder / `up()` for element `E`. The element's own
  * string/number/boolean DOM properties, the framework `DomAttrs`
  * (class/style/role/events), the `GlobalAttrs` aliases, and the optional
- * supplemental set `S` — the constrained widening hook a caller (or a typed
- * builder like the SVG ones) uses to name extra verbatim attributes (e.g. SVG
- * presentation attrs) without casting the whole payload.
+ * supplemental set `S`.
  */
 export type Attrs<E extends Omit<Element, "update">, S = object> = Partial<
   Omit<{ [k in keyof E]: string | number | boolean }, "style" | "toString"> &
