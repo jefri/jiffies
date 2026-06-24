@@ -35,19 +35,109 @@ export type DenormChildren =
 
 export type DOMElement = Element & ElementCSSInlineStyle;
 
+// WAI-ARIA 1.2 role tokens. The DOM lib does not ship an `AriaRole` type.
+export type AriaRole =
+  | "alert"
+  | "alertdialog"
+  | "application"
+  | "article"
+  | "banner"
+  | "button"
+  | "cell"
+  | "checkbox"
+  | "columnheader"
+  | "combobox"
+  | "complementary"
+  | "contentinfo"
+  | "definition"
+  | "dialog"
+  | "directory"
+  | "document"
+  | "feed"
+  | "figure"
+  | "form"
+  | "grid"
+  | "gridcell"
+  | "group"
+  | "heading"
+  | "img"
+  | "link"
+  | "list"
+  | "listbox"
+  | "listitem"
+  | "log"
+  | "main"
+  | "marquee"
+  | "math"
+  | "menu"
+  | "menubar"
+  | "menuitem"
+  | "menuitemcheckbox"
+  | "menuitemradio"
+  | "navigation"
+  | "none"
+  | "note"
+  | "option"
+  | "presentation"
+  | "progressbar"
+  | "radio"
+  | "radiogroup"
+  | "region"
+  | "row"
+  | "rowgroup"
+  | "rowheader"
+  | "scrollbar"
+  | "search"
+  | "searchbox"
+  | "separator"
+  | "slider"
+  | "spinbutton"
+  | "status"
+  | "switch"
+  | "tab"
+  | "table"
+  | "tablist"
+  | "tabpanel"
+  | "term"
+  | "textbox"
+  | "timer"
+  | "toolbar"
+  | "tooltip"
+  | "tree"
+  | "treegrid"
+  | "treeitem";
+
 export type DomAttrs = {
   class: string | string[];
   style: Partial<SVGProperties> | string;
-  role: "button" | "list" | "listbox";
+  role: AriaRole;
   events: Partial<{
     [K in keyof HTMLElementEventMap]: EventHandler | null;
   }>;
 };
 
+/**
+ * Jiffies intrinsic DataSet attributes.
+ * 
+ * DOM types don't include data- and aria- properties, they come from JSX intrinsics.
+ */
+export type GlobalAttrs = {
+  [key: `data-${string}`]: string | number | boolean;
+  [key: `aria-${string}`]: string | number | boolean;
+  for: string;
+};
+
+/**
+ * Attributes accepted by a builder / `up()` for element `E`. The element's own
+ * string/number/boolean DOM properties, the framework `DomAttrs`
+ * (class/style/role/events), the `GlobalAttrs` aliases, and the optional
+ * supplemental set `S`.
+ */
 export type Attrs<E extends Omit<Element, "update">, S = object> = Partial<
   Omit<{ [k in keyof E]: string | number | boolean }, "style" | "toString"> &
     S &
-    DomAttrs
+    DomAttrs &
+    GlobalAttrs
 >;
 
 export type DenormAttrs<E extends Omit<Element, "update">, S = object> =
@@ -97,12 +187,15 @@ export function normalizeArguments<E extends Element>(
   return [attributes, children.flat().filter((c) => c != null && c !== false)];
 }
 
-export function up<E extends Element>(
+export function up<E extends Element, S = object>(
   element: Omit<E, "update">,
-  attrs?: DenormAttrs<E>,
+  attrs?: DenormAttrs<E, S>,
   ...children: DenormChildren[]
 ): E {
-  return update(element, ...normalizeArguments(attrs, children)) as E;
+  return update(
+    element,
+    ...normalizeArguments(attrs as DenormAttrs<E>, children),
+  ) as E;
 }
 
 /**

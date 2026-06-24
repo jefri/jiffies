@@ -28,13 +28,7 @@ export const Form = (attrs: FormAttributes, ...children: DenormChildren[]) => {
   return form(attrs as Attrs<HTMLFormElement>, ...children);
 };
 export const Input = (attrs: InputAttributes, ...children: DenormChildren[]) =>
-  label(
-    input(
-      // @ts-expect-error
-      attrs as Attrs<HTMLInputElement>,
-    ),
-    ...children,
-  );
+  label(input(attrs as Attrs<HTMLInputElement>), ...children);
 
 export const Select = (
   attrs: { options: string[] | object; selected?: string } & SelectAttributes &

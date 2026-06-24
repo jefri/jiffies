@@ -2,13 +2,13 @@ import { type DenormAttrs, type DenormChildren, up } from "./dom.ts";
 
 const makeHTMLElement =
   <K extends keyof HTMLElementTagNameMap>(name: K) =>
-  (
-    attrs?: DenormAttrs<HTMLElementTagNameMap[K]>,
+  <S = object>(
+    attrs?: DenormAttrs<HTMLElementTagNameMap[K], S>,
     ...children: DenormChildren[]
   ) =>
     up(
       window.document.createElement(name),
-      attrs,
+      attrs as DenormAttrs<HTMLElementTagNameMap[K]>,
       ...children,
     ) as HTMLElementTagNameMap[K];
 

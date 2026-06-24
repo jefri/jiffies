@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { button, table, tbody, td, th, thead, tr } from "./html.ts";
+import type { GlobalAttrs } from "./dom.ts";
+import {
+  button,
+  div,
+  input,
+  label,
+  table,
+  tbody,
+  td,
+  th,
+  thead,
+  tr,
+} from "./html.ts";
 
 describe("html", () => {
   it("creates HTML Elements", () => {
@@ -82,5 +94,39 @@ describe("html", () => {
     assert.ok(btn.classList.contains("test-class"));
     assert.strictEqual(btn.style.flexDirection, "column");
     assert.ok(clicked);
+  });
+
+  it("accepts the GlobalAttrs aliases (data-*, aria-*, for, role) with no cast", () => {
+    // Before the supplemental-attrs typing, none of these keys were named on the
+    // element's own property type, so each call needed a `as` cast to widen the
+    // literal. They are now in every builder's accepted attrs and written
+    // verbatim.
+    const lbl = label({ for: "email" }, "Email");
+    const group = div({ role: "group", "data-value": "galilean" });
+    const field = input({
+      type: "checkbox",
+      "data-var": "--ground",
+      "aria-label": "Background",
+    });
+
+    assert.strictEqual(lbl.getAttribute("for"), "email");
+    assert.strictEqual(group.getAttribute("role"), "group");
+    assert.strictEqual(group.getAttribute("data-value"), "galilean");
+    assert.strictEqual(field.getAttribute("data-var"), "--ground");
+    assert.strictEqual(field.getAttribute("aria-label"), "Background");
+  });
+
+  it("accepts a supplemental attrs type parameter S for extra verbatim keys", () => {
+    // The `S` hook names extra attributes inline without widening every key. Here
+    // a caller declares a bespoke `data-custom` payload via S; the engine writes
+    // it like any other attribute.
+    const el = div<{ "data-custom": string }>({ "data-custom": "x" });
+    assert.strictEqual(el.getAttribute("data-custom"), "x");
+
+    // GlobalAttrs is exported so callers can name the alias set explicitly.
+    const typed: GlobalAttrs = { "data-value": "1", for: "y" };
+    const reuse = div(typed);
+    assert.strictEqual(reuse.getAttribute("data-value"), "1");
+    assert.strictEqual(reuse.getAttribute("for"), "y");
   });
 });

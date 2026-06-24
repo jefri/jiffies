@@ -1,6 +1,7 @@
 "use client"; // Hydrate runs entirely client side.
 
 import {
+  type DenormAttrs,
   isNested,
   isUnit,
   propsFromElement,
@@ -115,13 +116,13 @@ export function start(root?: ParentNode): void {
       if (update) {
         attach(el, update);
         el.replaceChildren();
-        el.update(payload[index]);
+        el.update(payload[index] as DenormAttrs<Element>);
         drainQueue(el);
       }
     } else {
       customElements.whenDefined(el.localName).then(() => {
         el.replaceChildren();
-        el.update(payload[index]);
+        el.update(payload[index] as DenormAttrs<Element>);
         drainQueue(el);
       });
     }
@@ -142,13 +143,13 @@ function startHydrate(root: ParentNode): void {
       const update = getFCC(fc);
       if (update) {
         attach(el, update);
-        el.update(propsFromElement(el));
+        el.update(propsFromElement(el) as DenormAttrs<Element>);
         startHydrate(el);
       }
       continue;
     }
     customElements.whenDefined(el.localName).then(() => {
-      el.update(propsFromElement(el));
+      el.update(propsFromElement(el) as DenormAttrs<Element>);
       startHydrate(el);
     });
   }
