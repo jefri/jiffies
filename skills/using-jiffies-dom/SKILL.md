@@ -1,6 +1,6 @@
 ---
 name: using-jiffies-dom
-description: Use when building or updating UI in a project that depends on @davidsouther/jiffies and you are writing DOM code with its html/svg/fc modules — creating elements, updating a node in place via its .update() method, wiring event handlers, setting class/style, or building stateful FC components. Covers the reentrant create-or-update model and the correct .ts import paths.
+description: Use when building or updating UI in a project that depends on @davidsouther/jiffies.
 ---
 
 # Using Jiffies DOM
@@ -126,6 +126,82 @@ export const Toggle = FC<{ label: string }, { on: boolean }>(
 );
 ```
 
+## FCC: server-rendered, client-hydrated components
+
+`FCC` (containerless functional component) is the third form. Unlike `FC`, it has **no
+custom-element wrapper**: it renders its children directly into a *boundary element* you
+supply, so the markup it produces is plain HTML with no extra host tag. That makes it the
+form to reach for when the page is **server-rendered (SSG) and hydrated on the client** —
+the boundary element exists in the emitted HTML, and hydration re-attaches behaviour to it.
+
+```ts
+import { FCC } from "@davidsouther/jiffies/dom/fc.ts";
+import { div, output } from "@davidsouther/jiffies/dom/html.ts";
+
+const boundary = () => div({ class: "gauge" }); // the FCC's root element
+export const Gauge = FCC<{ value: number }>("gauge", boundary, (_el, attrs) => [
+  output(`${attrs.value}`),
+]);
+```
+
+`FCC(name, boundaryFactory, render)` — `render(el, attrs) => Element | Element[]` returns the
+**children** of the boundary; the boundary itself comes from the factory. Working examples
+live in `fcc.test.ts` and `hydrate.test.ts`.
+
+### Choosing a form
+
+- **Plain reentrant node** (`div(...)` + held reference + `.update()`) — a one-off subtree you
+  build and mutate imperatively from one place. The default; reach for it first.
+- **`FC`** — a reusable component that owns state and re-renders from props, where an extra
+  custom-element host tag in the DOM is acceptable.
+- **`FCC`** — a reusable component whose markup must be server-rendered and hydrated, or where
+  a wrapper element is unwanted. SVG components must use the FCC form.  Everything below is FCC-specific and **does not** apply to the
+  other two forms.
+
+### Every prop is written onto the boundary as an attribute
+
+Before `render` runs, an FCC applies its props to the boundary with `setAttribute(key,
+String(value))`. So props must be **DOM-valid attribute values** — strings, numbers, booleans.
+Consequences if you ignore this:
+
+- A **function** prop named `onChange`/`onToggle` lowercases to the `onchange`/`ontoggle`
+  *content attribute*, which jsdom and real browsers compile as a live inline handler the
+  moment a matching event bubbles to the boundary — a hard crash ("Function statements require
+  a function name") or silently wrong execution.
+- An **object/array** prop becomes `"[object Object]"` junk that serializes into the SSG HTML.
+
+Pass dynamic DOM-valid values (`checked`, `value`, `class`) as props; deliver everything else
+another way:
+
+- **Close static config and callbacks over a factory** that returns the FCC — the canonical
+  fix. The factory captures `onChange`, ids, etc.; only DOM values flow as props.
+- **Wire events with the `events:` attr** (special-cased to `addEventListener`, never
+  serialized).
+- **Deliver controller callbacks once via a dedicated `.wire()` method** on the handle (it sets
+  closure holders and touches no attribute).
+- Set form state through the sanctioned **`.value`/`.checked` property assignment**.
+- An unavoidable inert object prop can be dropped in render with `up(el, { state: false })`.
+
+### The `.update()` graft does not survive SSG serialize→reparse
+
+Every node Jiffies builds in-process carries a grafted `.update()` method — a function 
+that **does not serialize**. When the SSG renders the page to an HTML string and the browser
+re-parses it, the resulting elements are brand-new objects with **no `.update()`**. So client
+code that queries a page-emitted element and calls `el.update(...)` — or `el?.update?.(...)`,
+which hides the failure — is a **silent no-op in production**.
+
+Drive raw, page-emitted elements with **`up()`** from `@davidsouther/jiffies/dom/dom.ts`
+instead: `up(el, attrs, ...children)` applies attrs / class tokens (`"!x"` removes) / style /
+`events` / children to *any* raw element, no graft required. In-memory tests that mount the
+page module directly keep the graft and will pass while production is broken — guard the path
+with a **round-trip test** (`outerHTML` → `container.innerHTML = html` → drive the view).
+Client-built FCC handles created at runtime (not page-emitted) legitimately keep `.update()`.
+
+### Constructing an FCC at SSG build time
+
+- Use `window.document` (Jiffies sets `global.window`, not a bare `document`).
+- Guard `getComputedStyle` — it is absent during SSG.
+
 ## Typing nodes
 
 You do not need a Jiffies-specific type to hold a node. Jiffies augments the global DOM
@@ -199,3 +275,9 @@ describe("counter", () => {
   `getAttribute`, not `getAttributeNS`.
 - **Copying README examples verbatim.** The package README snippets are illustrative and not
   all valid TypeScript; rely on this skill and the `*.test.ts` files for working code.
+- **Passing a callback or object as an FCC prop.** Every FCC prop is `setAttribute`'d onto the
+  boundary; a function becomes a live `onchange`/`ontoggle` handler (crash) and an object
+  becomes `"[object Object]"`. Close them over a factory, or use `events:` / `.wire()`.
+- **Calling `.update()` on a page-emitted (SSG-reparsed) element.** The graft did not survive
+  serialization; the call is a silent no-op. Use `up()` on raw elements and guard with a
+  round-trip test.
