@@ -7,6 +7,13 @@ import { DEFAULT_LOGGER, type Logger } from "./log.ts";
  * const listing = await sh.ls("-la");
  * const status = await git.status({ short: true });
  * const pick = await git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
+ *
+ * // -c selects Docker's context, run's CPU shares, then a Postgres setting.
+ * const db = await sh.docker.$({ c: "dev" }).run.$({
+ *   d: true,
+ *   c: 512,
+ *   e: { POSTGRES_PASSWORD: "dev" },
+ * })("postgres:16", "postgres", "-c", "shared_buffers=256MB");
  * ```
  *
  * Property access appends a command segment, a call appends arguments and returns
