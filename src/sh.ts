@@ -4,24 +4,35 @@ import { DEFAULT_LOGGER, type Logger } from "./log.ts";
  * Fluent shell commands.
  *
  * ```ts
+ * // Get a file listing using the `ls` command.
  * const listing = await sh.ls("-la");
+ * 
+ * // Call `git` in the working directory of the process
+ * const status = await sh.git.status({ short: true });
+ * const pick = await sh.git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
+ * 
+ * // Using the memoized `git` caller
  * const status = await git.status({ short: true });
  * const pick = await git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
  *
- * // -c selects Docker's context, run's CPU shares, then sh's command.
- * // Assumes a Postgres server named db on the dev Docker network.
- * const selected = await sh.docker.$({ c: "dev" }).run.$({
+ * // Call `docker` using positional arguments.
+ * const selected = await sh.docker
+ * .$({ c: "dev" }) // Pass docker context
+ * .run.$({ // set `docker run` arguments
  *   i: true,
  *   rm: true,
  *   c: 512,
  *   network: "dev",
  *   e: { PGPASSWORD: "dev" },
- * })(
+ * }) 
+ * ( // a full argv for inside docker
  *   "postgres:16",
  *   "sh",
  *   "-c",
  *   "exec psql -h db -U postgres -d postgres -v ON_ERROR_STOP=1 -f -",
- * ).with({ input: "SELECT current_database();\n" });
+ * )
+ * // and pipe input
+ * .with({ input: "SELECT current_database();\n" });
  * ```
  *
  * Property access appends a command segment, a call appends arguments and returns

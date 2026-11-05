@@ -11,8 +11,8 @@ JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulle
 
 Jiffies also includes several microframeworks.
 
+- `sh` - streamlined, idiomatic, safe shell wrappers.
 - `dom` - a tiny DOM functional library.
-- `scope` - JavaScript testing microframework.
 - `server` - Node HTTP Server & middleware.
 
 ## Development
