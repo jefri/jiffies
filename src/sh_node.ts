@@ -1,10 +1,25 @@
 import { spawn } from "node:child_process";
 import { constants } from "node:os";
-import { CommandTimeout, type Runner } from "./sh.ts";
+import {
+  CommandTimeout,
+  type Completed,
+  type CompletedFor,
+  type CompletedWithCapture,
+  type RunRequest,
+} from "./sh.ts";
 
 /** The runner that launches real subprocesses. */
-export const nodeRunner: Runner = ({ args, capture, cwd, input, timeout }) =>
-  new Promise((resolve, reject) => {
+export function nodeRunner<Capture extends boolean>(
+  request: RunRequest<Capture>,
+): Promise<CompletedFor<Capture>>;
+export function nodeRunner({
+  args,
+  capture,
+  cwd,
+  input,
+  timeout,
+}: RunRequest): Promise<Completed | CompletedWithCapture> {
+  return new Promise((resolve, reject) => {
     const [command, ...rest] = args;
     if (command === undefined) {
       reject(new TypeError("Cannot run an empty command"));
@@ -37,7 +52,8 @@ export const nodeRunner: Runner = ({ args, capture, cwd, input, timeout }) =>
         ? undefined
         : setTimeout(() => {
             timedOut = true;
-            child.kill();
+            // Enforce the timeout even if the command handles SIGTERM.
+            child.kill("SIGKILL");
           }, timeout * 1000);
     child.on("error", (error) => {
       clearTimeout(timer);
@@ -51,6 +67,9 @@ export const nodeRunner: Runner = ({ args, capture, cwd, input, timeout }) =>
       }
       // Like Python's subprocess, a signal death is the negated signal number.
       const returncode = code ?? -(signal ? constants.signals[signal] : 1);
-      resolve({ args, returncode, stdout, stderr });
+      resolve(
+        capture ? { args, returncode, stdout, stderr } : { args, returncode },
+      );
     });
   });
+}

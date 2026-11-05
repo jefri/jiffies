@@ -22,7 +22,9 @@ Do not wrap calls in an `exec()` helper that maps errors, supplies stdin, or tol
 
 - `Sh` is an immutable command prefix: `git`, `sh` (empty prefix), or `Sh("docker")`. Every property access returns a new `Sh`.
 - Calling an `Sh` returns a lazy `Run`. It executes once, on first use, and caches.
-- `await run` resolves to stdout. `await run.stdout`, `.stderr`, `.returncode`, and `.completed` (all of them) are promises.
+- With capture enabled (the default), `await run` resolves to stdout, and `.stdout`/`.stderr` are promises of captured text. `.completed` resolves to `CompletedWithCapture` (`args`, `returncode`, `stdout`, `stderr`).
+- With `capture: false`, `await run` and `.completed` resolve to `Completed` (`args`, `returncode`); `.stdout`/`.stderr` are unavailable. `.returncode` is a promise on every run.
+- `.then()`, `.catch()`, and `.finally()` use the same cached execution. Capture types follow command segments, `clone()`, `.with()`, and the target of `.pipe()`. A dynamic boolean requires narrowing with `instanceof RunWithCapture` before accessing output or piping.
 - With the default `check: true`, every read rejects with `CommandFailed` on a nonzero exit. The error carries `command`, `returncode`, `stdout`, and `stderr`.
 - Reserved keys: `$`, `then`, `toJSON`. Every other name is a command segment.
 
@@ -62,7 +64,7 @@ Set them with `.with(...)` before reading. `.with` returns a new `Run` and does 
 | `cwd` | Working directory |
 | `timeout` | Seconds, floats allowed; rejects with `CommandTimeout`, and a timed-out run is not cached |
 | `input` | Text for stdin |
-| `capture: false` | Pass output through to this process; `stdout`/`stderr` are `""` |
+| `capture: false` | Pass output through to this process; return the completion record without stdout/stderr |
 
 ```ts
 const code = await git["cherry-pick"]("abc123").with({ check: false }).returncode;
@@ -78,7 +80,7 @@ const out = await sh.cat().with({ input: "from stdin\n" });
 const hit = await sh.printf("hello\nworld\n").pipe(sh.grep("world")); // "world\n"
 ```
 
-`a.pipe(b)` is lazy: it returns `b`, which receives `a`'s stdout when read. If `a` fails, `b` rejects without running.
+`a.pipe(b)` requires a capturing source and returns a lazy copy of `b`, preserving its capture setting. The copy reads `a`'s stdout as stdin; a source failure prevents the target from running. Use `.with({ capture: true })` to create a capturing source explicitly.
 
 ## Derived shells and settings
 
@@ -109,7 +111,7 @@ const tool = Sh("tool", { runner: fake });
 await tool.deploy({ env: "prod" }); // "ok"; calls[0] is ["tool", "deploy", "--env=prod"]
 ```
 
-`makeRunner` returns `Output` (`returncode`, `stdout`, `stderr`, each optional) and applies `capture`. `withExitCode(n)`, `TrueRunner`, and `FalseRunner` return an exit code with no output. `Run` raises `CommandFailed` for them under `check`, so these also exercise failure handling.
+`makeRunner` adapts a callback returning `Output` (`returncode`, `stdout`, `stderr`, each optional) into a `Runner` and applies `capture`. `withExitCode(n)`, `TrueRunner`, and `FalseRunner` return an exit code with empty captured output, or no output fields when capture is disabled. `Run` raises `CommandFailed` for them under `check`, so these also exercise failure handling.
 
 ## Instead of child_process
 

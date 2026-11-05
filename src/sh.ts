@@ -1,7 +1,7 @@
 import { DEFAULT_LOGGER, type Logger } from "./log.ts";
 
 /**
- * Fluent shell commands. A port of Python's `shgit`.
+ * Fluent shell commands.
  *
  * ```ts
  * const listing = await sh.ls("-la");
@@ -74,18 +74,26 @@ function renderArgs(args: readonly Arg[]): string[] {
 
 // ── Results, errors, and runners ────────────────────────────────────────────
 
-/** The outcome of a finished command. `stdout` and `stderr` are `""` when not captured. */
+/** The outcome of a finished command. */
 export interface Completed {
   args: readonly string[];
   returncode: number;
+}
+
+/** A finished command whose output was captured. */
+export interface CompletedWithCapture extends Completed {
   stdout: string;
   stderr: string;
 }
 
+export type CompletedFor<Capture extends boolean> = Capture extends true
+  ? CompletedWithCapture
+  : Completed;
+
 /** Everything a {@link Runner} is asked to execute. `input` and `timeout` are absent unless set. */
-export interface RunRequest {
+export interface RunRequest<Capture extends boolean = boolean> {
   args: readonly string[];
-  capture: boolean;
+  capture: Capture;
   cwd: string | URL;
   input?: string;
   /** Seconds, possibly fractional. */
@@ -96,7 +104,9 @@ export interface RunRequest {
  * Executes a command. A runner reports the exit code and never checks it; the
  * `Run` raises {@link CommandFailed} when `check` is set.
  */
-export type Runner = (request: RunRequest) => Completed | Promise<Completed>;
+export type Runner = <Capture extends boolean>(
+  request: RunRequest<Capture>,
+) => CompletedFor<Capture> | Promise<CompletedFor<Capture>>;
 
 /** Supplies a {@link Runner} on first use, so a host-specific one can be loaded lazily. */
 export type RunnerFactory = () => Runner | Promise<Runner>;
@@ -129,7 +139,7 @@ export class CommandFailed extends Error {
   readonly stdout: string;
   readonly stderr: string;
 
-  constructor(completed: Completed) {
+  constructor(completed: Completed | CompletedWithCapture) {
     const command = completed.args.map(quote).join(" ");
     super(
       `Command '${command}' returned non-zero exit status ${completed.returncode}.`,
@@ -137,8 +147,8 @@ export class CommandFailed extends Error {
     this.name = "CommandFailed";
     this.command = command;
     this.returncode = completed.returncode;
-    this.stdout = completed.stdout;
-    this.stderr = completed.stderr;
+    this.stdout = "stdout" in completed ? completed.stdout : "";
+    this.stderr = "stderr" in completed ? completed.stderr : "";
   }
 }
 
@@ -176,20 +186,34 @@ export type RunnerCallback = (
 
 /** Adapt a callback into a {@link Runner}; the adapter applies `capture`. */
 export function makeRunner(callback: RunnerCallback): Runner {
-  return async ({ args, capture, cwd, input }) => {
+  function runner<Capture extends boolean>(
+    request: RunRequest<Capture>,
+  ): Promise<CompletedFor<Capture>>;
+  async function runner({
+    args,
+    capture,
+    cwd,
+    input,
+  }: RunRequest): Promise<Completed | CompletedWithCapture> {
     const output = await callback(args, cwd, input);
-    return {
+    const completed: Completed = {
       args,
       returncode: output.returncode ?? 0,
-      stdout: capture ? (output.stdout ?? "") : "",
-      stderr: capture ? (output.stderr ?? "") : "",
     };
-  };
+    return capture
+      ? {
+          ...completed,
+          stdout: output.stdout ?? "",
+          stderr: output.stderr ?? "",
+        }
+      : completed;
+  }
+  return runner;
 }
 
 /** A runner that exits with a fixed code and prints nothing. */
 export function withExitCode(returncode: number): Runner {
-  return ({ args }) => ({ args, returncode, stdout: "", stderr: "" });
+  return makeRunner(() => ({ returncode }));
 }
 
 export const TrueRunner: Runner = withExitCode(0);
@@ -197,11 +221,11 @@ export const FalseRunner: Runner = withExitCode(1);
 
 // ── Run ─────────────────────────────────────────────────────────────────────
 
-export interface Settings {
+export interface Settings<Capture extends boolean = boolean> {
   /** Reject with {@link CommandFailed} on a nonzero exit. Default `true`. */
   check: boolean;
   /** Capture stdout and stderr; otherwise they pass through to this process. Default `true`. */
-  capture: boolean;
+  capture: Capture;
   /** Working directory. Default `"."`. */
   cwd: string | URL;
   /** Log each command, shell-quoted, when its `Run` is created. Default `false`. */
@@ -255,26 +279,37 @@ export interface CheckOptions {
   reraise?: boolean;
 }
 
-interface RunState {
+interface RunState<Capture extends boolean = boolean> {
   args: readonly string[];
-  settings: Settings;
-  input: string | PromiseLike<string> | undefined;
+  settings: Settings<Capture>;
+  input: string | PromiseLike<string> | (() => Promise<string>) | undefined;
 }
+
+type RunValue<Capture extends boolean> = Capture extends true
+  ? string
+  : Completed;
+
+export type RunFor<Capture extends boolean> = Capture extends true
+  ? RunWithCapture
+  : Run<false>;
 
 /**
  * A command that has not necessarily run yet. It executes once, on first use, and
  * caches its result; a timed-out or failed-to-launch command is not cached.
  *
- * A `Run` is awaitable and resolves to stdout, so `await sh.ls()` is the common
- * case. Read `.stdout`, `.stderr`, `.returncode`, or `.completed` for more. With
+ * A `Run` resolves to stdout when capturing, or the completion record otherwise.
+ * Every run exposes `.returncode` and `.completed`; {@link RunWithCapture} also
+ * exposes `.stdout` and `.stderr`. With
  * `check` set (the default) every read rejects with {@link CommandFailed} on a
  * nonzero exit; use `.with({ check: false })` when the exit code is data.
  */
-export class Run implements PromiseLike<string> {
-  readonly #state: RunState;
-  #result: Promise<Completed> | undefined;
+export class Run<Capture extends boolean = boolean>
+  implements PromiseLike<RunValue<Capture>>
+{
+  readonly #state: RunState<Capture>;
+  #result: Promise<CompletedFor<Capture>> | undefined;
 
-  constructor(state: RunState) {
+  constructor(state: RunState<Capture>) {
     this.#state = state;
   }
 
@@ -293,24 +328,32 @@ export class Run implements PromiseLike<string> {
   }
 
   /** A copy of this command with per-run settings changed; it has not run. */
-  with(options: RunOptions): Run {
+  with<Next extends boolean>(
+    options: RunOptions & { capture: Next },
+  ): RunFor<Next>;
+  with(options: RunOptions & { capture?: undefined }): RunFor<Capture>;
+  with(options: RunOptions): RunFor<boolean>;
+  with(options: RunOptions): RunFor<boolean> {
     const { input, ...settings } = options;
-    return new Run({
+    return createRun({
       ...this.#state,
       settings: merge(this.#state.settings, settings),
       input: input ?? this.#state.input,
     });
   }
 
-  /** Feed this command's stdout to `next`'s stdin; returns `next`, still lazy. */
-  pipe(next: Run): Run {
-    const source = this.#state.settings.capture
-      ? this
-      : this.with({ capture: true });
-    return new Run({ ...next.#state, input: source.stdout });
+  /** Feed captured stdout to a lazy copy of `next`, preserving its capture setting. */
+  // Keep capture inference when declaration emit erases the private state.
+  pipe(this: Run<true>, next: Run<true>): RunWithCapture;
+  pipe<Next extends boolean>(this: Run<true>, next: Run<Next>): RunFor<Next>;
+  pipe<Next extends boolean>(this: Run<true>, next: Run<Next>): RunFor<Next> {
+    return createRun({
+      ...next.#state,
+      input: async () => (await this.completed).stdout,
+    });
   }
 
-  get completed(): Promise<Completed> {
+  get completed(): Promise<CompletedFor<Capture>> {
     return this.#execute().then((completed) => {
       if (this.#state.settings.check && completed.returncode !== 0) {
         throw new CommandFailed(completed);
@@ -319,24 +362,35 @@ export class Run implements PromiseLike<string> {
     });
   }
 
-  get stdout(): Promise<string> {
-    return this.completed.then((completed) => completed.stdout);
-  }
-
-  get stderr(): Promise<string> {
-    return this.completed.then((completed) => completed.stderr);
-  }
-
   get returncode(): Promise<number> {
     return this.completed.then((completed) => completed.returncode);
   }
 
-  // biome-ignore lint/suspicious/noThenProperty: a Run is deliberately awaitable; it resolves to stdout.
-  then<A = string, B = never>(
-    onfulfilled?: ((stdout: string) => A | PromiseLike<A>) | null,
+  // biome-ignore lint/suspicious/noThenProperty: a Run is deliberately awaitable.
+  then<A = RunValue<Capture>, B = never>(
+    onfulfilled?: ((value: RunValue<Capture>) => A | PromiseLike<A>) | null,
     onrejected?: ((reason: unknown) => B | PromiseLike<B>) | null,
   ): Promise<A | B> {
-    return this.stdout.then(onfulfilled, onrejected);
+    return this.#value().then(onfulfilled, onrejected);
+  }
+
+  catch<B = never>(
+    onrejected?: ((reason: unknown) => B | PromiseLike<B>) | null,
+  ): Promise<RunValue<Capture> | B> {
+    return this.#value().catch(onrejected);
+  }
+
+  finally(onfinally?: (() => void) | null): Promise<RunValue<Capture>> {
+    return this.#value().finally(onfinally);
+  }
+
+  async #value(): Promise<RunValue<Capture>> {
+    const completed: Completed | CompletedWithCapture = await this.completed;
+    return (
+      this.#state.settings.capture && "stdout" in completed
+        ? completed.stdout
+        : completed
+    ) as RunValue<Capture>;
   }
 
   /**
@@ -349,8 +403,8 @@ export class Run implements PromiseLike<string> {
     event,
     logger = this.#state.settings.logger,
     reraise = true,
-  }: CheckOptions = {}): Promise<Completed | undefined> {
-    let completed: Completed | undefined;
+  }: CheckOptions = {}): Promise<CompletedFor<Capture> | undefined> {
+    let completed: CompletedFor<Capture> | undefined;
     try {
       completed = await this.#execute();
       if (completed.returncode !== 0) throw new CommandFailed(completed);
@@ -359,20 +413,21 @@ export class Run implements PromiseLike<string> {
       logger.warn(event ?? this.command, {
         cwd: this.cwd,
         command: this.command,
-        stdout: completed?.stdout ?? null,
-        stderr: completed?.stderr ?? null,
+        stdout: completed && "stdout" in completed ? completed.stdout : null,
+        stderr: completed && "stderr" in completed ? completed.stderr : null,
       });
       if (reraise) throw error;
       return undefined;
     }
   }
 
-  #execute(): Promise<Completed> {
+  #execute(): Promise<CompletedFor<Capture>> {
     this.#result ??= (async () => {
       const { capture, cwd, timeout } = this.#state.settings;
+      const pendingInput = this.#state.input;
       const [runner, input] = await Promise.all([
         resolveRunner(this.#state.settings),
-        this.#state.input,
+        typeof pendingInput === "function" ? pendingInput() : pendingInput,
       ]);
       return runner({
         args: this.#state.args,
@@ -389,6 +444,32 @@ export class Run implements PromiseLike<string> {
   }
 }
 
+/** A run that captures output; awaiting it resolves to stdout. */
+export class RunWithCapture extends Run<true> {
+  get stdout(): Promise<string> {
+    return this.completed.then((completed) => completed.stdout);
+  }
+
+  get stderr(): Promise<string> {
+    return this.completed.then((completed) => completed.stderr);
+  }
+}
+
+function createRun<Capture extends boolean>(
+  state: RunState<Capture>,
+): RunFor<Capture>;
+function createRun(state: RunState): RunFor<boolean> {
+  return state.settings.capture
+    ? new RunWithCapture({
+        ...state,
+        settings: { ...state.settings, capture: true },
+      })
+    : new Run<false>({
+        ...state,
+        settings: { ...state.settings, capture: false },
+      });
+}
+
 // ── Sh ──────────────────────────────────────────────────────────────────────
 
 /**
@@ -400,25 +481,26 @@ export class Run implements PromiseLike<string> {
  *
  * `$`, `then`, and `toJSON` are reserved; every other name is a segment.
  */
-export type Sh = ShCall & ShSegments & { readonly [segment: string]: Sh };
+export type Sh<Capture extends boolean = true> = ShCall<Capture> &
+  ShSegments<Capture> & { $(...segments: Arg[]): Sh<Capture> };
 
-type ShCall = (...args: Arg[]) => Run;
+type ShCall<Capture extends boolean> = (...args: Arg[]) => RunFor<Capture>;
 
-interface ShSegments {
-  $(...segments: Arg[]): Sh;
+interface ShSegments<Capture extends boolean> {
+  readonly [segment: string]: Sh<Capture>;
 }
 
-interface ShState {
+interface ShState<Capture extends boolean = boolean> {
   args: readonly string[];
-  settings: Settings;
+  settings: Settings<Capture>;
 }
 
 const states = new WeakMap<object, ShState>();
 
-function build(state: ShState): Sh {
+function build<Capture extends boolean>(state: ShState<Capture>): Sh<Capture> {
   const proxy = new Proxy(() => {}, {
     apply(_target, _this, args: Arg[]) {
-      const run = new Run({
+      const run = createRun({
         args: [...state.args, ...renderArgs(args)],
         settings: state.settings,
         input: undefined,
@@ -435,44 +517,76 @@ function build(state: ShState): Sh {
       }
       return extend(state, [key]);
     },
-  }) as unknown as Sh;
+  }) as unknown as Sh<Capture>;
   states.set(proxy, state);
   return proxy;
 }
 
-function extend(state: ShState, segments: string[]): Sh {
+function extend<Capture extends boolean>(
+  state: ShState<Capture>,
+  segments: string[],
+): Sh<Capture> {
   return build({ ...state, args: [...state.args, ...segments] });
 }
 
-/** Create a shell, optionally starting from a command. */
-export function Sh(
+function createShell<Capture extends boolean>(
+  command: string | readonly string[] | undefined,
+  settings: Partial<Settings> & { capture: Capture },
+): Sh<Capture>;
+function createShell(
+  command?: string | readonly string[],
+  settings?: Partial<Settings> & { capture?: undefined },
+): Sh<true>;
+function createShell(
+  command: string | readonly string[] | undefined,
+  settings: Partial<Settings>,
+): Sh<boolean>;
+function createShell(
   command?: string | readonly string[],
   settings: Partial<Settings> = {},
-): Sh {
+): Sh<boolean> {
   return build({
     args: typeof command === "string" ? [command] : [...(command ?? [])],
     settings: merge(DEFAULTS, settings),
   });
 }
 
-function stateOf(shell: Sh): ShState {
+/** Create a shell, optionally starting from a command. */
+export const Sh = createShell;
+
+function stateOf(shell: Sh<boolean>): ShState {
   const state = states.get(shell);
   if (!state) throw new TypeError("Not an Sh");
   return state;
 }
 
 /** The arguments accumulated so far. */
-export function argsOf(shell: Sh): readonly string[] {
+export function argsOf(shell: Sh<boolean>): readonly string[] {
   return stateOf(shell).args;
 }
 
 /** The settings of a shell. */
-export function settingsOf(shell: Sh): Readonly<Settings> {
+export function settingsOf(shell: Sh<boolean>): Readonly<Settings> {
   return stateOf(shell).settings;
 }
 
 /** Another shell with the same arguments and the given settings replaced. */
-export function clone(shell: Sh, settings: Partial<Settings>): Sh {
+export function clone<Original extends boolean, Capture extends boolean>(
+  shell: Sh<Original>,
+  settings: Partial<Settings> & { capture: Capture },
+): Sh<Capture>;
+export function clone<Capture extends boolean>(
+  shell: Sh<Capture>,
+  settings: Partial<Settings> & { capture?: undefined },
+): Sh<Capture>;
+export function clone(
+  shell: Sh<boolean>,
+  settings: Partial<Settings>,
+): Sh<boolean>;
+export function clone(
+  shell: Sh<boolean>,
+  settings: Partial<Settings>,
+): Sh<boolean> {
   const state = stateOf(shell);
   return build({ ...state, settings: merge(state.settings, settings) });
 }
