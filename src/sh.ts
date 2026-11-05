@@ -8,17 +8,25 @@ import { DEFAULT_LOGGER, type Logger } from "./log.ts";
  * const status = await git.status({ short: true });
  * const pick = await git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
  *
- * // -c selects Docker's context, run's CPU shares, then a Postgres setting.
- * const db = await sh.docker.$({ c: "dev" }).run.$({
- *   d: true,
+ * // -c selects Docker's context, run's CPU shares, then sh's command.
+ * // Assumes a Postgres server named db on the dev Docker network.
+ * const selected = await sh.docker.$({ c: "dev" }).run.$({
+ *   i: true,
+ *   rm: true,
  *   c: 512,
- *   e: { POSTGRES_PASSWORD: "dev" },
- * })("postgres:16", "postgres", "-c", "shared_buffers=256MB");
+ *   network: "dev",
+ *   e: { PGPASSWORD: "dev" },
+ * })(
+ *   "postgres:16",
+ *   "sh",
+ *   "-c",
+ *   "exec psql -h db -U postgres -d postgres -v ON_ERROR_STOP=1 -f -",
+ * ).with({ input: "SELECT current_database();\n" });
  * ```
  *
  * Property access appends a command segment, a call appends arguments and returns
  * a lazy {@link Run}, and nothing executes until the `Run` is awaited or one of its
- * outputs is read. Commands never go through a shell.
+ * outputs is read. Arguments are passed directly to the executable.
  */
 
 // ── Options and arguments ───────────────────────────────────────────────────
