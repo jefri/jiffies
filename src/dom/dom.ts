@@ -118,7 +118,7 @@ export type DomAttrs = {
 
 /**
  * Jiffies intrinsic DataSet attributes.
- * 
+ *
  * DOM types don't include data- and aria- properties, they come from JSX intrinsics.
  */
 export type GlobalAttrs = {
