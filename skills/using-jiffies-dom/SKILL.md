@@ -1,5 +1,4 @@
 ---
-
 name: using-jiffies-dom
 description: Use when building or updating UI in a project that depends on @davidsouther/jiffies.
 ---
@@ -21,6 +20,10 @@ To update a node later, you must **keep a reference to it** and call `.update()`
 Calling the tag function again does not update the old node; it builds a new one.
 
 > Ideally, the object returned from the tag function would itself be directly callable, so instead of `const el = div({'class': 'off'}); el.update({'class': 'on'});`, you could just do `const el = div({'class': 'off'}); el({'class': 'on})';`. This is possible by wrapping the returned `HTMLDivElement` in a `Proxy` that implements a call interceptor, but `Proxy` cannot be passed to DOM APIs like appendChildren or addEventListener.
+
+Prefer Jiffies APIs over raw DOM calls throughout. Use tag functions instead of
+`createElement`, `events:` instead of `addEventListener`, and `.update()` instead of
+`setAttribute`, `classList`, `style`, `innerHTML`, or `textContent`.
 
 ## Import paths (get this right first)
 
@@ -46,19 +49,25 @@ are re-exported from `dom/index.ts`; reach `svg`, `observable`, `router`, `provi
 
 ## Quick reference
 
-| You want to…             | Do this                                                                          |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| Create an element        | `div(attrs?, ...children)` — first arg is attrs only if a plain object           |
-| Update a node in place   | hold a reference to the node, then call `node.update(attrs?, ...children)`       |
-| Set children only        | `node.update("new text")` or `node.update(child1, child2)`                       |
-| Empty children           | `import { CLEAR } from ".../dom/dom.ts"; node.update(CLEAR)`                     |
-| Add an event             | `button({ events: { click: (e) => {...} } })`                                    |
-| Replace an event handler | `node.update({ events: { click: newHandler } })` — old listener is removed first |
-| Remove an event          | `node.update({ events: { click: null } })`                                       |
-| Set a class              | `div({ class: "a b" })` or `{ class: ["a", "b"] }`                               |
-| Remove a class on update | `node.update({ class: "!hidden" })` (`!` prefix removes)                         |
-| Inline style             | `{ style: { flexDirection: "column" } }` or `{ style: "color:red" }`             |
-| Boolean attribute        | `{ disabled: true }` (falsy removes the attribute)                               |
+| You want to…              | Do this                                                                          | Instead of this                                                      |
+| ------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Create an element         | `div(attrs?, ...children)` (first arg is attrs only if a plain object)           | `document.createElement("div")` plus `setAttribute` and `append`     |
+| Update a node in place    | hold a reference to the node, then call `node.update(attrs?, ...children)`       | `node.setAttribute(...)`, `node.textContent = ...`, re-calling `div` |
+| Set children only         | `node.update("new text")` or `node.update(child1, child2)`                       | `node.innerHTML = ...`, `node.textContent = ...`, `node.append(...)` |
+| Empty children            | `import { CLEAR } from ".../dom/dom.ts"; node.update(CLEAR)`                     | `node.innerHTML = ""`, `node.replaceChildren()`, `removeChild` loops |
+| Add an event              | `button({ events: { click: (e) => {...} } })`                                    | `button.addEventListener("click", ...)`, `onclick = ...`             |
+| Replace an event handler  | `node.update({ events: { click: newHandler } })` (old listener is removed first) | `removeEventListener` plus `addEventListener`, stacked listeners     |
+| Remove an event           | `node.update({ events: { click: null } })`                                       | `node.removeEventListener("click", saved)` with a saved reference    |
+| Set a class               | `div({ class: "a b" })` or `{ class: ["a", "b"] }`                               | `el.className = ...`, `el.classList.add(...)`                        |
+| Remove a class on update  | `node.update({ class: "!hidden" })` (`!` prefix removes)                         | `el.classList.remove("hidden")`                                      |
+| Inline style              | `{ style: { flexDirection: "column" } }` or `{ style: "color:red" }`             | `el.style.color = ...`, `el.style.cssText = ...`                     |
+| Boolean attribute         | `{ disabled: true }` (falsy removes the attribute)                               | `el.setAttribute("disabled", "")`, `el.removeAttribute("disabled")`  |
+| Drive a page-emitted node | `up(el, attrs, ...children)` from `.../dom/dom.ts`                               | `el.update(...)` (absent after SSG reparse), raw DOM mutation        |
+
+Raw DOM APIs bypass Jiffies bookkeeping. In particular, a listener added with
+`addEventListener` is invisible to `events:`, so a later `update({ events })` cannot remove or
+replace it, and it will fire alongside the new handler. Reach for a raw DOM API only when
+Jiffies has no equivalent, such as `focus()`, `scrollIntoView()`, or reading layout.
 
 ## The argument rule (common error source)
 
@@ -198,7 +207,7 @@ another way:
 - **Close static config and callbacks over a factory** that returns the FCC — the canonical
   fix. The factory captures `onChange`, ids, etc.; only DOM values flow as props.
 - **Wire events with the `events:` attr** (special-cased to `addEventListener`, never
-  serialized).
+  serialized). Do not call `addEventListener` on the boundary yourself.
 - **Deliver controller callbacks once via a dedicated `.wire()` method** on the handle (it sets
   closure holders and touches no attribute).
 - Set form state through the sanctioned **`.value`/`.checked` property assignment**.
@@ -287,6 +296,15 @@ describe("counter", () => {
 - **Expecting event handlers to stack.** Calling `node.update({ events: { click: newFn } })`
   removes the old listener before adding the new one. Each event key tracks exactly one
   listener; the last one set is the one that fires.
+- **Using `addEventListener` or `onclick`.** Handlers attached this way are untracked, so
+  `update({ events })` cannot replace or remove them and they stack with Jiffies handlers.
+  Pass `events: { click: fn }` at creation and `update({ events })` afterward.
+- **Mutating nodes with raw DOM APIs.** `innerHTML`, `textContent`, `setAttribute`,
+  `classList`, `style.x = ...`, `append`, and `replaceChildren` skip child reconciliation and
+  event tracking, and `innerHTML` discards node identity, focus, and listeners. Use
+  `node.update(...)`, `CLEAR`, or `up()` instead.
+- **Building nodes with `document.createElement`.** Use a tag function so the node carries
+  `.update()`.
 - **Importing `jiffies/dom/html`.** Use `@davidsouther/jiffies/dom/html.ts` (full name, `.ts`).
 - **Passing a config object as the first child.** A plain object becomes attrs; wrap text/nodes
   as children explicitly.
