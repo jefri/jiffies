@@ -1,9 +1,10 @@
 /**
  * Cut CalVer releases of the npm packages in a repository, for a single package or
- * an npm-workspaces monorepo. Used by `jiffies-release stamp` (see `release_cli.ts`).
+ * an npm-workspaces monorepo.
  *
  * For each public package, in order:
- *   1. with `ifChanged`, skip it unless its shipped paths changed since its last tag,
+ *   1. with `ifChanged`, skip it unless its shipped paths changed since its last tag
+ *      (a package with no tag yet is always released),
  *   2. compute the next version ({@link nextVersion}) from its tags and package.json,
  *   3. write the version to its package.json,
  *   4. when `commit` is on, commit it (`chore(release): <version>`),
@@ -18,7 +19,10 @@
  *
  * - `shipped`: paths whose changes warrant a release; default is the package directory.
  * - `commit`: commit the version bump; default `true` for a root package and `false`
- *   for a workspace package (its tags alone record the release).
+ *   for a workspace package. With `false` the bump is still written to package.json for
+ *   publishing but is left uncommitted, so the tag marks the commit that was released
+ *   and the working tree is dirty afterward. That suits a fresh CI checkout; a second
+ *   local run fails the clean-tree check until the change is discarded.
  *
  * Tags are `v<version>` for a root package and `<dir>-v<version>` for a workspace.
  * Publishing authenticates with npm Trusted Publishing in CI (see `npm_trust.ts`).
@@ -41,7 +45,7 @@ export interface ReleasePackage {
   config: ReleaseConfig;
 }
 
-/** What the release functions need from their host. All but `fs` and `root` are optional. */
+/** What the release functions need from their host. */
 export interface ReleaseEnv {
   fs: FileSystem;
   /** The repository root, used as the working directory for commands. */
@@ -118,7 +122,7 @@ export async function discoverPackages(
   return found.filter((pkg) => pkg !== undefined);
 }
 
-/** `v` for the root package; `<dir>-v` for a workspace package. */
+/** `v` for the root package; `<dir>-v` for a workspace, with each `/` in `dir` written as `-`. */
 export function tagPrefix(dir: string): string {
   return dir === "." ? "v" : `${dir.replaceAll("/", "-")}-v`;
 }
@@ -164,8 +168,9 @@ async function step(
 }
 
 /**
- * Cut releases for every public package in the repository. Returns the tags
- * created, which is empty when nothing needed releasing.
+ * Cut releases for every public package in the repository. Returns the release tags,
+ * which is empty when nothing needed releasing. In a dry run they are the tags that
+ * would be created.
  */
 export async function release(env: ReleaseEnv): Promise<string[]> {
   const log = env.log ?? console.log;

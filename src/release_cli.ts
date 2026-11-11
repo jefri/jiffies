@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * jiffies-release: CalVer releases and npm Trusted Publishing setup.
+ * jiffies-release: CalVer releases via npm Trusted Publishing.
  *
  *   jiffies-release stamp [--dry-run] [--if-changed]
  *   jiffies-release trust [--workflow release.yml] [--ref main] [--repo owner/repo]
+ *   jiffies-release --help
  *
- * Run from the repository root. See `release.ts` and `npm_trust.ts`.
+ * Run from the repository root for the to-be-published package.
  */
 import { parseArgs } from "node:util";
 import { NodeFileSystem } from "./fs_node.ts";

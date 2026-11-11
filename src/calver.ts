@@ -1,18 +1,14 @@
 /**
- * CalVer `YYYY.ISO_WEEK.MICRO`, using the ISO 8601 week-numbering year and week.
- * MICRO counts releases within the week, starting at 0, so versions are monotonic
- * and collision-free without depending on the day of the week.
+ * CalVer `YYYY.ISO_WEEK.MICRO`. MICRO counts releases within the week, starting at 0.
+ * {@link nextVersion} continues MICRO from existing candidate versions. The result
+ * does not depend on the day of the week.
  */
 
 const MS_PER_DAY = 86_400_000;
 
 /**
- * The ISO 8601 week-numbering year and week of `date`. The week-numbering year is
- * the year that owns the week's Thursday, which is why it can differ from the
- * calendar year at the boundaries: 2026 starts on a Thursday, so 2026-12-31
- * (Thursday) and 2027-01-01 (Friday) are both week 53 of 2026, while 2027-01-04
- * (Monday) opens week 1 of 2027. Computed in UTC off the local calendar date so a
- * machine's timezone and DST never shift the result.
+ * The ISO 8601 week-numbering year and week of `date`. Computed in UTC off the
+ * local calendar date so timezone and DST never shift the result.
  */
 export function isoWeek(date: Date): { year: number; week: number } {
   const d = new Date(
@@ -30,10 +26,8 @@ export function isoWeek(date: Date): { year: number; week: number } {
 
 /**
  * The next CalVer version after `existing`, for a release cut on `date`. MICRO
- * continues from the highest `existing` version that already names this same ISO
- * `year.week`; otherwise (a new week, or only non-CalVer values like an old semver
- * `0.1.0`) it restarts at 0. `existing` is one version, or every known version,
- * such as release tags.
+ * continues from the highest `existing` version with the given ISO year and week;
+ * otherwise for a new week it restarts at 0.
  */
 export function nextVersion(
   existing: string | readonly string[],

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { FileSystem, ObjectFileSystemAdapter } from "./fs.ts";
-import { repoFromRemote, setupTrust, trustArgs } from "./npm_trust.ts";
+import {
+  repoFromRemote,
+  setupTrust,
+  trustArgs,
+  trustsWorkflow,
+} from "./npm_trust.ts";
 import { makeRunner, type Output } from "./sh.ts";
 
 function machine(answers: Record<string, Output> = {}) {
@@ -66,6 +71,28 @@ describe("trustArgs", () => {
   });
 });
 
+describe("trustsWorkflow", () => {
+  it("matches the exact workflow file, not a longer name containing it", () => {
+    assert.equal(
+      trustsWorkflow("github release.yml Owner/repo", "release.yml"),
+      true,
+    );
+    assert.equal(
+      trustsWorkflow("github .github/workflows/release.yml", "release.yml"),
+      true,
+    );
+    assert.equal(
+      trustsWorkflow("github prerelease.yml Owner/repo", "release.yml"),
+      false,
+    );
+    assert.equal(
+      trustsWorkflow("github release.yml.bak", "release.yml"),
+      false,
+    );
+    assert.equal(trustsWorkflow("", "release.yml"), false);
+  });
+});
+
 describe("setupTrust", () => {
   it("trusts an existing package and triggers the workflow", async () => {
     const { calls, runner } = machine({
@@ -86,7 +113,7 @@ describe("setupTrust", () => {
     assert.ok(!calls.some((c) => c.startsWith("npm publish")));
   });
 
-  it("publishes a placeholder first when the package does not exist", async () => {
+  it("publishes the package as checked out when it does not exist yet", async () => {
     const { calls, runner } = machine({
       ...remote,
       "npm view": { returncode: 1 },
@@ -103,6 +130,15 @@ describe("setupTrust", () => {
     });
     await setupTrust({ fs: fs(), root: ".", runner, log: () => {} });
     assert.ok(calls.includes("npm login --auth-type=web"));
+  });
+
+  it("still trusts release.yml when only a similarly named workflow is trusted", async () => {
+    const { calls, runner } = machine({
+      ...remote,
+      "npm trust list": { stdout: "github prerelease.yml Owner/repo" },
+    });
+    await setupTrust({ fs: fs(), root: ".", runner, log: () => {} });
+    assert.ok(calls.some((c) => c.startsWith("npm trust github @s/a")));
   });
 
   it("skips a package that already trusts the workflow", async () => {

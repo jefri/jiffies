@@ -9,7 +9,7 @@
 
 Runs `node src/release_cli.ts stamp --if-changed`, the same tool as `npm run stamp` (see `src/release.ts`). It:
 
-1. Skips the release if no commits touched `src`, `LICENSE`, or `README.md` since the latest `v*` tag. A version bump touches only `package.json`, so it never triggers another release.
+1. Skips the release if no commits touched `src`, `LICENSE`, or `README.md` since the latest `v*` tag. The release tag lands on the bump commit, so a bump never counts as a change since the last tag.
 2. Computes a calver version `YYYY.ISO_WEEK.MICRO` (see `src/calver.ts`), writes it to `package.json`, and commits `chore(release): <version>`.
 3. Tags `v<version>` and pushes the commit and tag to `main` as `github-actions[bot]`.
 4. Runs `npm publish --access public`, which builds `lib/` through `prepublishOnly`.

@@ -12,12 +12,6 @@ Versions follow a `year.week.release` scheme (e.g. `2026.4.1`).
   Jiffies now releases itself with it (`scripts/stamp.ts` and `scripts/npm-trust.ts`
   are gone). Includes the `using-jiffies-release` skill.
 
-### Fixed
-
-- Release tooling called `npm.whoami.with({ check: false })`, which runs
-  `npm whoami with`, so the exit code was never treated as data. It now calls
-  `npm.whoami().with(...)`.
-
 ### Removed
 
 - **Breaking:** removed the `flags` module and its published entry point
