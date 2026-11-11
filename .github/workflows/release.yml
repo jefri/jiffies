@@ -29,4 +29,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       # Bumps the version, tags, pushes, and publishes with npm Trusted Publishing
       # (OIDC, no token). Does nothing if shipped files are unchanged. See .github/README.md.
-      - run: node scripts/stamp.ts --if-changed
+      - run: node src/release_cli.ts stamp --if-changed
