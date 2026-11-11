@@ -6,11 +6,11 @@ import { DEFAULT_LOGGER, type Logger } from "./log.ts";
  * ```ts
  * // Get a file listing using the `ls` command.
  * const listing = await sh.ls("-la");
- * 
+ *
  * // Call `git` in the working directory of the process
  * const status = await sh.git.status({ short: true });
  * const pick = await sh.git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
- * 
+ *
  * // Using the memoized `git` caller
  * const status = await git.status({ short: true });
  * const pick = await git["cherry-pick"]("abc123").returncode; // throws unless .with({ check: false })
@@ -24,7 +24,7 @@ import { DEFAULT_LOGGER, type Logger } from "./log.ts";
  *   c: 512,
  *   network: "dev",
  *   e: { PGPASSWORD: "dev" },
- * }) 
+ * })
  * ( // a full argv for inside docker
  *   "postgres:16",
  *   "sh",

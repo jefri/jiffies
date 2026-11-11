@@ -1,4 +1,5 @@
 ---
+
 name: using-ssg-cli
 description: Use when setting up a new project to build a static site with @davidsouther/jiffies SSG CLI — configuring npm dependencies, page structure, TypeScript type-checking without emit, and GitHub Actions CI.
 ---
@@ -11,14 +12,14 @@ description: Use when setting up a new project to build a static site with @davi
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Build site | `node src/ssg/main.ts build` |
-| Build with size budget | `node src/ssg/main.ts build --max-size 50000` |
-| Build to custom dir | `node src/ssg/main.ts build --out dist` |
-| Type-check without emit | `tsc --noEmit` |
-| Keep existing output | `node src/ssg/main.ts build --no-clean` |
-| Emit JSON manifest | `node src/ssg/main.ts build --json` |
+| Task                    | Command                                       |
+| ----------------------- | --------------------------------------------- |
+| Build site              | `node src/ssg/main.ts build`                  |
+| Build with size budget  | `node src/ssg/main.ts build --max-size 50000` |
+| Build to custom dir     | `node src/ssg/main.ts build --out dist`       |
+| Type-check without emit | `tsc --noEmit`                                |
+| Keep existing output    | `node src/ssg/main.ts build --no-clean`       |
+| Emit JSON manifest      | `node src/ssg/main.ts build --json`           |
 
 ## Project Setup
 

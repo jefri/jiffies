@@ -1,4 +1,5 @@
 ---
+
 name: using-jiffies-dom
 description: Use when building or updating UI in a project that depends on @davidsouther/jiffies.
 ---
@@ -17,7 +18,7 @@ operations:
   method. Calling it mutates **that same node** — same identity, no replacement.
 
 To update a node later, you must **keep a reference to it** and call `.update()` on it.
-Calling the tag function again does not update the old node; it builds a new one. 
+Calling the tag function again does not update the old node; it builds a new one.
 
 > Ideally, the object returned from the tag function would itself be directly callable, so instead of `const el = div({'class': 'off'}); el.update({'class': 'on'});`, you could just do `const el = div({'class': 'off'}); el({'class': 'on})';`. This is possible by wrapping the returned `HTMLDivElement` in a `Proxy` that implements a call interceptor, but `Proxy` cannot be passed to DOM APIs like appendChildren or addEventListener.
 
@@ -27,7 +28,14 @@ The package is `@davidsouther/jiffies` and its export map is `"./*.ts": "./src/*
 Imports use the real subpath **with the `.ts` extension**:
 
 ```ts
-import { div, button, span, ul, li, p } from "@davidsouther/jiffies/dom/html.ts";
+import {
+  div,
+  button,
+  span,
+  ul,
+  li,
+  p,
+} from "@davidsouther/jiffies/dom/html.ts";
 import { FC, State } from "@davidsouther/jiffies/dom/fc.ts";
 import { svg, circle } from "@davidsouther/jiffies/dom/svg.ts";
 ```
@@ -38,19 +46,19 @@ are re-exported from `dom/index.ts`; reach `svg`, `observable`, `router`, `provi
 
 ## Quick reference
 
-| You want to… | Do this |
-|---|---|
-| Create an element | `div(attrs?, ...children)` — first arg is attrs only if a plain object |
-| Update a node in place | hold a reference to the node, then call `node.update(attrs?, ...children)` |
-| Set children only | `node.update("new text")` or `node.update(child1, child2)` |
-| Empty children | `import { CLEAR } from ".../dom/dom.ts"; node.update(CLEAR)` |
-| Add an event | `button({ events: { click: (e) => {...} } })` |
+| You want to…             | Do this                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| Create an element        | `div(attrs?, ...children)` — first arg is attrs only if a plain object           |
+| Update a node in place   | hold a reference to the node, then call `node.update(attrs?, ...children)`       |
+| Set children only        | `node.update("new text")` or `node.update(child1, child2)`                       |
+| Empty children           | `import { CLEAR } from ".../dom/dom.ts"; node.update(CLEAR)`                     |
+| Add an event             | `button({ events: { click: (e) => {...} } })`                                    |
 | Replace an event handler | `node.update({ events: { click: newHandler } })` — old listener is removed first |
-| Remove an event | `node.update({ events: { click: null } })` |
-| Set a class | `div({ class: "a b" })` or `{ class: ["a", "b"] }` |
-| Remove a class on update | `node.update({ class: "!hidden" })` (`!` prefix removes) |
-| Inline style | `{ style: { flexDirection: "column" } }` or `{ style: "color:red" }` |
-| Boolean attribute | `{ disabled: true }` (falsy removes the attribute) |
+| Remove an event          | `node.update({ events: { click: null } })`                                       |
+| Set a class              | `div({ class: "a b" })` or `{ class: ["a", "b"] }`                               |
+| Remove a class on update | `node.update({ class: "!hidden" })` (`!` prefix removes)                         |
+| Inline style             | `{ style: { flexDirection: "column" } }` or `{ style: "color:red" }`             |
+| Boolean attribute        | `{ disabled: true }` (falsy removes the attribute)                               |
 
 ## The argument rule (common error source)
 
@@ -59,8 +67,8 @@ no `nodeType`. A string, a Node, or `CLEAR` is treated as the **first child**.
 
 ```ts
 div({ class: "row" }, span("a"), span("b")); // attrs + 2 children
-div(span("a"), span("b"));                    // 0 attrs, 2 children
-div("hello");                                 // 0 attrs, 1 text child
+div(span("a"), span("b")); // 0 attrs, 2 children
+div("hello"); // 0 attrs, 1 text child
 ```
 
 ## Example: in-place Counter
@@ -78,7 +86,14 @@ export function Counter(start = 0) {
   return div(
     display,
     button(
-      { events: { click: () => { count += 1; display.update(`${count}`); } } },
+      {
+        events: {
+          click: () => {
+            count += 1;
+            display.update(`${count}`);
+          },
+        },
+      },
       "+1",
     ),
   );
@@ -116,10 +131,17 @@ import { FC, State } from "@davidsouther/jiffies/dom/fc.ts";
 export const Toggle = FC<{ label: string }, { on: boolean }>(
   "app-toggle",
   (el, { label }) => {
-    el[State] ??= { on: false };          // initialise once; retained across updates
+    el[State] ??= { on: false }; // initialise once; retained across updates
     const s = el[State];
     return button(
-      { events: { click: () => { s.on = !s.on; el.update(); } } }, // el.update() re-renders
+      {
+        events: {
+          click: () => {
+            s.on = !s.on;
+            el.update();
+          },
+        },
+      }, // el.update() re-renders
       `${label}: ${s.on ? "on" : "off"}`,
     );
   },
@@ -129,7 +151,7 @@ export const Toggle = FC<{ label: string }, { on: boolean }>(
 ## FCC: server-rendered, client-hydrated components
 
 `FCC` (containerless functional component) is the third form. Unlike `FC`, it has **no
-custom-element wrapper**: it renders its children directly into a *boundary element* you
+custom-element wrapper**: it renders its children directly into a _boundary element_ you
 supply, so the markup it produces is plain HTML with no extra host tag. That makes it the
 form to reach for when the page is **server-rendered (SSG) and hydrated on the client** —
 the boundary element exists in the emitted HTML, and hydration re-attaches behaviour to it.
@@ -155,7 +177,7 @@ live in `fcc.test.ts` and `hydrate.test.ts`.
 - **`FC`** — a reusable component that owns state and re-renders from props, where an extra
   custom-element host tag in the DOM is acceptable.
 - **`FCC`** — a reusable component whose markup must be server-rendered and hydrated, or where
-  a wrapper element is unwanted. SVG components must use the FCC form.  Everything below is FCC-specific and **does not** apply to the
+  a wrapper element is unwanted. SVG components must use the FCC form. Everything below is FCC-specific and **does not** apply to the
   other two forms.
 
 ### Every prop is written onto the boundary as an attribute
@@ -165,7 +187,7 @@ String(value))`. So props must be **DOM-valid attribute values** — strings, nu
 Consequences if you ignore this:
 
 - A **function** prop named `onChange`/`onToggle` lowercases to the `onchange`/`ontoggle`
-  *content attribute*, which jsdom and real browsers compile as a live inline handler the
+  _content attribute_, which jsdom and real browsers compile as a live inline handler the
   moment a matching event bubbles to the boundary — a hard crash ("Function statements require
   a function name") or silently wrong execution.
 - An **object/array** prop becomes `"[object Object]"` junk that serializes into the SSG HTML.
@@ -184,7 +206,7 @@ another way:
 
 ### The `.update()` graft does not survive SSG serialize→reparse
 
-Every node Jiffies builds in-process carries a grafted `.update()` method — a function 
+Every node Jiffies builds in-process carries a grafted `.update()` method — a function
 that **does not serialize**. When the SSG renders the page to an HTML string and the browser
 re-parses it, the resulting elements are brand-new objects with **no `.update()`**. So client
 code that queries a page-emitted element and calls `el.update(...)` — or `el?.update?.(...)`,
@@ -192,7 +214,7 @@ which hides the failure — is a **silent no-op in production**.
 
 Drive raw, page-emitted elements with **`up()`** from `@davidsouther/jiffies/dom/dom.ts`
 instead: `up(el, attrs, ...children)` applies attrs / class tokens (`"!x"` removes) / style /
-`events` / children to *any* raw element, no graft required. In-memory tests that mount the
+`events` / children to _any_ raw element, no graft required. In-memory tests that mount the
 page module directly keep the graft and will pass while production is broken — guard the path
 with a **round-trip test** (`outerHTML` → `container.innerHTML = html` → drive the view).
 Client-built FCC handles created at runtime (not page-emitted) legitimately keep `.update()`.

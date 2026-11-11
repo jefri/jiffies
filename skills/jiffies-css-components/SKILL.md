@@ -1,4 +1,5 @@
 ---
+
 name: jiffies-css-components
 description: Use when writing jiffies DOM code (TypeScript html/fc modules) for a UI that jiffies-css styles — cards, alerts, navigation, tabs, accordions, dialogs, property sheets, or form groups. Apply when composing a page from jiffies tag functions and wondering which component function to call or whether to add a class. This is the TypeScript-function counterpart of the jiffies-css-semantic-html skill (which covers raw HTML).
 ---
@@ -22,7 +23,12 @@ Import the components, not the bare tag functions, whenever a jiffies-css-aligne
 UI is needed:
 
 ```ts
-import { Card, Alert, Nav, jiffiesCssLink } from "@davidsouther/jiffies/dom/components/index.ts";
+import {
+  Card,
+  Alert,
+  Nav,
+  jiffiesCssLink,
+} from "@davidsouther/jiffies/dom/components/index.ts";
 ```
 
 Do not hand-build `article > (header / main / footer)` when `Card()` already
@@ -31,22 +37,22 @@ calling a component function.
 
 ## Component reference
 
-| UI Pattern | Function | Common mistake |
-|---|---|---|
-| Elevated card | `Card({ header, footer }, ...body)` | `article(div(...))` without the `main` wrapper |
-| Flat panel | `Panel({ header, footer }, ...body)` | `section(div(...))` without the `main` wrapper |
-| Destructive alert | `Alert("error", ...)` / `Alert("warning", ...)` | `aside(...)` without `role` or `data-variant` |
-| Info alert | `Alert("info", ...)` / `Alert("success", ...)` / `Alert("neutral", ...)` | same |
-| Inline chip | `Chip("warning", "label")` | `span` with a `.badge` class |
-| Accordion | `Accordion(summary, ...body)` | `div` with an `.accordion` class |
-| Modal | `Modal(...children)` then `.update({ open: true })` | `div` with a `.modal` class |
-| Navigation | `Nav([{ label, href, current }])` | `ul > li > a` without the `nav > ol` wrapper |
-| Breadcrumb | `Breadcrumb([{ label, href, current }])` | `nav > ol` without the `span` wrapper |
-| Property sheet | `PropertySheet({ label, value })` | `table` or `div` with a `.property` class |
-| Form group | `FormGroup(legend, ...inputs)` | `div` with a `.form-group` class |
-| JS tabs | `TabList({ label, selected, onSelect })` | `div.tabs > div.tab.active` |
-| CSS-only tabs | `StaticTabList(name, { id, label, selected })` | same |
-| Stylesheet link | `jiffiesCssLink()` in `<head>` | a bare Pico or Bootstrap CDN link |
+| UI Pattern        | Function                                                                 | Common mistake                                 |
+| ----------------- | ------------------------------------------------------------------------ | ---------------------------------------------- |
+| Elevated card     | `Card({ header, footer }, ...body)`                                      | `article(div(...))` without the `main` wrapper |
+| Flat panel        | `Panel({ header, footer }, ...body)`                                     | `section(div(...))` without the `main` wrapper |
+| Destructive alert | `Alert("error", ...)` / `Alert("warning", ...)`                          | `aside(...)` without `role` or `data-variant`  |
+| Info alert        | `Alert("info", ...)` / `Alert("success", ...)` / `Alert("neutral", ...)` | same                                           |
+| Inline chip       | `Chip("warning", "label")`                                               | `span` with a `.badge` class                   |
+| Accordion         | `Accordion(summary, ...body)`                                            | `div` with an `.accordion` class               |
+| Modal             | `Modal(...children)` then `.update({ open: true })`                      | `div` with a `.modal` class                    |
+| Navigation        | `Nav([{ label, href, current }])`                                        | `ul > li > a` without the `nav > ol` wrapper   |
+| Breadcrumb        | `Breadcrumb([{ label, href, current }])`                                 | `nav > ol` without the `span` wrapper          |
+| Property sheet    | `PropertySheet({ label, value })`                                        | `table` or `div` with a `.property` class      |
+| Form group        | `FormGroup(legend, ...inputs)`                                           | `div` with a `.form-group` class               |
+| JS tabs           | `TabList({ label, selected, onSelect })`                                 | `div.tabs > div.tab.active`                    |
+| CSS-only tabs     | `StaticTabList(name, { id, label, selected })`                           | same                                           |
+| Stylesheet link   | `jiffiesCssLink()` in `<head>`                                           | a bare Pico or Bootstrap CDN link              |
 
 `Alert` derives the ARIA role from the variant: `warning`/`error` become
 `role="alert"`, and `info`/`success`/`neutral` become `role="status"`. The variant

@@ -89,7 +89,7 @@ const MyPage = () => [
           flexDirection: "column",
         },
       },
-    })
+    }),
   ),
   section("..."),
   section("..."),
