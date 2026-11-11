@@ -31,7 +31,8 @@
     "check:lint": "biome check",
     "all": "npm run check:lint && npm run test",
     "prepublish": "npm run build",
-    "stamp": "node scripts/stamp.ts"
+    "stamp": "node scripts/stamp.ts",
+    "setup-npm-trust": "node scripts/npm-trust.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
@@ -45,5 +46,9 @@
     "rollup": "^4.61.1",
     "ts-blank-space": "^0.7.0",
     "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jefri/jiffies.git"
   }
 }

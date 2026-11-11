@@ -14,6 +14,11 @@
  *   5. pushes the current branch and the tag to origin, and
  *   6. publishes the package to npm.
  *
+ * Pass `--if-changed` to do nothing unless `src`, `LICENSE`, or `README.md`
+ * changed since the latest `v*` tag; the nightly `release.yml` workflow uses it.
+ * In GitHub Actions the npm session check is skipped, because publishing
+ * authenticates with npm Trusted Publishing (OIDC) rather than a login.
+ *
  * Pass `--dry-run` to preview every step without mutating package.json,
  * committing, tagging, pushing, or publishing. The publish step is exercised via
  * `npm publish --dry-run`, which validates the tarball contents without uploading.
@@ -22,11 +27,19 @@
  * authenticated npm session (`npm whoami`). Either being unmet aborts a live run;
  * in a dry run they are reported as warnings.
  */
-import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { NodeFileSystem } from "../src/fs_node.ts";
+import { git, type Run, Sh } from "../src/sh.ts";
 
-const PACKAGE_JSON = fileURLToPath(new URL("../package.json", import.meta.url));
+const ROOT = new URL("..", import.meta.url);
+const PACKAGE_JSON = "package.json";
+/** Paths whose changes warrant a release. A version bump touches only package.json. */
+const SHIPPED = ["src", "LICENSE", "README.md"];
+/** Commands whose output streams to this process. */
+const live = {
+  git: Sh("git", { capture: false, cwd: ROOT }),
+  npm: Sh("npm", { capture: false, cwd: ROOT }),
+};
 const MS_PER_DAY = 86_400_000;
 
 /**
@@ -67,20 +80,38 @@ export function nextVersion(current: string, date: Date): string {
 }
 
 /** Print and run a command, or just print it when `dryRun` is set. */
-function step(cmd: string, args: string[], dryRun: boolean): void {
-  const line = `${cmd} ${args.join(" ")}`;
+async function step(run: Run, dryRun: boolean): Promise<void> {
   if (dryRun) {
-    console.log(`[dry-run] ${line}`);
+    console.log(`[dry-run] ${run.command}`);
     return;
   }
-  console.log(`> ${line}`);
-  execFileSync(cmd, args, { stdio: "inherit" });
+  console.log(`> ${run.command}`);
+  await run.completed;
 }
 
-function main(): void {
-  const dryRun = process.argv.includes("--dry-run");
+/** Whether shipped files changed since the latest release tag (true when untagged). */
+async function changedSinceLastRelease(): Promise<boolean> {
+  const repo = git.$({ C: fileURLToPath(ROOT) });
+  const described = await repo
+    .describe("--tags", "--abbrev=0", "--match", "v*")
+    .with({ check: false }).completed;
+  if (described.returncode !== 0) return true;
+  const tag = described.stdout.trim();
+  return Boolean(await repo.log("--oneline", `${tag}..HEAD`, "--", ...SHIPPED));
+}
 
-  const pkg = JSON.parse(readFileSync(PACKAGE_JSON, "utf8"));
+async function main(): Promise<void> {
+  const dryRun = process.argv.includes("--dry-run");
+  const ifChanged = process.argv.includes("--if-changed");
+  const inActions = process.env.GITHUB_ACTIONS === "true";
+  const fs = new NodeFileSystem(fileURLToPath(ROOT));
+
+  if (ifChanged && !(await changedSinceLastRelease())) {
+    console.log("stamp: no shipped changes since the last release tag");
+    return;
+  }
+
+  const pkg = JSON.parse(await fs.readFile(PACKAGE_JSON));
   const current: string = pkg.version;
   const version = nextVersion(current, new Date());
   const tag = `v${version}`;
@@ -89,25 +120,27 @@ function main(): void {
     `stamp: ${pkg.name} ${current} -> ${version}${dryRun ? "  (dry run)" : ""}`,
   );
 
-  // Preflight — a release must be cut from a clean tree and an authenticated npm
-  // session. A live run aborts if either is unmet; a dry run only warns.
-  const dirty = execFileSync("git", ["status", "--porcelain"], {
-    encoding: "utf8",
-  }).trim();
-  if (dirty) {
-    const message = `working tree is not clean:\n${dirty}`;
+  // Preflight: a release must be cut from a clean tree and, outside Actions, an
+  // authenticated npm session. A live run aborts if either is unmet; a dry run
+  // only warns.
+  const complain = (message: string) => {
     if (!dryRun) throw new Error(message);
     console.warn(`[dry-run] WARNING: ${message}`);
-  }
+  };
 
-  try {
-    const user = execFileSync("npm", ["whoami"], { encoding: "utf8" }).trim();
-    console.log(`npm: authenticated as ${user}`);
-  } catch {
-    const message =
-      "not authenticated to npm — run `npm login` before publishing";
-    if (!dryRun) throw new Error(message);
-    console.warn(`[dry-run] WARNING: ${message}`);
+  const dirty = (
+    await git.$({ C: fileURLToPath(ROOT) }).status("--porcelain")
+  ).trim();
+  if (dirty) complain(`working tree is not clean:\n${dirty}`);
+
+  if (!inActions) {
+    const whoami = await Sh("npm", { cwd: ROOT }).whoami.with({ check: false })
+      .completed;
+    if (whoami.returncode === 0) {
+      console.log(`npm: authenticated as ${whoami.stdout.trim()}`);
+    } else {
+      complain("not authenticated to npm; run `npm login` before publishing");
+    }
   }
 
   // 1. Write the new version. JSON.stringify with 2-space indent + trailing
@@ -117,44 +150,34 @@ function main(): void {
     console.log(`[dry-run] write package.json version = ${version}`);
   } else {
     pkg.version = version;
-    writeFileSync(PACKAGE_JSON, `${JSON.stringify(pkg, null, 2)}\n`);
+    await fs.writeFile(PACKAGE_JSON, `${JSON.stringify(pkg, null, 2)}\n`);
     console.log(`wrote package.json version = ${version}`);
   }
 
   // 2. commit, 3. tag, 4. push branch + the annotated tag.
-  step("git", ["add", "package.json"], dryRun);
-  step("git", ["commit", "-m", `chore(release): ${version}`], dryRun);
-  step("git", ["tag", "-a", tag, "-m", `Release ${version}`], dryRun);
-  step("git", ["push", "origin", "HEAD", "--follow-tags"], dryRun);
+  await step(live.git.add("package.json"), dryRun);
+  await step(live.git.commit("-m", `chore(release): ${version}`), dryRun);
+  await step(live.git.tag("-a", tag, "-m", `Release ${version}`), dryRun);
+  await step(live.git.push("origin", "HEAD", "--follow-tags"), dryRun);
 
   // 5. publish. In a dry run, npm's own --dry-run validates the tarball without
   // uploading; tolerate its failure (e.g. when not logged in) so the preview
   // still completes.
   if (dryRun) {
-    console.log("[dry-run] npm publish --access public --dry-run");
-    try {
-      execFileSync("npm", ["publish", "--access", "public", "--dry-run"], {
-        stdio: "inherit",
-      });
-    } catch (error) {
-      console.warn(
-        `[dry-run] npm publish --dry-run reported: ${(error as Error).message}`,
-      );
-    }
+    const publish = live.npm.publish("--access", "public", "--dry-run");
+    console.log(`[dry-run] ${publish.command}`);
+    await publish.with({ check: false }).completed;
   } else {
-    console.log("> npm publish --access public");
-    execFileSync("npm", ["publish", "--access", "public"], {
-      stdio: "inherit",
-    });
+    await step(live.npm.publish("--access", "public"), false);
   }
 
   console.log(
     dryRun
-      ? "dry run complete — nothing was changed, pushed, or published"
+      ? "dry run complete; nothing was changed, pushed, or published"
       : `published ${pkg.name}@${version}`,
   );
 }
 
 // Run only when invoked directly (`node scripts/stamp.ts`), not when the test
 // imports the pure functions above.
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) await main();
