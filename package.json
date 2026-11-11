@@ -30,7 +30,6 @@
     "check:format": "biome format",
     "check:lint": "biome check",
     "all": "npm run check:lint && npm run test",
-    "prepublish": "npm run build",
     "stamp": "node scripts/stamp.ts",
     "setup-npm-trust": "node scripts/npm-trust.ts"
   },
