@@ -35,7 +35,7 @@ Published subpaths follow the export map `./*.ts`, for example `@davidsouther/ji
 | `npm run format`       | Format files in place with Biome                    |
 | `npm run check:format` | Verify formatting without writing                   |
 | `npm run check:lint`   | Run Biome lint and format checks                    |
-| `npm run fix`          | Apply Biome fixes, including unsafe ones            |
+| `npm run fix`          | Apply Biome fixes, including unsafe                 |
 | `npm run all`          | Lint, then test. CI runs this on every pull request |
 | `npm start`            | Start the Node HTTP server in `src/server/main.ts`  |
 
@@ -43,7 +43,7 @@ Run `npm run all` before opening a pull request.
 
 ## Formatting
 
-This repository uses [Biome](https://biomejs.dev) for formatting and linting. Do not use Prettier. Configuration lives in `biome.json`: two space indentation, double quotes, and organized imports.
+This repository uses [Biome](https://biomejs.dev) for formatting and linting. Do not use Prettier or other formatters. Configuration lives in `biome.json`: two space indentation, double quotes, and organized imports.
 
 Run `npm run format` before committing, including for Markdown and skill files.
 

@@ -274,18 +274,19 @@ output (see the common mistake below).
 
 ## Testing
 
-Tests use the `scope` microframework and run under Node (jsdom loads automatically when
-`window` is undefined). Run with `npm test` (`node ./src/test.mjs`).
+Tests use the built in Node test runner and run under Node (jsdom loads automatically when
+`window` is undefined). Run with `npm test`.
 
 ```ts
-import { describe, it, expect } from "@davidsouther/jiffies/scope/index.ts";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { button } from "@davidsouther/jiffies/dom/html.ts";
 
 describe("counter", () => {
   it("reuses the node on update", () => {
     const b = button("0");
     b.update("1");
-    expect(b.textContent).toBe("1");
+    assert.equal(b.textContent, "1");
   });
 });
 ```
