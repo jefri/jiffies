@@ -1,9 +1,9 @@
 # GitHub workflows
 
-| Workflow | Trigger | Purpose |
-| --- | --- | --- |
-| `ci.yml` | Pull request; manual | Runs lint and tests (`npm run all`). |
-| `release.yml` | 04:44 UTC; manual | Publishes `@davidsouther/jiffies` to npm when shipped files changed. |
+| Workflow      | Trigger              | Purpose                                                              |
+| ------------- | -------------------- | -------------------------------------------------------------------- |
+| `ci.yml`      | Pull request; manual | Runs lint and tests (`npm run all`).                                 |
+| `release.yml` | 04:44 UTC; manual    | Publishes `@davidsouther/jiffies` to npm when shipped files changed. |
 
 ## release.yml
 
