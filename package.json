@@ -30,8 +30,8 @@
     "check:format": "biome format",
     "check:lint": "biome check",
     "all": "npm run check:lint && npm run test",
-    "stamp": "node scripts/stamp.ts",
-    "setup-npm-trust": "node scripts/npm-trust.ts"
+    "stamp": "node src/release_cli.ts stamp",
+    "setup-npm-trust": "node src/release_cli.ts trust"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.6",
@@ -49,5 +49,16 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jefri/jiffies.git"
+  },
+  "bin": {
+    "jiffies-release": "lib/esm/release_cli.js"
+  },
+  "release": {
+    "shipped": [
+      "src",
+      "LICENSE",
+      "README.md"
+    ],
+    "commit": true
   }
 }

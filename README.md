@@ -12,6 +12,7 @@ JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulle
 Jiffies also includes several microframeworks.
 
 - `sh` - streamlined, idiomatic, safe shell wrappers.
+- `release` - CalVer npm releases and Trusted Publishing setup (`jiffies-release`).
 - `dom` - a tiny DOM functional library.
 - `server` - Node HTTP Server & middleware.
 
