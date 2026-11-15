@@ -1,65 +1,92 @@
-// Node adapter for compress/index.ts, built on node:zlib and Buffer. Only this file
-// may import node:zlib. Nothing a browser loads imports it.
+// Node adapter for compress/index.ts. It runs the same CompressionStream based code as
+// web.ts, over a CompressionStream and DecompressionStream polyfill backed by node:zlib.
+// Only this file may import node:zlib. Nothing a browser loads imports it.
 //
-// Buffer and inflateSync are more lenient than atob and DecompressionStream, so
-// inflate parses its input with the rules atob uses and rejects bytes after the
-// end of the zlib stream. Each version then rejects the same inputs.
+// zlib streams are more lenient than DecompressionStream, so the polyfilled
+// DecompressionStream rejects bytes after the end of the zlib stream as the Web one does.
 
-import { deflate as deflateZlib, inflate as inflateZlib } from "node:zlib";
+import { Duplex, Transform, type TransformCallback } from "node:stream";
+import { createDeflate, createInflate, type Inflate } from "node:zlib";
+import { makeCompressor } from "./web.ts";
 
-const ASCII_WHITESPACE = /[\t\n\f\r ]/g;
-const BASE64_EITHER_ALPHABET = /^[A-Za-z0-9+/_-]*$/;
+type Pair = { readable: ReadableStream<Uint8Array>; writable: WritableStream };
 
-/**
- * Parses base64url or standard base64 into bytes with the forgiving base64
- * rules that atob applies. It strips ASCII whitespace and allows up to two
- * padding characters when the length is a multiple of four. It throws on any
- * other character or on a length that leaves one character over.
- */
-function decodeBase64(encoded: string): Buffer {
-  let data = encoded.replace(ASCII_WHITESPACE, "");
-  if (data.length % 4 === 0) data = data.replace(/={1,2}$/, "");
-  if (data.length % 4 === 1 || !BASE64_EITHER_ALPHABET.test(data)) {
-    throw new SyntaxError("The string is not correctly encoded as base64.");
-  }
-  return Buffer.from(data, "base64");
+function toWeb(stream: Duplex): Pair {
+  return Duplex.toWeb(stream) as unknown as Pair;
 }
 
-interface InflateInfo {
-  buffer: Buffer;
-  engine: { bytesWritten: number };
-}
+/** Inflates a zlib stream and fails when input continues past its end. */
+class ExactInflate extends Transform {
+  #inflate: Inflate = createInflate();
+  #written = 0;
+  // zlib ends by itself at the end of the zlib stream, possibly before this stream is flushed.
+  #ended: Promise<void>;
 
-/**
- * Inflates one complete zlib stream. It throws when bytes follow the end of
- * the stream, which inflateSync otherwise ignores.
- */
-async function inflateExactly(bytes: Buffer): Promise<Buffer> {
-  const { buffer, engine } = (await new Promise<unknown>((resolve, reject) => {
-    inflateZlib(bytes, { info: true }, (error, result) => {
-      if (error) reject(error);
-      else resolve(result);
+  constructor() {
+    super();
+    this.#ended = new Promise((resolve) => this.#inflate.once("end", resolve));
+    this.#inflate.on("data", (chunk: Buffer) => this.push(chunk));
+    this.#inflate.on("error", (error) => {
+      this.destroy(error);
     });
-  })) as InflateInfo;
-  if (engine.bytesWritten !== bytes.length) {
-    throw new TypeError("Junk found after end of compressed data.");
   }
-  return buffer;
+
+  override _transform(
+    chunk: Buffer,
+    _encoding: BufferEncoding,
+    callback: TransformCallback,
+  ) {
+    this.#written += chunk.length;
+    this.#inflate.write(chunk, (error) => callback(error));
+  }
+
+  override _flush(callback: TransformCallback) {
+    this.#inflate.end();
+    this.#ended.then(() => {
+      if (this.#inflate.bytesWritten !== this.#written) {
+        callback(new TypeError("Junk found after end of compressed data."));
+      } else callback();
+    });
+  }
 }
+
+/** A CompressionStream for the "deflate" format, backed by node:zlib. */
+export class ZlibCompressionStream {
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream;
+
+  constructor(format: "deflate") {
+    if (format !== "deflate") {
+      throw new TypeError(`Unsupported compression format: ${format}`);
+    }
+    ({ readable: this.readable, writable: this.writable } = toWeb(
+      createDeflate(),
+    ));
+  }
+}
+
+/** A DecompressionStream for the "deflate" format, backed by node:zlib. */
+export class ZlibDecompressionStream {
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream;
+
+  constructor(format: "deflate") {
+    if (format !== "deflate") {
+      throw new TypeError(`Unsupported compression format: ${format}`);
+    }
+    ({ readable: this.readable, writable: this.writable } = toWeb(
+      new ExactInflate(),
+    ));
+  }
+}
+
+const compressor = makeCompressor({
+  CompressionStream: ZlibCompressionStream as never,
+  DecompressionStream: ZlibDecompressionStream as never,
+});
 
 /** Compresses UTF-8 text as a zlib stream and encodes it as unpadded base64url. */
-export async function deflate(text: string): Promise<string> {
-  const compressed = await new Promise<Buffer>((resolve, reject) => {
-    deflateZlib(Buffer.from(text, "utf8"), (error, result) => {
-      if (error) reject(error);
-      else resolve(result);
-    });
-  });
-  return compressed.toString("base64url");
-}
+export const deflate = compressor.deflate;
 
 /** Decodes base64url or standard base64 and inflates the zlib stream to text. */
-export async function inflate(encoded: string): Promise<string> {
-  // TextDecoder drops a leading byte order mark as the Web version does. Buffer#toString keeps it.
-  return new TextDecoder().decode(await inflateExactly(decodeBase64(encoded)));
-}
+export const inflate = compressor.inflate;

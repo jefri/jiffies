@@ -2,6 +2,14 @@
 // DecompressionStream, which exist in browsers and in Node. Nothing here imports
 // compress/index.ts, so the browser module graph never reaches node:zlib.
 
+import type { Compressor } from "./types.ts";
+
+/** Constructors for the two stream classes. The default is the platform's. */
+export interface StreamClasses {
+  CompressionStream: new (format: "deflate") => CompressionStream;
+  DecompressionStream: new (format: "deflate") => DecompressionStream;
+}
+
 async function transform(
   bytes: Uint8Array<ArrayBuffer>,
   stream: CompressionStream | DecompressionStream,
@@ -19,24 +27,38 @@ function toBase64Url(bytes: Uint8Array): string {
     .replace(/=+$/, "");
 }
 
-function fromBase64Url(encoded: string): Uint8Array<ArrayBuffer> {
+export function fromBase64Url(encoded: string): Uint8Array<ArrayBuffer> {
   // atob accepts input without padding, so no padding is restored. Input that is already in the
   // standard alphabet passes through the replacements unchanged.
   const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(binary, (c) => c.charCodeAt(0));
 }
 
+/** Builds deflate and inflate on top of the given stream classes. */
+export function makeCompressor(classes: StreamClasses): Compressor {
+  return {
+    async deflate(text) {
+      const bytes = new TextEncoder().encode(text);
+      return toBase64Url(
+        await transform(bytes, new classes.CompressionStream("deflate")),
+      );
+    },
+    async inflate(encoded) {
+      const bytes = await transform(
+        fromBase64Url(encoded),
+        new classes.DecompressionStream("deflate"),
+      );
+      return new TextDecoder().decode(bytes);
+    },
+  };
+}
+
 /** Compresses UTF-8 text as a zlib stream and encodes it as unpadded base64url. */
-export async function deflate(text: string): Promise<string> {
-  const bytes = new TextEncoder().encode(text);
-  return toBase64Url(await transform(bytes, new CompressionStream("deflate")));
+export function deflate(text: string): Promise<string> {
+  return makeCompressor(globalThis).deflate(text);
 }
 
 /** Decodes base64url or standard base64 and inflates the zlib stream to text. */
-export async function inflate(encoded: string): Promise<string> {
-  const bytes = await transform(
-    fromBase64Url(encoded),
-    new DecompressionStream("deflate"),
-  );
-  return new TextDecoder().decode(bytes);
+export function inflate(encoded: string): Promise<string> {
+  return makeCompressor(globalThis).inflate(encoded);
 }
