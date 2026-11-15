@@ -5,6 +5,12 @@
   "displayName": "JEFRi Jiffies",
   "type": "module",
   "exports": {
+    "./compress/index.ts": {
+      "types": "./lib/esm/compress/index.d.ts",
+      "browser": "./lib/esm/compress/index.js",
+      "node": "./lib/esm/compress/node.js",
+      "default": "./lib/esm/compress/index.js"
+    },
     "./*.ts": {
       "types": "./lib/esm/*.d.ts",
       "default": "./lib/esm/*.js"

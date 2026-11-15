@@ -3,6 +3,7 @@
 JEFRi Jiffies are a number of "common" utilities for JavaScript/TypeScript pulled from and inspired by other programming languages, and common base tools missing or inconsistent between DOM and Node runtimes.
 
 - `assert` - common runtime assertions.
+- `compress` - URL-safe string compression. `@davidsouther/jiffies/compress/index.ts` selects Node or Web code for its runtime; adapters are also available as `/compress/node.ts` and `/compress/web.ts`.
 - `context` - JavaScript implementation of the Python [`with`][pywith] statement.
 - `display` - TypeScript implementation of the Rust [Display][rustdisplay] trait.
 - `equal` - JavaScript deep equality checkers, including TS type checking.
